@@ -19,6 +19,7 @@ type FormElement = {
 };
 
 type Label = string | IntlMessage;
+type ErrorMessage = string | IntlMessage;
 
 type ValidationRule = {
   fn: ({
@@ -28,7 +29,10 @@ type ValidationRule = {
     fieldName: string,
     state: {},
     validationArgs: {}
-  }) => string
+  }) => string,
+  message: ?ErrorMessage,
+  args: ?{},
+  validateAnotherField: ?string
 };
 
 type FieldMetadata = {
