@@ -18,11 +18,25 @@ type FormElement = {
   Component: ComponentType<{ value: any, error: string, onChange: any => void }>
 };
 
+type Label = string | IntlMessage;
+
+type ValidationRule = {
+  fn: ({
+    value: string,
+    message: IntlMessage,
+    args: {},
+    fieldName: string,
+    state: {},
+    validationArgs: {}
+  }) => string
+};
+
 type FieldMetadata = {
-  defaultValue: string | number | boolean | Array<string>,
+  defaultValue: string | number | boolean | Array<string> | void,
   formElement: FormElement,
-  label: string | IntlMessage,
-  label2: string | IntlMessage
+  label: ?Label,
+  label2: ?Label,
+  validationRules: ?Array<ValidationRule>
 };
 
 type Schema = { [string]: FieldMetadata };
@@ -32,6 +46,6 @@ export const InputTypes = {
   SELECT: "SELECT_INPUT"
 };
 
-export default function useForm(schema) {
-  return {}
+export default function useForm(schema: Schema) {
+  return {};
 }
