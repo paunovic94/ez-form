@@ -1,5 +1,5 @@
 import React, { useReducer } from "react";
-import useForm from "./ez-form";
+import useForm from "./ez-form/useFormDemo";
 import formSchema from "./formSchema";
 import formElements from "./formElements";
 
