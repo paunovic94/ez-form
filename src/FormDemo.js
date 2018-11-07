@@ -50,7 +50,7 @@ export default function FormDemo() {
 
       <button
         onClick={() =>
-          dispatch({ type: "CHANGE_SOURCE", source: elemData.value })
+          dispatch({ type: "CHANGE_SOURCE", source: formData.firstName.value })
         }
       >
         Change Source

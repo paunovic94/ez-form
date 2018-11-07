@@ -5,4 +5,19 @@ export const InputTypes = {
   SELECT: "SELECT_INPUT"
 };
 
-export default function useForm(schema) {}
+export default function useForm(schema) {
+  let formData = {};
+  Object.keys(schema).forEach(fieldName => {
+    const formElement = schema[fieldName].formElement;
+    formData[fieldName] = {
+      render: additionalProps => (
+        <formElement.Component
+          value={schema[fieldName].defaultValue}
+          {...additionalProps}
+        />
+      )
+    };
+  });
+
+  return formData
+}
