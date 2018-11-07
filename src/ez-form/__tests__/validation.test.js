@@ -46,7 +46,8 @@ describe("Validate form data on input change", () => {
           formElement: formElements.textInput,
           validationRules: [
             {
-              fn: isName
+              fn: isName,
+              message: "Is name custom"
             },
           ]
         }
@@ -85,10 +86,10 @@ describe("Validate form data on input change", () => {
     });
 
     errorMessage1 = inputWrapper1.querySelector(".Error");
-    errorMessage2 = queryByTextGlobal(inputWrapper2, "Is name default");
+    errorMessage2 = queryByTextGlobal(inputWrapper2, "Is name custom");
 
     expect(errorMessage1).toBeNull();
     expect(errorMessage2).toBeTruthy();
-
   });
+
 });
