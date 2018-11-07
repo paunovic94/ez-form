@@ -1,5 +1,5 @@
 import React from "react";
-import { render, cleanup } from "react-testing-library";
+import { render, cleanup, fireEvent } from "react-testing-library";
 import useForm from "../index";
 import formElements from "./formTestElements";
 
@@ -29,6 +29,8 @@ describe("init default value from schema", () => {
     const { container } = render(<TestForm />);
 
     const inputs = container.querySelectorAll("input");
+
+    fireEvent.change(inputs[1], { target: { value: "test2" } });
 
     expect(inputs[0].value).toBe("test-input-text");
     expect(inputs[1].value).toBe("");

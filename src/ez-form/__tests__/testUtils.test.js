@@ -1,7 +1,5 @@
 import React from "react";
 import { render, cleanup } from "react-testing-library";
-import useForm from "../index";
-import formElements from "./formTestElements";
 
 afterEach(cleanup);
 

@@ -53,11 +53,11 @@ export const InputTypes = {
 export default function useForm(schema: Schema) {
   let formData = {};
   Object.keys(schema).forEach(fieldName => {
-    const formElement = schema[fieldName].formElement;
+    const {formElement, defaultValue = ''} = schema[fieldName];
     formData[fieldName] = {
       render: additionalProps => (
         <formElement.Component
-          value={schema[fieldName].defaultValue}
+          value={defaultValue}
           {...additionalProps}
         />
       )
