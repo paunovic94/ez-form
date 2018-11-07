@@ -1,21 +1,20 @@
-// @flow
-import React from "react";
-import type { ComponentType } from "react";
+import React, { useState } from 'react';
+import type { ComponentType } from 'react';
 
 type IntlMessageDescriptor = {
   id: string,
   defaultMessage: string,
-  description: ?string
+  description: ?string,
 };
 
 type IntlMessage = {
   descriptor: IntlMessageDescriptor,
-  values: ?{}
+  values: ?{},
 };
 
 type FormElement = {
   type: string,
-  Component: ComponentType<{ value: any, error: string, onChange: any => void }>
+  Component: ComponentType<{ value: any, error: string, onChange: any => void }>,
 };
 
 type Label = string | IntlMessage;
@@ -28,11 +27,11 @@ type ValidationRule = {
     args: {},
     fieldName: string,
     state: {},
-    validationArgs: {}
+    validationArgs: {},
   }) => string,
   message: ?ErrorMessage,
   args: ?{},
-  validateAnotherField: ?string
+  validateAnotherField: ?string,
 };
 
 type FieldMetadata = {
@@ -40,29 +39,64 @@ type FieldMetadata = {
   formElement: FormElement,
   label: ?Label,
   label2: ?Label,
-  validationRules: ?Array<ValidationRule>
+  validationRules: ?Array<ValidationRule>,
 };
 
 type Schema = { [string]: FieldMetadata };
 
 export const InputTypes = {
-  TEXT: "TEXT_INPUT",
-  SELECT: "SELECT_INPUT"
+  TEXT: 'TEXT_INPUT',
+  SELECT: 'SELECT_INPUT',
 };
 
 export default function useForm(schema: Schema) {
+  let [formState, setFormState] = useState(() => initFormData(schema));
+
+  function handleChange({ event, fieldName }) {
+    const fieldState = formState[fieldName];
+    const newValue = fieldState.handleInputValueChange(event);
+    const changedFiledState = {
+      ...fieldState,
+      value: newValue,
+    };
+
+    setFormState({ ...formState, [fieldName]: changedFiledState });
+  }
+
   let formData = {};
   Object.keys(schema).forEach(fieldName => {
-    const {formElement, defaultValue = ''} = schema[fieldName];
+    const { formElement } = schema[fieldName];
     formData[fieldName] = {
       render: additionalProps => (
         <formElement.Component
-          value={defaultValue}
+          value={formState[fieldName].value}
           {...additionalProps}
+          onChange={event => {
+            handleChange({
+              event,
+              fieldName,
+            });
+          }}
         />
-      )
+      ),
     };
   });
 
-  return formData
+  return formData;
+}
+
+function initFormData(schema) {
+  let formData = {};
+
+  Object.keys(schema).forEach(fieldName => {
+    formData[fieldName] = {
+      value:
+        schema[fieldName].defaultValue === undefined
+          ? ''
+          : schema[fieldName].defaultValue,
+      handleInputValueChange: event => event.target.value,
+    };
+  });
+
+  return formData;
 }
