@@ -34,7 +34,7 @@ describe("init default value from schema", () => {
     expect(inputs[1].value).toBe("");
   });
 
-  test.skip("Select", () => {
+  test("Select", () => {
     function TestForm(props) {
       const formData = useForm({
         testSelectStringValue: {
