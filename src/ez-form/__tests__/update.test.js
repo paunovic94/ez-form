@@ -60,10 +60,12 @@ describe("Update form data on input change", () => {
             options: [
               { value: "option-default", label: "Test Default 1" },
               { value: "option-1", label: "Test 1" }
-            ]
+            ],
+            onChangeTestValue: { value: "option-1", label: "Test 1" }
           })}
           {formData.testSelect2.render({
-            options: [{ value: "option-default", label: "Test Default 2" }]
+            options: [{ value: "option-default", label: "Test Default 2" }],
+            onChangeTestValue: null
           })}
         </div>
       );
@@ -73,15 +75,12 @@ describe("Update form data on input change", () => {
 
     const [select1, select2] = container.querySelectorAll(".TestSelect");
 
-    fireEvent.click(select1, { value: "option-1", label: "Test 1" });
-    fireEvent.click(select2, null);
+    fireEvent.click(select1);
+    fireEvent.click(select2);
 
-    await waitForElement(
-      () => getByText("Test 1"),
-      {
-        container
-      }
-    );
+    await waitForElement(() => getByText("Test 1"), {
+      container
+    });
 
     expect(queryByText("Test Default 2")).toBeNull();
   });

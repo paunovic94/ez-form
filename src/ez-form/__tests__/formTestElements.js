@@ -20,13 +20,21 @@ function TextInput({ label, error, fontSize, ...restProps }) {
   );
 }
 
-function Select({ label, error, value, options, onChange, ...restProps }) {
+function Select({
+  label,
+  error,
+  value,
+  options,
+  onChange,
+  onChangeTestValue,
+  ...restProps
+}) {
   if (typeof value === "string" && options) {
     value = options.find(option => option.value === value);
   }
 
   return (
-    <div className="TestSelect" onClick={onChange}>
+    <div className="TestSelect" onClick={e => onChange(onChangeTestValue)}>
       {label && <div>Label: {label}</div>}
       {error && <div>Error: {error}</div>}
       <ReactSelect
