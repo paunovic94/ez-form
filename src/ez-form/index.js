@@ -94,9 +94,14 @@ function initFormData(schema) {
         schema[fieldName].defaultValue === undefined
           ? ''
           : schema[fieldName].defaultValue,
-      handleInputValueChange: event => event.target.value,
+      handleInputValueChange: ValueResolvers[schema[fieldName].formElement.type],
     };
   });
 
   return formData;
 }
+
+const ValueResolvers = {
+  [InputTypes.TEXT]: event => event.target.value,
+  [InputTypes.SELECT]: event => event
+};
