@@ -1,5 +1,10 @@
 import React from "react";
-import { render, cleanup, fireEvent, waitForElement } from "react-testing-library";
+import {
+  render,
+  cleanup,
+  fireEvent,
+  waitForElement
+} from "react-testing-library";
 import useForm from "../index";
 import formElements from "./formTestElements";
 
@@ -32,15 +37,52 @@ describe("Update form data on input change", () => {
     fireEvent.change(input1, { target: { value: "test1" } });
     fireEvent.change(input2, { target: { value: "test2" } });
 
+    await waitForElement(() => [getByValue("test1"), getByValue("test2")], {
+      container
+    });
+  });
+
+  test("Select", async () => {
+    function TestForm() {
+      const formData = useForm({
+        testSelect1: {
+          formElement: formElements.select
+        },
+        testSelect2: {
+          formElement: formElements.select,
+          defaultValue: "option-default"
+        }
+      });
+
+      return (
+        <div>
+          {formData.testSelect1.render({
+            options: [
+              { value: "option-default", label: "Test Default 1" },
+              { value: "option-1", label: "Test 1" }
+            ]
+          })}
+          {formData.testSelect2.render({
+            options: [{ value: "option-default", label: "Test Default 2" }]
+          })}
+        </div>
+      );
+    }
+
+    const { container, getByText, queryByText } = render(<TestForm />);
+
+    const [select1, select2] = container.querySelectorAll(".TestSelect");
+
+    fireEvent.click(select1, { value: "option-1", label: "Test 1" });
+    fireEvent.click(select2, null);
+
     await waitForElement(
-      () => [
-        getByValue('test1'),
-        getByValue('test2'),
-      ],
-      {container},
+      () => getByText("Test 1"),
+      {
+        container
+      }
     );
 
-    // expect(input1.value).toBe("test1");
-    // expect(input2.value).toBe("test2");
+    expect(queryByText("Test Default 2")).toBeNull();
   });
 });
