@@ -12,7 +12,9 @@
     "react-select": "2.1.1",
     "react-testing-library": "5.2.3"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "flow-bin": "^0.85.0"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
