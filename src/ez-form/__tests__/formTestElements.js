@@ -2,9 +2,9 @@ import React from "react";
 import ReactSelect from "react-select";
 import { InputTypes } from "../index";
 
-function TextInput({ label, error, fontSize, ...restProps }) {
+function TextInput({ label, error, fontSize, name, ...restProps }) {
   return (
-    <div className="TestTextInput">
+    <div className={`TestTextInput ${name}`}>
       {label && <div>Label: {label}</div>}
       {error && <div className="Error">Error: {error}</div>}
       <input
