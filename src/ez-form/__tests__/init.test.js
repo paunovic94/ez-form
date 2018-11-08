@@ -65,7 +65,7 @@ describe("init default value from schema", () => {
     expect(queryByText("Test Select Default")).toBeTruthy();
   });
 
-  test.skip("IsVisible flag in schema", () => {
+  test("IsVisible flag in schema", () => {
     function TestForm(props) {
       const formData = useForm({
         testInputText1: {
