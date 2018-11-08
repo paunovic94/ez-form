@@ -144,4 +144,75 @@ describe("Validate form data on input change", () => {
     expect(errorMessage.innerHTML).toBe("Error: Max length is 3");
 
   });
+
+
+  test("Validate anoter field", async () => {
+    function TestForm() {
+      const formData = useForm({
+        testInputText1: {
+          formElement: formElements.textInput,
+          name: "testInputText1",
+          validationRules: [
+            {
+              fn: isMaxLength,
+              args : {
+                  maxLength : 3
+              }
+            },
+            {
+              validateAnotherField : "testInputText2"
+            }
+          ]
+        },
+        testInputText2: {
+          formElement: formElements.textInput,
+          name: "testInputText2",
+          validationRules: [
+            {
+              fn: isRequired,
+            }
+          ]
+        }
+      });
+
+      return (
+        <div>
+          {formData.testInputText1.render()}
+          {formData.testInputText2.render()}
+        </div>
+      );
+    }
+
+    const { container, getByValue } = render(<TestForm />);
+
+    const [input1, input2] = container.querySelectorAll("input");
+    const [inputWrapper1, inputWrapper2] = container.querySelectorAll(
+      ".TestTextInput"
+    );
+
+    fireEvent.change(input1, { target: { value: "Text1" } });
+
+    await waitForElement(() => [getByValue("Text1")], {
+        container
+    });
+
+    let errorMessage1 = container.querySelector(".testInputText1 > .Error");
+    let errorMessage2 = container.querySelector(".testInputText2 > .Error");
+
+    expect(errorMessage1.innerHTML).toBe('Error: Max length is 3');
+    expect(errorMessage2.innerHTML).toBe('Error: Is required default');
+
+    fireEvent.change(input1, { target: { value: "t" } });
+    fireEvent.change(input2, { target: { value: "text2" } });
+
+    await waitForElement(() => [getByValue("t"), getByValue("text2")], {
+      container
+    });
+
+    errorMessage1 =  container.querySelector(".testInputText1 > .Error");
+    errorMessage2 = container.querySelector(".testInputText2 > .Error");
+
+    expect(errorMessage1).toBeNull();
+    expect(errorMessage2).toBeNull();
+  });
 });

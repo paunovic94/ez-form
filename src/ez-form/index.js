@@ -108,7 +108,6 @@ function initFormData(schema) {
 
 function validateField(fieldState) {
   for (let rule of fieldState.validationRules) {
-    console.log(fieldState.value);
     let error = rule.fn({
       value: fieldState.value,
       args: rule.args,
