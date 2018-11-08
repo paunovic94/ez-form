@@ -2,7 +2,7 @@ import React from "react";
 import ReactSelect from "react-select";
 import { InputTypes } from "../index";
 
-function TextInput({ label, error, fontSize, name, value, onChange,  ...restProps }) {
+function TextInput({ label, error, fontSize, name, value, onChange, disabled, ...restProps }) {
   return (
     <div className={`TestTextInput ${name}`}>
       {label && <div>Label: {label}</div>}
@@ -16,6 +16,7 @@ function TextInput({ label, error, fontSize, name, value, onChange,  ...restProp
           background: error ? "coral" : "white",
           fontSize: fontSize || 16
         }}
+        disabled={disabled}
       />
     </div>
   );
@@ -28,6 +29,9 @@ function Select({
   options,
   onChange,
   onChangeTestValue,
+  disabled,
+  clearable,
+  onInputChange,
   ...restProps
 }) {
   if (typeof value === "string" && options) {
@@ -42,7 +46,9 @@ function Select({
         value={value}
         options={options}
         onChange={onChange}
-        {...restProps}
+        isDisabled={disabled}
+        isClearable={clearable}
+        onInputChange={onInputChange}
       />
     </div>
   );
