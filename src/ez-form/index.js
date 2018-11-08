@@ -55,10 +55,12 @@ export default function useForm(schema: Schema) {
   function handleChange({ event, fieldName }) {
     const fieldState = formState[fieldName];
     const newValue = fieldState.handleInputValueChange(event);
-    const changedFiledState = {
+    let changedFiledState = {
       ...fieldState,
       value: newValue,
     };
+
+    changedFiledState.error = validateField(changedFiledState);
 
     setFormState({ ...formState, [fieldName]: changedFiledState });
   }
@@ -71,6 +73,7 @@ export default function useForm(schema: Schema) {
         <formElement.Component
           value={formState[fieldName].value}
           name={name}
+          error={formState[fieldName].error}
           {...additionalProps}
           onChange={event => {
             handleChange({
@@ -90,19 +93,32 @@ function initFormData(schema) {
   let formData = {};
 
   Object.keys(schema).forEach(fieldName => {
+    let {
+      defaultValue,
+      formElement,
+      validationRules = []
+    } = schema[fieldName];
+
     formData[fieldName] = {
-      value:
-        schema[fieldName].defaultValue === undefined
-          ? ''
-          : schema[fieldName].defaultValue,
-      handleInputValueChange: ValueResolvers[schema[fieldName].formElement.type],
+      value: defaultValue === undefined ? '' : defaultValue,
+      handleInputValueChange: ValueResolvers[formElement.type],
+      error: "",
+      validationRules,
     };
   });
 
   return formData;
 }
 
+function validateField(fieldState) {
+  for (let rule of fieldState.validationRules) {
+    let error = rule.fn({value: fieldState.value});
+    if (error) return error;
+  }
+  return "";
+}
+
 const ValueResolvers = {
   [InputTypes.TEXT]: event => event.target.value,
-  [InputTypes.SELECT]: event => event
+  [InputTypes.SELECT]: event => event,
 };

@@ -18,8 +18,8 @@ function isRequired({ value, message }) {
 }
 
 function isName({ value, message }) {
-  if (value && /^[a-zA-Z]*$/.test(value)) {
-    return message || "Is name default";
+  if (value && !/^[a-zA-Z]*$/.test(value)) {
+    return message || "Is name custom";
   }
   return "";
 }
@@ -85,7 +85,7 @@ describe("Validate form data on input change", () => {
     let errorMessage1 = container.querySelector(".testInputText1 > .Error");
     let errorMessage2 = container.querySelector(".testInputText2 > .Error");
 
-    expect(errorMessage1.innerHTML).toBe('Is required default')
+    expect(errorMessage1.innerHTML).toBe('Error: Is required default');
     expect(errorMessage2).toBeNull();
 
     fireEvent.change(input1, { target: { value: "text" } });
@@ -100,7 +100,7 @@ describe("Validate form data on input change", () => {
     errorMessage2 = container.querySelector(".testInputText2 > .Error");
 
     expect(errorMessage1).toBeNull();
-    expect(errorMessage2.innerHTML).toBe('Is name custom');
+    expect(errorMessage2.innerHTML).toBe('Error: Is name custom');
   });
 
   test.skip("Args property for validation function", async () => {
