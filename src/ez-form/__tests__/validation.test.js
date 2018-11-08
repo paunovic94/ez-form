@@ -103,6 +103,47 @@ describe("Validate form data on input change", () => {
     expect(errorMessage2.innerHTML).toBe('Error: Is name custom');
   });
 
+
+  test("Hanlde intl error message" , async () => {
+    function TestForm() {
+      const formData = useForm({
+        testInputText1: {
+          formElement: formElements.textInput,
+          defaultValue: "text1",
+          name: "testInputText1",
+          validationRules: [
+            {
+              fn: isRequired,
+              message : {
+                descriptor : {
+                  id: "Util.isRequired",
+                  defaultMessage: "Is required intl message",
+                }
+              }
+            },
+          ]
+        },
+      });
+
+      return (
+        <div>
+          {formData.testInputText1.render()}
+        </div>
+      );
+    }
+
+    const { container, getByValue } = render(<TestForm />);
+    const input = container.querySelector("input");
+
+    fireEvent.change(input, { target: { value: "" } });
+    await waitForElement(() => getByValue(""), {
+      container
+    });
+
+    let errorMessage = container.querySelector(".Error");
+    expect(errorMessage.innerHTML).toBe('Error: Is required intl message');
+  })
+
   test("Args property for validation function", async () => {
     function TestForm() {
       const formData = useForm({
@@ -144,8 +185,7 @@ describe("Validate form data on input change", () => {
 
   });
 
-
-  test("Validate anoter field", async () => {
+  test.skip("Validate anoter field", async () => {
     function TestForm() {
       const formData = useForm({
         testInputText1: {
