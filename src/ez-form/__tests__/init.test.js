@@ -64,4 +64,44 @@ describe("init default value from schema", () => {
     expect(queryByText("Test Select")).toBeTruthy();
     expect(queryByText("Test Select Default")).toBeTruthy();
   });
+
+  test.skip("IsVisible flag in schema", () => {
+    function TestForm(props) {
+      const formData = useForm({
+        testInputText1: {
+          formElement: formElements.textInput,
+          defaultValue: "testInputText1",
+          name: "testInputText1",
+          isVisible: true
+        },
+        testInputText2: {
+          formElement: formElements.textInput,
+          name: "testInputText2",
+          defaultValue: "testInputText2"
+        },
+        testInputText3: {
+          formElement: formElements.textInput,
+          name: "testInputText3",
+          defaultValue: "testInputText3",
+          isVisible: false
+        }
+      });
+
+      return (
+        <div>
+          {formData.testInputText1.render()}
+          {formData.testInputText2.render()}
+          {formData.testInputText3.render()}
+        </div>
+      );
+    }
+
+    const { container, getByValue } = render(<TestForm />);
+    const inputs = container.querySelectorAll("input");
+    const TextInputComponent3 = container.querySelector(".testInputText3");
+
+    expect(inputs[0].value).toBe("testInputText1");
+    expect(inputs[1].value).toBe("testInputText2");
+    expect(TextInputComponent3).not.toBeTruthy();
+  });
 });
