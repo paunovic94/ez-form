@@ -25,7 +25,6 @@ function isName({ value, message }) {
 }
 
 function isMaxLength({value, args = {}}) {
-  console.log(args);
   if (value && value.length > args.maxLength) {
     return "Max length is " + args.maxLength;
   }

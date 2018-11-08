@@ -68,13 +68,14 @@ export default function useForm(schema: Schema) {
 
   let formData = {};
   Object.keys(schema).forEach(fieldName => {
-    const { formElement, name } = schema[fieldName];
+    const { formElement, name, isVisible } = schema[fieldName];
     formData[fieldName] = {
       render: additionalProps => (
         <formElement.Component
           value={formState[fieldName].value}
           name={name}
           error={formState[fieldName].error}
+          isVisible={isVisible}
           {...additionalProps}
           onChange={event => {
             handleChange({

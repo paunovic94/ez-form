@@ -1,8 +1,21 @@
-import React from "react";
-import ReactSelect from "react-select";
-import { InputTypes } from "../index";
+import React from 'react';
+import ReactSelect from 'react-select';
+import { InputTypes } from '../index';
 
-function TextInput({ label, error, fontSize, name, value, onChange, disabled, ...restProps }) {
+function TextInput({
+  label,
+  error,
+  fontSize,
+  name,
+  value,
+  onChange,
+  isVisible = true,
+  disabled,
+  ...restProps
+}) {
+  if (!isVisible) {
+    return null;
+  }
   return (
     <div className={`TestTextInput ${name}`}>
       {label && <div>Label: {label}</div>}
@@ -13,8 +26,8 @@ function TextInput({ label, error, fontSize, name, value, onChange, disabled, ..
         value={value}
         onChange={onChange}
         style={{
-          background: error ? "coral" : "white",
-          fontSize: fontSize || 16
+          background: error ? 'coral' : 'white',
+          fontSize: fontSize || 16,
         }}
         disabled={disabled}
       />
@@ -30,11 +43,15 @@ function Select({
   onChange,
   onChangeTestValue,
   disabled,
-  clearable,
   onInputChange,
+  isVisible = true,
   ...restProps
 }) {
-  if (typeof value === "string" && options) {
+  if (!isVisible) {
+    return null;
+  }
+
+  if (typeof value === 'string' && options) {
     value = options.find(option => option.value === value);
   }
 
@@ -47,7 +64,6 @@ function Select({
         options={options}
         onChange={onChange}
         isDisabled={disabled}
-        isClearable={clearable}
         onInputChange={onInputChange}
       />
     </div>
@@ -56,7 +72,7 @@ function Select({
 
 let formElements = {
   textInput: { type: InputTypes.TEXT, Component: TextInput },
-  select: { type: InputTypes.SELECT, Component: Select }
+  select: { type: InputTypes.SELECT, Component: Select },
 };
 
 export default formElements;

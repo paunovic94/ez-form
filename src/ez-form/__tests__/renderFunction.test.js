@@ -6,7 +6,7 @@ import formElements from "./formTestElements";
 afterEach(cleanup);
 
 describe("Test render additional options", () => {
-  test.skip("IsVisible flag", () => {
+  test("IsVisible flag", () => {
     function TestForm(props) {
       const formData = useForm({
         testInputText1: {
