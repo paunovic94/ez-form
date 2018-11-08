@@ -2,15 +2,16 @@ import React from "react";
 import ReactSelect from "react-select";
 import { InputTypes } from "../index";
 
-function TextInput({ label, error, fontSize, name, ...restProps }) {
+function TextInput({ label, error, fontSize, name, value, onChange,  ...restProps }) {
   return (
     <div className={`TestTextInput ${name}`}>
       {label && <div>Label: {label}</div>}
       {error && <div className="Error">Error: {error}</div>}
       <input
         type="text"
-        {...restProps}
         title={error}
+        value={value}
+        onChange={onChange}
         style={{
           background: error ? "coral" : "white",
           fontSize: fontSize || 16
