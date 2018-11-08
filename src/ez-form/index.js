@@ -61,8 +61,9 @@ export default function useForm(schema: Schema) {
     };
 
     changedFiledState.error = validateField(changedFiledState);
-
-    setFormState({ ...formState, [fieldName]: changedFiledState });
+    const newFormState = { ...formState, [fieldName]: changedFiledState };
+    setFormState(newFormState);
+    checkIfFieldValidateAnotherField(fieldState, newFormState, setFormState);
   }
 
   let formData = {};
@@ -108,6 +109,7 @@ function initFormData(schema) {
 
 function validateField(fieldState) {
   for (let rule of fieldState.validationRules) {
+    if (rule.validateAnotherField) return;
     let error = rule.fn({
       value: fieldState.value,
       args: rule.args,
@@ -116,6 +118,19 @@ function validateField(fieldState) {
     if (error) return error;
   }
   return '';
+}
+
+function checkIfFieldValidateAnotherField(fieldState, newFormState, setFormState) {
+  for (let rule of fieldState.validationRules) {
+    if (rule.validateAnotherField) {
+      const anotherFieldName = rule.validateAnotherField;
+      const error = validateField(newFormState[anotherFieldName]);
+      setFormState({
+        ...newFormState,
+        [anotherFieldName]: { ...newFormState[anotherFieldName], error: error },
+      });
+    }
+  }
 }
 
 const ValueResolvers = {
