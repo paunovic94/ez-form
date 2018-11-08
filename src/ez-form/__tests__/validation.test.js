@@ -25,6 +25,7 @@ function isName({ value, message }) {
 }
 
 function isMaxLength({value, args = {}}) {
+  console.log(args);
   if (value && value.length > args.maxLength) {
     return "Max length is " + args.maxLength;
   }
@@ -103,7 +104,7 @@ describe("Validate form data on input change", () => {
     expect(errorMessage2.innerHTML).toBe('Error: Is name custom');
   });
 
-  test.skip("Args property for validation function", async () => {
+  test("Args property for validation function", async () => {
     function TestForm() {
       const formData = useForm({
         testInputText: {
@@ -139,8 +140,8 @@ describe("Validate form data on input change", () => {
         container
     });
 
-    let errorMessage = inputWrapper.querySelector(".Error");
-    expect(errorMessage).toBe("Max length is 3");
+    let errorMessage = testInputText.querySelector(".Error");
+    expect(errorMessage.innerHTML).toBe("Error: Max length is 3");
 
   });
 });

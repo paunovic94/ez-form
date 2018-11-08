@@ -93,16 +93,12 @@ function initFormData(schema) {
   let formData = {};
 
   Object.keys(schema).forEach(fieldName => {
-    let {
-      defaultValue,
-      formElement,
-      validationRules = []
-    } = schema[fieldName];
+    let { defaultValue, formElement, validationRules = [] } = schema[fieldName];
 
     formData[fieldName] = {
       value: defaultValue === undefined ? '' : defaultValue,
       handleInputValueChange: ValueResolvers[formElement.type],
-      error: "",
+      error: '',
       validationRules,
     };
   });
@@ -112,10 +108,15 @@ function initFormData(schema) {
 
 function validateField(fieldState) {
   for (let rule of fieldState.validationRules) {
-    let error = rule.fn({value: fieldState.value});
+    console.log(fieldState.value);
+    let error = rule.fn({
+      value: fieldState.value,
+      args: rule.args,
+      message: rule.message,
+    });
     if (error) return error;
   }
-  return "";
+  return '';
 }
 
 const ValueResolvers = {
