@@ -9,6 +9,7 @@ function TextInput({
   name,
   value,
   onChange,
+  disabled,
   ...restProps
 }) {
   return (
@@ -24,6 +25,7 @@ function TextInput({
           background: error ? 'coral' : 'white',
           fontSize: fontSize || 16,
         }}
+        disabled={disabled}
       />
     </div>
   );
@@ -36,6 +38,8 @@ function Select({
   options,
   onChange,
   onChangeTestValue,
+  disabled,
+  onInputChange,
   ...restProps
 }) {
 
@@ -51,7 +55,8 @@ function Select({
         value={value}
         options={options}
         onChange={onChange}
-        {...restProps}
+        isDisabled={disabled}
+        onInputChange={onInputChange}
       />
     </div>
   );

@@ -77,6 +77,7 @@ export default function useForm(schema: Schema) {
             [fieldName]: {
               ...formState[fieldName],
               isVisible: isVisible,
+              error: ''
             },
           });
         }
