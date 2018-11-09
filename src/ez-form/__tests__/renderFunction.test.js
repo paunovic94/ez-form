@@ -36,7 +36,7 @@ describe("Test render additional options", () => {
     expect(TextInputComponents[1]).not.toBeTruthy();
   });
 
-  test.skip("IsDisabled flag", () => {
+  test("IsDisabled flag", () => {
     function TestForm(props) {
       const formData = useForm({
         testInputText1: {
@@ -78,9 +78,9 @@ describe("Test render additional options", () => {
     const { container, getByValue } = render(<TestForm />);
     const inputs = container.querySelectorAll("input");
 
-    expect(inputs[0].disabled).not.toBeTruthy();
+    expect(inputs[0].disabled).toBeTruthy();
     expect(inputs[1].disabled).not.toBeTruthy();
     expect(inputs[2].disabled).not.toBeTruthy();
-    expect(inputs[3].disabled).toBeTruthy();
+    expect(inputs[3].disabled).not.toBeTruthy();
   });
 });
