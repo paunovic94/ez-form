@@ -1,6 +1,23 @@
-import React from 'react';
-import ReactSelect from 'react-select';
-import { InputTypes } from '../index';
+import React from "react";
+import ReactSelect from "react-select";
+import { InputTypes } from "../index";
+
+
+export function formatDate(date) {
+  date =  new Date(date);
+  var monthNames = [
+    "January", "February", "March",
+    "April", "May", "June", "July",
+    "August", "September", "October",
+    "November", "December"
+  ];
+
+  var day = date.getDate();
+  var monthIndex = date.getMonth();
+  var year = date.getFullYear();
+
+  return day + ' ' + monthNames[monthIndex] + ' ' + year;
+}
 
 function TextInput({
   label,
@@ -14,7 +31,10 @@ function TextInput({
 }) {
   label = typeof label === "object" ? label.descriptor.defaultMessage : label;
   error = typeof error === "object" ? error.descriptor.defaultMessage : error;
-
+  
+  if (!isNaN(Date.parse(value))) {
+    value = formatDate(value)
+  }
   return (
     <div className={`TestTextInput ${name}`}>
       {label && <div className="Label">Label: {label}</div>}
@@ -25,8 +45,8 @@ function TextInput({
         value={value}
         onChange={onChange}
         style={{
-          background: error ? 'coral' : 'white',
-          fontSize: fontSize || 16,
+          background: error ? "coral" : "white",
+          fontSize: fontSize || 16
         }}
         disabled={disabled}
       />
@@ -45,8 +65,7 @@ function Select({
   onInputChange,
   ...restProps
 }) {
-
-  if (typeof value === 'string' && options) {
+  if (typeof value === "string" && options) {
     value = options.find(option => option.value === value);
   }
 
@@ -67,7 +86,7 @@ function Select({
 
 let formElements = {
   textInput: { type: InputTypes.TEXT, Component: TextInput },
-  select: { type: InputTypes.SELECT, Component: Select },
+  select: { type: InputTypes.SELECT, Component: Select }
 };
 
 export default formElements;
