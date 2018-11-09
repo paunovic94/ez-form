@@ -68,9 +68,9 @@ export default function useForm(schema: Schema, schemaValues = {}) {
 
   let formData = {};
   Object.keys(schema).forEach(fieldName => {
-    const { formElement, name } = schema[fieldName];
+    const { formElement, name, label, label2} = schema[fieldName];
     formData[fieldName] = {
-      render: ({ isVisible, disabled, ...additionalProps } = {}) => {
+      render: ({ useSecondLabel, isVisible, disabled, ...additionalProps } = {}) => {
         if (typeof isVisible === 'boolean' && isVisible !== formState[fieldName].isVisible) {
           setFormState({
             ...formState,
@@ -100,6 +100,7 @@ export default function useForm(schema: Schema, schemaValues = {}) {
               name={name}
               error={formState[fieldName].error}
               disabled={formState[fieldName].disabled}
+              label={useSecondLabel ? label2 : label}
               {...additionalProps}
               onChange={event => {
                 handleChange({
@@ -127,6 +128,7 @@ function initFormData(schema, schemaValues) {
       validationRules = [],
       isVisible = true,
       disabled = false,
+      useSecondLabel = false,
     } = schema[fieldName];
 
     formData[fieldName] = {
@@ -136,6 +138,7 @@ function initFormData(schema, schemaValues) {
       validationRules,
       isVisible,
       disabled,
+      useSecondLabel,
     };
   });
 
