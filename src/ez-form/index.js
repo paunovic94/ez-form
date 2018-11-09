@@ -68,23 +68,35 @@ export default function useForm(schema: Schema) {
 
   let formData = {};
   Object.keys(schema).forEach(fieldName => {
-    const { formElement, name, isVisible } = schema[fieldName];
+    const { formElement, name } = schema[fieldName];
     formData[fieldName] = {
-      render: additionalProps => (
-        <formElement.Component
-          value={formState[fieldName].value}
-          name={name}
-          error={formState[fieldName].error}
-          isVisible={isVisible}
-          {...additionalProps}
-          onChange={event => {
-            handleChange({
-              event,
-              fieldName,
-            });
-          }}
-        />
-      ),
+      render: ({ isVisible, ...additionalProps } = {}) => {
+        if (typeof isVisible === 'boolean' && isVisible !== formState[fieldName].isVisible) {
+          setFormState({
+            ...formState,
+            [fieldName]: {
+              ...formState[fieldName],
+              isVisible: isVisible,
+            },
+          });
+        }
+        return (
+          formState[fieldName].isVisible && (
+            <formElement.Component
+              value={formState[fieldName].value}
+              name={name}
+              error={formState[fieldName].error}
+              {...additionalProps}
+              onChange={event => {
+                handleChange({
+                  event,
+                  fieldName,
+                });
+              }}
+            />
+          )
+        );
+      },
     };
   });
 
@@ -95,13 +107,19 @@ function initFormData(schema) {
   let formData = {};
 
   Object.keys(schema).forEach(fieldName => {
-    let { defaultValue, formElement, validationRules = [] } = schema[fieldName];
+    let {
+      defaultValue,
+      formElement,
+      validationRules = [],
+      isVisible = true,
+    } = schema[fieldName];
 
     formData[fieldName] = {
       value: defaultValue === undefined ? '' : defaultValue,
       handleInputValueChange: ValueResolvers[formElement.type],
       error: '',
       validationRules,
+      isVisible,
     };
   });
 

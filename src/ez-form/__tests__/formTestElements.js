@@ -9,12 +9,8 @@ function TextInput({
   name,
   value,
   onChange,
-  isVisible = true,
   ...restProps
 }) {
-  if (!isVisible) {
-    return null;
-  }
   return (
     <div className={`TestTextInput ${name}`}>
       {label && <div>Label: {label}</div>}
@@ -40,12 +36,8 @@ function Select({
   options,
   onChange,
   onChangeTestValue,
-  isVisible = true,
   ...restProps
 }) {
-  if (!isVisible) {
-    return null;
-  }
 
   if (typeof value === 'string' && options) {
     value = options.find(option => option.value === value);
