@@ -165,10 +165,10 @@ describe("init default value from schema", () => {
     let label4 = container.querySelector(".testInputText4 > .Label");
     let label5 = container.querySelector(".testInputText5 > .Label");
 
-    expect(label1).toBe("Label: testInputText1");
-    expect(label2).toBe("Label: testInputText2");
-    expect(label3).toBe("Label: testInputText3 label2");
-    expect(label4).toBe("Label: testInputText4");
+    expect(label1.innerHTML).toBe("Label: testInputText1");
+    expect(label2.innerHTML).toBe("Label: testInputText2");
+    expect(label3.innerHTML).toBe("Label: testInputText3 label2");
+    expect(label4.innerHTML).toBe("Label: testInputText4");
     expect(label5).toBeNull();
   });
 
