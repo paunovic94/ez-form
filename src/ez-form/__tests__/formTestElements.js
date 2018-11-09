@@ -17,7 +17,7 @@ function TextInput({
 
   return (
     <div className={`TestTextInput ${name}`}>
-      {label && <div>Label: {label}</div>}
+      {label && <div className="Label">Label: {label}</div>}
       {error && <div className="Error">Error: {error}</div>}
       <input
         type="text"

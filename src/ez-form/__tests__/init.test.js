@@ -104,6 +104,74 @@ describe("init default value from schema", () => {
     expect(inputs[1].value).toBe("testInputText2");
     expect(TextInputComponent3).not.toBeTruthy();
   });
+
+  test("Label and Label2", () => {
+    function TestForm(props) {
+      const formData = useForm({
+        testInputText1: {
+          formElement: formElements.textInput,
+          defaultValue: "testInputText1",
+          name: "testInputText1",
+          label: "testInputText1",
+        },
+        testInputText2: {
+          formElement: formElements.textInput,
+          name: "testInputText2",
+          defaultValue: "testInputText2",
+          label: "testInputText2",
+          label2: "testInputText2 label2"
+        },
+        testInputText3: {
+          formElement: formElements.textInput,
+          name: "testInputText3",
+          defaultValue: "testInputText3",
+          label: "testInputText3",
+          label2: "testInputText3 label2"
+        },
+        testInputText4: {
+          formElement: formElements.textInput,
+          name: "testInputText4",
+          defaultValue: "testInputText4",
+          label: {
+            descriptor : {
+              id: "Util.label",
+              defaultMessage: "testInputText4",
+            }
+          },
+        },
+        testInputText5: {
+          formElement: formElements.textInput,
+          name: "testInputText5",
+          defaultValue: "testInputText5",
+        },
+      });
+
+      return (
+        <div>
+          {formData.testInputText1.render()}
+          {formData.testInputText2.render()}
+          {formData.testInputText3.render({ useSecondLabel: true })}
+          {formData.testInputText4.render()}
+          {formData.testInputText5.render()}
+        </div>
+      );
+    }
+
+    const { container, getByValue } = render(<TestForm />);
+
+    let label1 = container.querySelector(".testInputText1 > .Label");
+    let label2 = container.querySelector(".testInputText2 > .Label");
+    let label3 = container.querySelector(".testInputText3 > .Label");
+    let label4 = container.querySelector(".testInputText4 > .Label");
+    let label5 = container.querySelector(".testInputText5 > .Label");
+
+    expect(label1).toBe("Label: testInputText1");
+    expect(label2).toBe("Label: testInputText2");
+    expect(label3).toBe("Label: testInputText3 label2");
+    expect(label4).toBe("Label: testInputText4");
+    expect(label5).toBeNull();
+  });
+
 });
 
 describe("Init value in schema with second arg in useForm", () => {
