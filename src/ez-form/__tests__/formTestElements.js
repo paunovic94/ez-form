@@ -31,8 +31,8 @@ function TextInput({
 }) {
   label = typeof label === "object" ? label.descriptor.defaultMessage : label;
   error = typeof error === "object" ? error.descriptor.defaultMessage : error;
-  
-  if (!isNaN(Date.parse(value))) {
+
+  if (name && name.toLowerCase().includes('date') && !isNaN(Date.parse(value))) {
     value = formatDate(value)
   }
   return (

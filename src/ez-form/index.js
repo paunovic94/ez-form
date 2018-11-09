@@ -60,7 +60,7 @@ export default function useForm(schema: Schema, schemaValues = {}) {
       value: newValue,
     };
 
-    changedFiledState.error = validateField(changedFiledState);
+    changedFiledState.error = validateField(changedFiledState, formState);
     const newFormState = { ...formState, [fieldName]: changedFiledState };
     setFormState(newFormState);
     checkIfFieldValidateAnotherField(fieldState, newFormState, setFormState);
@@ -145,9 +145,12 @@ function initFormData(schema, schemaValues) {
   return formData;
 }
 
-function validateField(fieldState) {
+function validateField(fieldState, formState) {
   for (let rule of fieldState.validationRules) {
     if (rule.validateAnotherField) return;
+    if(rule.args && rule.args.dependencyFieldName){
+      rule.args.dependencyFieldValue = formState[rule.args.dependencyFieldName].value
+    }
     let error = rule.fn({
       value: fieldState.value,
       args: rule.args,

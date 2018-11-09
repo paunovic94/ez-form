@@ -31,14 +31,14 @@ function isMaxLength({ value, args = {} }) {
 }
 
 function isStartDateBeforeEndDate({ value, args, message }) {
-  let endDate = args.depenencyFieldValue;
+  let endDate = args.dependencyFieldValue;
   if (!endDate) return;
 
   if (!message) {
     message = "Start date should be before end date";
   }
 
-  if (value && endDate < value) {
+  if (value && endDate < new Date(value)) {
     return message;
   }
 }
@@ -269,17 +269,17 @@ describe("Validate form data on input change", () => {
     expect(errorMessage2).toBeNull();
   });
 
-  test.skip("Validate field based on value for another field", async () => {
+  test("Validate field based on value for another field", async () => {
     function TestForm() {
       const formData = useForm({
         startDate: {
           formElement: formElements.textInput,
-          name: "startData",
+          name: "startDate",
           validationRules: [
             {
               fn: isStartDateBeforeEndDate,
               args: {
-                depenencyFieldName: "endDate"
+                dependencyFieldName: "endDate"
               }
             }
           ]
@@ -309,7 +309,7 @@ describe("Validate form data on input change", () => {
       container
     });
 
-    let endDateErrorMessage = container.querySelector(".endDate > .Error");
+    let endDateErrorMessage = container.querySelector(".startDate > .Error");
     expect(endDateErrorMessage.innerHTML).toBe("Error: Start date should be before end date");
 
   });
