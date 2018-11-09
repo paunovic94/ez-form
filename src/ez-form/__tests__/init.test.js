@@ -175,7 +175,7 @@ describe("init default value from schema", () => {
 });
 
 describe("Init value in schema with second arg in useForm", () => {
-  test.skip("Text input", () => {
+  test("Text input", () => {
     function TestForm(props) {
       const formData = useForm(
         {
@@ -208,7 +208,7 @@ describe("Init value in schema with second arg in useForm", () => {
     expect(inputs[1].value).toBe("initText2");
   });
 
-  test.skip("Select", () => {
+  test("Select", () => {
     function TestForm(props) {
       const formData = useForm(
         {

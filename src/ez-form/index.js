@@ -49,8 +49,8 @@ export const InputTypes = {
   SELECT: 'SELECT_INPUT',
 };
 
-export default function useForm(schema: Schema) {
-  let [formState, setFormState] = useState(() => initFormData(schema));
+export default function useForm(schema: Schema, schemaValues = {}) {
+  let [formState, setFormState] = useState(() => initFormData(schema, schemaValues));
 
   function handleChange({ event, fieldName }) {
     const fieldState = formState[fieldName];
@@ -117,7 +117,7 @@ export default function useForm(schema: Schema) {
   return formData;
 }
 
-function initFormData(schema) {
+function initFormData(schema, schemaValues) {
   let formData = {};
 
   Object.keys(schema).forEach(fieldName => {
@@ -130,7 +130,7 @@ function initFormData(schema) {
     } = schema[fieldName];
 
     formData[fieldName] = {
-      value: defaultValue === undefined ? '' : defaultValue,
+      value: schemaValues[fieldName] ? schemaValues[fieldName] : defaultValue === undefined ? '' : defaultValue,
       handleInputValueChange: ValueResolvers[formElement.type],
       error: '',
       validationRules,
