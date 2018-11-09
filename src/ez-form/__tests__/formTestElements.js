@@ -12,6 +12,9 @@ function TextInput({
   disabled,
   ...restProps
 }) {
+  label = typeof label === "object" ? label.descriptor.defaultMessage : label;
+  error = typeof error === "object" ? error.descriptor.defaultMessage : error;
+
   return (
     <div className={`TestTextInput ${name}`}>
       {label && <div>Label: {label}</div>}

@@ -103,8 +103,8 @@ describe("Validate form data on input change", () => {
     expect(errorMessage2.innerHTML).toBe('Error: Is name custom');
   });
 
-
-  test("Hanlde intl error message" , async () => {
+  test("useForm treat intl error message and string same" , async () => {
+    // Intl error messages are handled in components from formElemet 
     function TestForm() {
       const formData = useForm({
         testInputText1: {
@@ -185,7 +185,7 @@ describe("Validate form data on input change", () => {
 
   });
 
-  test.skip("Validate anoter field", async () => {
+  test("Validate anoter field", async () => {
     function TestForm() {
       const formData = useForm({
         testInputText1: {
@@ -254,4 +254,6 @@ describe("Validate form data on input change", () => {
     expect(errorMessage1).toBeNull();
     expect(errorMessage2).toBeNull();
   });
+
+  
 });
