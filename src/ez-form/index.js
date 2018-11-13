@@ -52,7 +52,7 @@ export const InputTypes = {
 export default function useForm(schema: Schema, schemaValues = {}) {
   let [formState, setFormState] = useState(() => initFormData(schema, schemaValues));
 
-  function handleChange({ event, fieldName }) {
+  function handleChange({ event, fieldName, onComplete }) {
     const fieldState = formState[fieldName];
     const newValue = fieldState.handleInputValueChange(event);
     let changedFiledState = {
@@ -64,6 +64,7 @@ export default function useForm(schema: Schema, schemaValues = {}) {
     const newFormState = { ...formState, [fieldName]: changedFiledState };
     setFormState(newFormState);
     checkIfFieldValidateAnotherField(fieldState, newFormState, setFormState);
+    onComplete && onComplete(newValue);
   }
 
   let formData = {};
@@ -98,6 +99,7 @@ export default function useForm(schema: Schema, schemaValues = {}) {
                 handleChange({
                   event,
                   fieldName,
+                  onComplete: additionalProps.onChange,
                 });
               }}
             />
@@ -172,9 +174,6 @@ function checkIfFieldValidateAnotherField(fieldState, newFormState, setFormState
 }
 
 const ValueResolvers = {
-  [InputTypes.TEXT]: event => {
-    if (event.target.onChange) event.target.onChange();
-    return event.target.value;
-  },
+  [InputTypes.TEXT]: event => event.target.value,
   [InputTypes.SELECT]: event => event,
 };
