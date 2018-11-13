@@ -165,7 +165,7 @@ function checkIfFieldValidateAnotherField(fieldState, newFormState, setFormState
   for (let rule of fieldState.validationRules) {
     if (rule.validateAnotherField) {
       const anotherFieldName = rule.validateAnotherField;
-      const error = validateField(newFormState[anotherFieldName]);
+      const error = validateField(newFormState[anotherFieldName], newFormState);
       setFormState({
         ...newFormState,
         [anotherFieldName]: { ...newFormState[anotherFieldName], error: error },

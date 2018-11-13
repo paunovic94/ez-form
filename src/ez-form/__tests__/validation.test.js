@@ -3,12 +3,14 @@ import {
   render,
   cleanup,
   fireEvent,
-  waitForElement
-  //   getByText as getByTextGlobal,
-  //   queryByText as queryByTextGlobal
+  waitForElement,
+  waitForDomChange,
+  getByTestId,
+  queryByTestId,
+  wait
 } from "react-testing-library";
 import useForm from "../index";
-import formElements, {formatDate} from "./formTestElements";
+import formElements, { formatDate } from "./formTestElements";
 
 function isRequired({ value, message }) {
   if (!value) {
@@ -38,20 +40,20 @@ function isStartDateBeforeEndDate({ value, args, message }) {
     message = "Start date should be before end date";
   }
 
-  if (value && endDate < new Date(value)) {
+  if (value && new Date(endDate) < new Date(value)) {
     return message;
   }
 }
 
 function isEndDateBeforeStartDate({ value, args, message }) {
-  let startDate = args.depenencyFieldValue;
+  let startDate = args.dependencyFieldValue;
   if (!startDate) return;
 
   if (!message) {
     message = "End date should be after end date";
   }
 
-  if (value && startDate > value) {
+  if (value && new Date(startDate) > new Date(value)) {
     return message;
   }
 }
@@ -287,7 +289,7 @@ describe("Validate form data on input change", () => {
         endDate: {
           formElement: formElements.textInput,
           name: "endDate",
-          defaultValue: new Date(2017, 12, 31),
+          defaultValue: new Date(2017, 12, 31)
         }
       });
 
@@ -310,7 +312,85 @@ describe("Validate form data on input change", () => {
     });
 
     let endDateErrorMessage = container.querySelector(".startDate > .Error");
-    expect(endDateErrorMessage.innerHTML).toBe("Error: Start date should be before end date");
+    expect(endDateErrorMessage.innerHTML).toBe(
+      "Error: Start date should be before end date"
+    );
+  });
 
+  test("Validate another field: stop cyclically validation", async () => {
+    function TestForm() {
+      const formData = useForm({
+        startDate: {
+          formElement: formElements.textInput,
+          name: "startDate",
+          validationRules: [
+            {
+              fn: isStartDateBeforeEndDate,
+              args: {
+                dependencyFieldName: "endDate"
+              }
+            },
+            {
+              validateAnotherField: "endDate"
+            }
+          ]
+        },
+        endDate: {
+          formElement: formElements.textInput,
+          name: "endDate",
+          defaultValue: new Date(2017, 11, 31),
+          validationRules: [
+            {
+              fn: isEndDateBeforeStartDate,
+              args: {
+                dependencyFieldName: "startDate"
+              }
+            },
+            {
+              validateAnotherField: "startDate"
+            }
+          ]
+        }
+      });
+
+      return (
+        <div>
+          {formData.startDate.render()}
+          {formData.endDate.render()}
+        </div>
+      );
+    }
+
+    const { container, getByValue } = render(<TestForm />);
+    const [startDateInput] = container.querySelectorAll("input");
+
+    let startDate = new Date();
+    fireEvent.change(startDateInput, { target: { value: startDate } });
+
+    await waitForElement(() => getByValue(formatDate(startDate)), {
+      container
+    });
+
+    let startDateErrorMessage = container.querySelector(".startDate > .Error");
+    let endDateErrorMessage = container.querySelector(".endDate > .Error");
+
+    expect(startDateErrorMessage.innerHTML).toBe(
+      "Error: Start date should be before end date"
+    );
+    expect(endDateErrorMessage.innerHTML).toBe(
+      "Error: End date should be after end date"
+    );
+
+    let newStartDate = new Date(2015, 11, 31);
+    fireEvent.change(startDateInput, { target: { value: newStartDate } });
+
+    await waitForElement(() => getByValue(formatDate(newStartDate)), {
+      container
+    });
+
+    await wait(() => [
+      expect(container.querySelector(".startDate > .Error")).toBeNull(),
+      expect(container.querySelector(".endDate > .Error")).toBeNull(),
+    ]);
   });
 });
