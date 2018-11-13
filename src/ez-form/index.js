@@ -85,27 +85,13 @@ export default function useForm(schema: Schema, schemaValues = {}) {
           });
         }
 
-        if (
-          typeof disabled === 'boolean' &&
-          disabled !== formState[fieldName].disabled
-        ) {
-          setFormState({
-            ...formState,
-            [fieldName]: {
-              ...formState[fieldName],
-              disabled: disabled,
-              error: '',
-            },
-          });
-        }
-
         return (
           formState[fieldName].isVisible && (
             <formElement.Component
               value={formState[fieldName].value}
               name={name}
               error={formState[fieldName].error}
-              disabled={formState[fieldName].disabled}
+              disabled={disabled}
               label={useSecondLabel ? label2 : label}
               {...additionalProps}
               onChange={event => {
