@@ -68,27 +68,33 @@ export default function useForm(schema: Schema, schemaValues = {}) {
 
   let formData = {};
   Object.keys(schema).forEach(fieldName => {
-    const { formElement, name, label, label2} = schema[fieldName];
+    const { formElement, name, label, label2 } = schema[fieldName];
     formData[fieldName] = {
       render: ({ useSecondLabel, isVisible, disabled, ...additionalProps } = {}) => {
-        if (typeof isVisible === 'boolean' && isVisible !== formState[fieldName].isVisible) {
+        if (
+          typeof isVisible === 'boolean' &&
+          isVisible !== formState[fieldName].isVisible
+        ) {
           setFormState({
             ...formState,
             [fieldName]: {
               ...formState[fieldName],
               isVisible: isVisible,
-              error: ''
+              error: '',
             },
           });
         }
 
-        if (typeof disabled === 'boolean' && disabled !== formState[fieldName].disabled) {
+        if (
+          typeof disabled === 'boolean' &&
+          disabled !== formState[fieldName].disabled
+        ) {
           setFormState({
             ...formState,
             [fieldName]: {
               ...formState[fieldName],
               disabled: disabled,
-              error: ''
+              error: '',
             },
           });
         }
@@ -132,7 +138,11 @@ function initFormData(schema, schemaValues) {
     } = schema[fieldName];
 
     formData[fieldName] = {
-      value: schemaValues[fieldName] ? schemaValues[fieldName] : defaultValue === undefined ? '' : defaultValue,
+      value: schemaValues[fieldName]
+        ? schemaValues[fieldName]
+        : defaultValue === undefined
+          ? ''
+          : defaultValue,
       handleInputValueChange: ValueResolvers[formElement.type],
       error: '',
       validationRules,
@@ -148,8 +158,9 @@ function initFormData(schema, schemaValues) {
 function validateField(fieldState, formState) {
   for (let rule of fieldState.validationRules) {
     if (rule.validateAnotherField) return;
-    if(rule.args && rule.args.dependencyFieldName){
-      rule.args.dependencyFieldValue = formState[rule.args.dependencyFieldName].value
+    if (rule.args && rule.args.dependencyFieldName) {
+      rule.args.dependencyFieldValue =
+        formState[rule.args.dependencyFieldName].value;
     }
     let error = rule.fn({
       value: fieldState.value,
@@ -175,6 +186,9 @@ function checkIfFieldValidateAnotherField(fieldState, newFormState, setFormState
 }
 
 const ValueResolvers = {
-  [InputTypes.TEXT]: event => event.target.value,
+  [InputTypes.TEXT]: event => {
+    if (event.target.onChange) event.target.onChange();
+    return event.target.value;
+  },
   [InputTypes.SELECT]: event => event,
 };
