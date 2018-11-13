@@ -1,5 +1,10 @@
 import React from "react";
-import { render, cleanup, fireEvent, waitForElement } from "react-testing-library";
+import {
+  render,
+  cleanup,
+  fireEvent,
+  waitForElement
+} from "react-testing-library";
 import useForm from "../index";
 import formElements from "./formTestElements";
 
@@ -83,6 +88,8 @@ describe("Test render additional options", () => {
   });
 
   test("Trigger an action on text input change", async () => {
+    let handleInputChangeMock = jest.fn();
+
     function TestForm() {
       const formData = useForm({
         testInputText1: {
@@ -90,16 +97,19 @@ describe("Test render additional options", () => {
         }
       });
 
-      return <div>{formData.testInputText1.render()}</div>;
+      return (
+        <div>
+          {formData.testInputText1.render({ onChange: handleInputChangeMock })}
+        </div>
+      );
     }
 
     const { container, getByValue } = render(<TestForm />);
 
     const input = container.querySelector("input");
-    let handleInputChangeMock = jest.fn();
 
     fireEvent.change(input, {
-      target: { value: "test1", onChange: handleInputChangeMock }
+      target: { value: "test1" }
     });
     await waitForElement(() => [getByValue("test1")], {
       container
