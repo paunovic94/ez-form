@@ -1,5 +1,5 @@
 import React from "react";
-import { render, cleanup, fireEvent } from "react-testing-library";
+import { render, cleanup, fireEvent, waitForElement } from "react-testing-library";
 import useForm from "../index";
 import formElements from "./formTestElements";
 
@@ -66,9 +66,7 @@ describe("Test render additional options", () => {
           {formData.testInputText2.render({ disabled: false })}
           {formData.testInputText3.render()}
           {formData.testSelect.render({
-            options: [
-              { value: "test-select", label: "Test Select" },
-            ],
+            options: [{ value: "test-select", label: "Test Select" }],
             disabled: false
           })}
         </div>
@@ -82,5 +80,31 @@ describe("Test render additional options", () => {
     expect(inputs[1].disabled).not.toBeTruthy();
     expect(inputs[2].disabled).not.toBeTruthy();
     expect(inputs[3].disabled).not.toBeTruthy();
+  });
+
+  test("Trigger an action on text input change", async () => {
+    function TestForm() {
+      const formData = useForm({
+        testInputText1: {
+          formElement: formElements.textInput
+        }
+      });
+
+      return <div>{formData.testInputText1.render()}</div>;
+    }
+
+    const { container, getByValue } = render(<TestForm />);
+
+    const input = container.querySelector("input");
+    let handleInputChangeMock = jest.fn();
+
+    fireEvent.change(input, {
+      target: { value: "test1", onChange: handleInputChangeMock }
+    });
+    await waitForElement(() => [getByValue("test1")], {
+      container
+    });
+
+    expect(handleInputChangeMock).toHaveBeenCalled();
   });
 });
