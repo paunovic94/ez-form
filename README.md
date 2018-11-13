@@ -22,3 +22,25 @@ Form utils
 	- prepare form data for server (withAdditionalProps option for selects)
 	- clone form data to be able to revert form to some previous state
 	- update form state - setSchemaStateValue, setSchemaStateValues (Bulk)
+
+
+	Tests
+	* init.test
+		- init default value from schema (keep value in state)
+		- default isVisible flag in schema
+		- init values with second arg
+		- label and label2
+	* update.test
+		- update field value in state onChange
+	* validation.test
+		- validate value on inputChage
+		- support string and intl error messages (message is handled in formElemet)
+		- support default and custom error messages
+		- args property for validation func (based on another schema field or fixed arg)
+		- validate another field 
+		- prevent cyclically validation with validate another field (validate another field only on field change)
+	* render.test
+		- render componet based on is Visible prop in arg
+		- disable component based on disabled prop in arg
+		- onChange cb for text input and selet
+		- onInputChange for select

@@ -3,7 +3,7 @@ import {
   render,
   cleanup,
   fireEvent,
-  waitForElement
+  waitForElement,
 } from "react-testing-library";
 import useForm from "../index";
 import formElements from "./formTestElements";
@@ -78,7 +78,7 @@ describe("Test render additional options", () => {
       );
     }
 
-    const { container, getByValue } = render(<TestForm />);
+    const { container } = render(<TestForm />);
     const inputs = container.querySelectorAll("input");
 
     expect(inputs[0].disabled).toBeTruthy();
@@ -111,10 +111,86 @@ describe("Test render additional options", () => {
     fireEvent.change(input, {
       target: { value: "test1" }
     });
-    await waitForElement(() => [getByValue("test1")], {
+    let a = await waitForElement(() => getByValue("test1"), {
       container
     });
 
     expect(handleInputChangeMock).toHaveBeenCalled();
   });
+
+  test("Trigger an action on select input change", async () => {
+    let handleInputChangeMock = jest.fn();
+
+    function TestForm() {
+      const formData = useForm({
+        testSelect: {
+          formElement: formElements.select
+        }
+      });
+
+      return (
+        <div>
+          {formData.testSelect.render({
+            options: [
+              {
+                value: "test-select",
+                label: "Test Select"
+              }
+            ],
+            onInputChange : handleInputChangeMock
+          })}
+        </div>
+      );
+    }
+
+    const { container, getByValue } = render(<TestForm />);
+    const selectInput = container.querySelector("input");
+
+    fireEvent.change(selectInput, {
+      target: { value: "test"}
+    });
+    await waitForElement(() => [getByValue("test")], {
+      container
+    });
+
+    expect(handleInputChangeMock).toHaveBeenCalled();
+  });
+
+  test("Trigger an action on select option change", async () => {
+    let handleChangeOptionMock = jest.fn();
+
+    function TestForm() {
+      const formData = useForm({
+        testSelect: {
+          formElement: formElements.select
+        }
+      });
+
+      return (
+        <div>
+          {formData.testSelect.render({
+            options: [
+              {
+                value: "test-select",
+                label: "Test Select"
+              }
+            ],
+            onChangeTestValue: { value: "test-select", label: "Test Select" },
+            onChange: handleChangeOptionMock
+          })}
+        </div>
+      );
+    }
+
+    const { container, getByText } = render(<TestForm />);
+    const testSelect = container.querySelector(".TestSelect");
+
+    fireEvent.click(testSelect);
+    await waitForElement(() => getByText("Test Select"), {
+      container
+    });
+
+    expect(handleChangeOptionMock).toHaveBeenCalled();
+  });
+
 });
