@@ -10,7 +10,7 @@ import {
   wait
 } from "react-testing-library";
 import useForm from "../index";
-import formElements from "./formTestElements";
+import formElements, {formatDate} from "./formTestElements";
 
 function isRequired({ value, message }) {
   if (!value) {
@@ -426,9 +426,88 @@ describe("Validate form data on input change", () => {
     }
 
     const { container, getByText, getByValue } = render(<TestForm />);
+    let errorMessages = container.querySelector(".Error");
+
     fireEvent.click(getByText("Submit form"));
+
+    expect(errorMessages).toBeNull();
     expect(onSubmit).toHaveBeenCalled();
   });
+
+  test.only("Validate function", async ()=>{
+    let onSubmit = jest.fn();
+
+    function TestForm() {
+      const formData = useForm({
+        testInputText1: {
+          formElement: formElements.textInput,
+          name: "testInputText1",
+          validationRules: [
+            {
+              fn: isMaxLength,
+              args: {
+                maxLength: 3
+              }
+            },
+            {
+              validateAnotherField: "testInputText2"
+            }
+          ]
+        },
+        testInputText2: {
+          formElement: formElements.textInput,
+          name: "testInputText2",
+          validationRules: [
+            {
+              fn: isRequired
+            }
+          ]
+        },
+      });
+
+      return (
+        <div>
+          {formData.testInputText1.render()}
+          {formData.testInputText2.render()}
+          <button onClick={() => {
+            let isValid = formData.validate();
+            {/* console.log(isValid, "isValid"); */}
+            if(isValid){
+               onSubmit();
+            }
+            }}>Submit form</button>
+        </div>
+      );
+    }
+
+    const { container, getByText, getByValue } = render(<TestForm />);
+    fireEvent.click(getByText("Submit form"));
+    expect(onSubmit).not.toHaveBeenCalled();
+
+    let errorMessage1 = container.querySelector(".testInputText1 > .Error");
+    expect(errorMessage1).toBeNull();
+
+    let errorMessage2 = container.querySelector(".testInputText2 > .Error");
+    expect(errorMessage2.innerHTML).toBe("Error: Is required default");
+
+    // Fix error
+    let testInputText2 = container.querySelector(".testInputText2 > input");
+    fireEvent.change(testInputText2, { target: { value: "testInputText2" } });
+    await waitForElement(() => getByValue("testInputText2"), {
+      container
+    });
+
+    fireEvent.click(getByText("Submit form"));
+
+    errorMessage1 = container.querySelector(".testInputText1 > .Error");
+    expect(errorMessage1).toBeNull();
+
+    errorMessage2 = container.querySelector(".testInputText2 > .Error");
+    expect(errorMessage2).toBeNull();
+
+    expect(onSubmit).toHaveBeenCalled();
+  });
+
 
 });
 
