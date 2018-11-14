@@ -9,7 +9,7 @@ import {
   queryByTestId,
   wait
 } from "react-testing-library";
-import useForm, {validate} from "../index";
+import useForm from "../index";
 import formElements from "./formTestElements";
 
 function isRequired({ value, message }) {
@@ -399,7 +399,7 @@ describe("Validate form data on input change", () => {
     let onSubmit = jest.fn();
     
     function TestForm() {
-      const formData = useForm({
+      const { formData, validate }= useForm({
         testInputText1: {
           formElement: formElements.textInput,
           name: "testInputText1",
@@ -416,7 +416,7 @@ describe("Validate form data on input change", () => {
           {formData.testInputText1.render()}
           {formData.testInputText2.render()}
           <button onClick={() => {
-            let isValid = formData.validate();
+            let isValid = validate();
             if(isValid){
                onSubmit();
             }

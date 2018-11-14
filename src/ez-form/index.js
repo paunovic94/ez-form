@@ -67,6 +67,26 @@ export default function useForm(schema: Schema, schemaValues = {}) {
     onComplete && onComplete(newValue);
   }
 
+  function validate(){
+    let isValid = true;
+    Object.keys(formState).forEach(fieldName => {
+      const field = formState[fieldName];
+      if (!field.validationRules) {
+        return;
+      }
+
+      const fieldError = validateField(field, formState);
+
+      if (isValid && fieldError !== '') {
+        isValid = false;
+      }
+      const newFormSchema = { ...formState, [fieldName]: {...fieldName, error: fieldError} };
+      setFormState(newFormSchema);
+    });
+
+    return isValid;
+  }
+
   let formData = {};
   Object.keys(schema).forEach(fieldName => {
     const { formElement, name, label, label2 } = schema[fieldName];
@@ -109,7 +129,7 @@ export default function useForm(schema: Schema, schemaValues = {}) {
     };
   });
 
-  return formData;
+  return {formData, validate};
 }
 
 function initFormData(schema, schemaValues) {
