@@ -9,7 +9,7 @@ import {
   queryByTestId,
   wait
 } from "react-testing-library";
-import useForm from "../index";
+import useForm, {validate} from "../index";
 import formElements, { formatDate } from "./formTestElements";
 
 function isRequired({ value, message }) {
@@ -393,4 +393,39 @@ describe("Validate form data on input change", () => {
       expect(container.querySelector(".endDate > .Error")).toBeNull(),
     ]);
   });
+
+
+    test("Validate function is returning true when there are no validation rules", async ()=>{
+    let onSubmit = jest.fn();
+    
+    function TestForm() {
+      const formData = useForm({
+        testInputText1: {
+          formElement: formElements.textInput,
+          name: "testInputText1",
+        },
+      });
+
+      return (
+        <div>
+          {formData.testInputText1.render()}
+          <button onClick={() => {
+            let isValid = validate(formData);
+            if(isValid){
+               onSubmit();
+            }
+            }}>Submit form</button>
+        </div>
+      );
+    }
+
+    const { container, getByText, getByValue } = render(<TestForm />);
+    fireEvent.click(getByText("Submit form"));
+    expect(onSubmit).toHaveBeenCalled();
+
+    let errorMessage2 = container.querySelector(".testInputText2 > .Error");
+    expect(errorMessage2.innerHTML).toBe("Error: Is required default");
+  });
+
 });
+
