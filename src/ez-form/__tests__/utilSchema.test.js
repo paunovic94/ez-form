@@ -54,7 +54,7 @@ describe(" Test utiliti functions for schema", () => {
 
     fireEvent.click(getByText("Submit form"));
 
-    expect(onSubmitMock.mock.calls[0][0]).toBe({
+    expect(onSubmitMock.mock.calls[0][0]).toEqual({
       testInputText: "testInputText",
       testSelect: "test-select"
     });

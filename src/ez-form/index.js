@@ -86,6 +86,22 @@ export default function useForm(schema: Schema, schemaValues = {}) {
     return isValid;
   }
 
+  function prepareForServer(){
+    let prepared = {};
+    Object.keys(formState).forEach(fieldName => {
+      const {value} = formState[fieldName];
+
+      if(typeof value === "string"){ // text input
+        prepared[fieldName] = value
+      } else if(typeof value === "object"){ // select
+        prepared[fieldName] = value.value
+      } else { // for rest cases
+        prepared[fieldName] = null
+      }
+    });
+    return prepared;
+  }
+
   let formData = {};
   Object.keys(schema).forEach(fieldName => {
     const { formElement, name, label, label2 } = schema[fieldName];
@@ -128,7 +144,7 @@ export default function useForm(schema: Schema, schemaValues = {}) {
     };
   });
 
-  return {formData, validate};
+  return {formData, validate, prepareForServer};
 }
 
 function initFormData(schema, schemaValues) {
