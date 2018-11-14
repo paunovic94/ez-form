@@ -37,9 +37,10 @@ function TextInput({
   }
   return (
     <div className={`TestTextInput ${name}`}>
-      {label && <div className="Label">Label: {label}</div>}
+      {label && <label htmlFor={`${name}-input`} className="Label">Label: {label}</label>}
       {error && <div className="Error">Error: {error}</div>}
       <input
+        id={`${name}-input`}
         type="text"
         title={error}
         value={value}
@@ -63,6 +64,8 @@ function Select({
   onChangeTestValue,
   disabled,
   onInputChange,
+  multi,
+  name,
   ...restProps
 }) {
   if (typeof value === "string" && options) {
@@ -70,7 +73,7 @@ function Select({
   }
 
   return (
-    <div className="TestSelect" onClick={e => onChange(onChangeTestValue)}>
+    <div className={`TestSelect ${name}`} onClick={e => onChange(onChangeTestValue)}>
       {label && <div>Label: {label}</div>}
       {error && <div>Error: {error}</div>}
       <ReactSelect
@@ -79,6 +82,7 @@ function Select({
         onChange={onChange}
         isDisabled={disabled}
         onInputChange={onInputChange}
+        isMulti={multi}
       />
     </div>
   );
@@ -90,3 +94,4 @@ let formElements = {
 };
 
 export default formElements;
+

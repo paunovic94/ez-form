@@ -8,7 +8,7 @@ afterEach(cleanup);
 describe("init default value from schema", () => {
   test("Text Input", () => {
     function TestForm(props) {
-      const {formData} = useForm({
+      const { formData } = useForm({
         testInputText: {
           formElement: formElements.textInput,
           defaultValue: "test-input-text"
@@ -36,7 +36,7 @@ describe("init default value from schema", () => {
 
   test("Select", () => {
     function TestForm(props) {
-      const {formData} = useForm({
+      const { formData } = useForm({
         testSelectStringValue: {
           formElement: formElements.select,
           defaultValue: "test-select"
@@ -67,7 +67,7 @@ describe("init default value from schema", () => {
 
   test("IsVisible flag in schema", () => {
     function TestForm(props) {
-      const {formData} = useForm({
+      const { formData } = useForm({
         testInputText1: {
           formElement: formElements.textInput,
           defaultValue: "testInputText1",
@@ -107,12 +107,12 @@ describe("init default value from schema", () => {
 
   test("Label and Label2", () => {
     function TestForm(props) {
-      const {formData} = useForm({
+      const { formData } = useForm({
         testInputText1: {
           formElement: formElements.textInput,
           defaultValue: "testInputText1",
           name: "testInputText1",
-          label: "testInputText1",
+          label: "testInputText1"
         },
         testInputText2: {
           formElement: formElements.textInput,
@@ -133,17 +133,17 @@ describe("init default value from schema", () => {
           name: "testInputText4",
           defaultValue: "testInputText4",
           label: {
-            descriptor : {
+            descriptor: {
               id: "Util.label",
-              defaultMessage: "testInputText4",
+              defaultMessage: "testInputText4"
             }
-          },
+          }
         },
         testInputText5: {
           formElement: formElements.textInput,
           name: "testInputText5",
-          defaultValue: "testInputText5",
-        },
+          defaultValue: "testInputText5"
+        }
       });
 
       return (
@@ -171,13 +171,12 @@ describe("init default value from schema", () => {
     expect(label4.innerHTML).toBe("Label: testInputText4");
     expect(label5).toBeNull();
   });
-
 });
 
 describe("Init value in schema with second arg in useForm", () => {
   test("Text input", () => {
     function TestForm(props) {
-      const {formData} = useForm(
+      const { formData } = useForm(
         {
           testInputText1: {
             formElement: formElements.textInput,
@@ -208,9 +207,52 @@ describe("Init value in schema with second arg in useForm", () => {
     expect(inputs[1].value).toBe("initText2");
   });
 
+  test("Text input - init with '', undefiend, null", () => {
+    function TestForm(props) {
+      const { formData } = useForm(
+        {
+          testInputText1: {
+            formElement: formElements.textInput,
+            name: "testInputText1",
+            label: "testInputText1"
+          },
+          testInputText2: {
+            formElement: formElements.textInput,
+            name: "testInputText2",
+            label: "testInputText2"
+          },
+          testInputText3: {
+            formElement: formElements.textInput,
+            name: "testInputText3",
+            label: "testInputText3"
+          }
+        },
+        {
+          testInputText1: "",
+          testInputText2: undefined,
+          testInputText3: null
+        }
+      );
+
+      return (
+        <div>
+          {formData.testInputText1.render()}
+          {formData.testInputText2.render()}
+          {formData.testInputText3.render()}
+        </div>
+      );
+    }
+
+    const { container, getByLabelText } = render(<TestForm />);
+
+    expect(getByLabelText("Label: testInputText1").value).toEqual("");
+    expect(getByLabelText("Label: testInputText2").value).toEqual("");
+    expect(getByLabelText("Label: testInputText3").value).toEqual("");
+  });
+
   test("Select", () => {
     function TestForm(props) {
-      const {formData} = useForm(
+      const { formData } = useForm(
         {
           testSelectStringValue: {
             formElement: formElements.select
@@ -245,4 +287,62 @@ describe("Init value in schema with second arg in useForm", () => {
     expect(queryByText("Test Select Init 1")).toBeTruthy();
     expect(queryByText("Test Select Init 2")).toBeTruthy();
   });
-})
+
+  test("Select - init with '', undefiend, null or non existing value ", () => {
+    function TestForm(props) {
+      const { formData, validate, prepareForServer } = useForm(
+        {
+          testSelect1: {
+            formElement: formElements.select,
+            name: "testSelect1",
+            validationRules: [],
+            label: "testSelect1"
+          },
+          testSelect2: {
+            formElement: formElements.select,
+            name: "testSelect2",
+            validationRules: [],
+            label: "testSelect2"
+          },
+          testSelect3: {
+            formElement: formElements.select,
+            name: "testSelect3",
+            validationRules: [],
+            label: "testSelect3"
+          },
+          testSelect4: {
+            formElement: formElements.select,
+            name: "testSelect4",
+            validationRules: [],
+            label: "testSelect4"
+          }
+        },
+        {
+          testSelect1: null,
+          testSelect2: undefined,
+          testSelect3: "",
+          testSelect4: "non-existing-value"
+        }
+      );
+
+      return (
+        <div>
+          {formData.testSelect1.render()}
+          {formData.testSelect2.render()}
+          {formData.testSelect3.render()}
+          {formData.testSelect4.render({
+            options: []
+          })}
+        </div>
+      );
+    }
+
+    const { container, getByLabelText, debug } = render(<TestForm />);
+    const selectInputs = container.querySelectorAll(".TestSelect input");
+
+    expect(selectInputs[0].value).toEqual("");
+    expect(selectInputs[1].value).toEqual("");
+    expect(selectInputs[2].value).toEqual("");
+    expect(selectInputs[3].value).toEqual("");
+  });
+});
