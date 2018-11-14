@@ -63,7 +63,7 @@ afterEach(cleanup);
 describe("Validate form data on input change", () => {
   test("Validate only changed input", async () => {
     function TestForm() {
-      const formData = useForm({
+      const {formData} = useForm({
         testInputText1: {
           formElement: formElements.textInput,
           defaultValue: "text1",
@@ -133,7 +133,7 @@ describe("Validate form data on input change", () => {
   test("useForm treat intl error message and string same", async () => {
     // Intl error messages are handled in components from formElemet
     function TestForm() {
-      const formData = useForm({
+      const {formData} = useForm({
         testInputText1: {
           formElement: formElements.textInput,
           defaultValue: "text1",
@@ -169,7 +169,7 @@ describe("Validate form data on input change", () => {
 
   test("Args property for validation function", async () => {
     function TestForm() {
-      const formData = useForm({
+      const {formData} = useForm({
         testInputText: {
           formElement: formElements.textInput,
           validationRules: [
@@ -203,7 +203,7 @@ describe("Validate form data on input change", () => {
 
   test("Validate anoter field", async () => {
     function TestForm() {
-      const formData = useForm({
+      const {formData} = useForm({
         testInputText1: {
           formElement: formElements.textInput,
           name: "testInputText1",
@@ -273,7 +273,7 @@ describe("Validate form data on input change", () => {
 
   test("Validate field based on value for another field", async () => {
     function TestForm() {
-      const formData = useForm({
+      const {formData} = useForm({
         startDate: {
           formElement: formElements.textInput,
           name: "startDate",
@@ -319,7 +319,7 @@ describe("Validate form data on input change", () => {
 
   test("Validate another field: stop cyclically validation", async () => {
     function TestForm() {
-      const formData = useForm({
+      const {formData} = useForm({
         startDate: {
           formElement: formElements.textInput,
           name: "startDate",
@@ -434,11 +434,11 @@ describe("Validate form data on input change", () => {
     expect(onSubmit).toHaveBeenCalled();
   });
 
-  test.only("Validate function", async ()=>{
+  test("Validate function", async ()=>{
     let onSubmit = jest.fn();
 
     function TestForm() {
-      const formData = useForm({
+      const { formData, validate } = useForm({
         testInputText1: {
           formElement: formElements.textInput,
           name: "testInputText1",
@@ -470,7 +470,7 @@ describe("Validate form data on input change", () => {
           {formData.testInputText1.render()}
           {formData.testInputText2.render()}
           <button onClick={() => {
-            let isValid = formData.validate();
+            let isValid = validate();
             {/* console.log(isValid, "isValid"); */}
             if(isValid){
                onSubmit();

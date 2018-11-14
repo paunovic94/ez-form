@@ -13,7 +13,7 @@ afterEach(cleanup);
 describe("Update form data on input change", () => {
   test("Text Input", async () => {
     function TestForm() {
-      const formData = useForm({
+      const {formData} = useForm({
         testInputText1: {
           formElement: formElements.textInput
         },
@@ -44,7 +44,7 @@ describe("Update form data on input change", () => {
 
   test("Select", async () => {
     function TestForm() {
-      const formData = useForm({
+      const {formData} = useForm({
         testSelect1: {
           formElement: formElements.select
         },

@@ -13,7 +13,7 @@ afterEach(cleanup);
 describe("Test render additional options", () => {
   test("IsVisible flag", () => {
     function TestForm(props) {
-      const formData = useForm({
+      const {formData} = useForm({
         testInputText1: {
           formElement: formElements.textInput,
           defaultValue: "testInputText1",
@@ -43,7 +43,7 @@ describe("Test render additional options", () => {
 
   test("IsDisabled flag", () => {
     function TestForm(props) {
-      const formData = useForm({
+      const {formData} = useForm({
         testInputText1: {
           formElement: formElements.textInput,
           defaultValue: "testInputText1",
@@ -91,7 +91,7 @@ describe("Test render additional options", () => {
     let handleInputChangeMock = jest.fn();
 
     function TestForm() {
-      const formData = useForm({
+      const {formData} = useForm({
         testInputText1: {
           formElement: formElements.textInput
         }
@@ -122,7 +122,7 @@ describe("Test render additional options", () => {
     let handleInputChangeMock = jest.fn();
 
     function TestForm() {
-      const formData = useForm({
+      const {formData} = useForm({
         testSelect: {
           formElement: formElements.select
         }
@@ -160,7 +160,7 @@ describe("Test render additional options", () => {
     let handleChangeOptionMock = jest.fn();
 
     function TestForm() {
-      const formData = useForm({
+      const {formData} = useForm({
         testSelect: {
           formElement: formElements.select
         }

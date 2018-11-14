@@ -71,19 +71,18 @@ export default function useForm(schema: Schema, schemaValues = {}) {
     let isValid = true;
     Object.keys(formState).forEach(fieldName => {
       const field = formState[fieldName];
-      if (!field.validationRules) {
-        return;
-      }
+
+      if (!field.validationRules) return;
 
       const fieldError = validateField(field, formState);
 
-      if (isValid && fieldError !== '') {
+      if (isValid && (fieldError !== '')) {
         isValid = false;
       }
-      const newFormSchema = { ...formState, [fieldName]: {...fieldName, error: fieldError} };
+
+      const newFormSchema = { ...formState, [fieldName]: {...field, error: fieldError} };
       setFormState(newFormSchema);
     });
-
     return isValid;
   }
 
@@ -165,7 +164,7 @@ function initFormData(schema, schemaValues) {
 
 function validateField(fieldState, formState) {
   for (let rule of fieldState.validationRules) {
-    if (rule.validateAnotherField) return;
+    if (rule.validateAnotherField) return '';
     if (rule.args && rule.args.dependencyFieldName) {
       rule.args.dependencyFieldValue =
         formState[rule.args.dependencyFieldName].value;

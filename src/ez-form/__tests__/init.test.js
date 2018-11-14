@@ -8,7 +8,7 @@ afterEach(cleanup);
 describe("init default value from schema", () => {
   test("Text Input", () => {
     function TestForm(props) {
-      const formData = useForm({
+      const {formData} = useForm({
         testInputText: {
           formElement: formElements.textInput,
           defaultValue: "test-input-text"
@@ -36,7 +36,7 @@ describe("init default value from schema", () => {
 
   test("Select", () => {
     function TestForm(props) {
-      const formData = useForm({
+      const {formData} = useForm({
         testSelectStringValue: {
           formElement: formElements.select,
           defaultValue: "test-select"
@@ -67,7 +67,7 @@ describe("init default value from schema", () => {
 
   test("IsVisible flag in schema", () => {
     function TestForm(props) {
-      const formData = useForm({
+      const {formData} = useForm({
         testInputText1: {
           formElement: formElements.textInput,
           defaultValue: "testInputText1",
@@ -107,7 +107,7 @@ describe("init default value from schema", () => {
 
   test("Label and Label2", () => {
     function TestForm(props) {
-      const formData = useForm({
+      const {formData} = useForm({
         testInputText1: {
           formElement: formElements.textInput,
           defaultValue: "testInputText1",
@@ -177,7 +177,7 @@ describe("init default value from schema", () => {
 describe("Init value in schema with second arg in useForm", () => {
   test("Text input", () => {
     function TestForm(props) {
-      const formData = useForm(
+      const {formData} = useForm(
         {
           testInputText1: {
             formElement: formElements.textInput,
@@ -210,7 +210,7 @@ describe("Init value in schema with second arg in useForm", () => {
 
   test("Select", () => {
     function TestForm(props) {
-      const formData = useForm(
+      const {formData} = useForm(
         {
           testSelectStringValue: {
             formElement: formElements.select
