@@ -10,7 +10,7 @@ import {
   wait
 } from "react-testing-library";
 import useForm, {validate} from "../index";
-import formElements, { formatDate } from "./formTestElements";
+import formElements from "./formTestElements";
 
 function isRequired({ value, message }) {
   if (!value) {
@@ -404,13 +404,19 @@ describe("Validate form data on input change", () => {
           formElement: formElements.textInput,
           name: "testInputText1",
         },
+        testInputText2: {
+          formElement: formElements.textInput,
+          name: "testInputText2",
+          validationRules: []
+        },
       });
 
       return (
         <div>
           {formData.testInputText1.render()}
+          {formData.testInputText2.render()}
           <button onClick={() => {
-            let isValid = validate(formData);
+            let isValid = formData.validate();
             if(isValid){
                onSubmit();
             }
@@ -422,9 +428,6 @@ describe("Validate form data on input change", () => {
     const { container, getByText, getByValue } = render(<TestForm />);
     fireEvent.click(getByText("Submit form"));
     expect(onSubmit).toHaveBeenCalled();
-
-    let errorMessage2 = container.querySelector(".testInputText2 > .Error");
-    expect(errorMessage2.innerHTML).toBe("Error: Is required default");
   });
 
 });
