@@ -113,7 +113,8 @@ describe(" Test utiliti functions for schema", () => {
         {
           testInputText1: "",
           testInputText2: undefined,
-          testSelect1: "non-existing-value",
+          // testSelect1: "non-existing-value",
+          testSelect1: null,
           testSelect2: "",
           testSelect3: undefined
         }

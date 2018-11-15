@@ -67,7 +67,7 @@ export default function useForm(schema: Schema, schemaValues = {}) {
     onComplete && onComplete(newValue);
   }
 
-  function validate(){
+  function validate() {
     let isValid = true;
     Object.keys(formState).forEach(fieldName => {
       const field = formState[fieldName];
@@ -86,17 +86,21 @@ export default function useForm(schema: Schema, schemaValues = {}) {
     return isValid;
   }
 
-  function prepareForServer(){
+  function prepareForServer() {
     let prepared = {};
     Object.keys(formState).forEach(fieldName => {
-      const {value} = formState[fieldName];
+      const { value } = formState[fieldName];
 
-      if(typeof value === "string"){ // text input
-        prepared[fieldName] = value
-      } else if(typeof value === "object"){ // select
-        prepared[fieldName] = value.value
-      } else { // for rest cases
-        prepared[fieldName] = null
+      if (value === undefined || value === null || value === '') {
+        prepared[fieldName] = null;
+      } else {
+        if (value && typeof value === 'object' && value.hasOwnProperty('value')) {
+          // select
+          prepared[fieldName] = value.value;
+        } else if (typeof value === 'string') {
+          // text input
+          prepared[fieldName] = value;
+        }
       }
     });
     return prepared;
@@ -144,7 +148,7 @@ export default function useForm(schema: Schema, schemaValues = {}) {
     };
   });
 
-  return {formData, validate, prepareForServer};
+  return { formData, validate, prepareForServer };
 }
 
 function initFormData(schema, schemaValues) {
