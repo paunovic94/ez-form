@@ -77,7 +77,7 @@ describe("init default value from schema", () => {
         },
         testSelectMultiString: {
           formElement: formElements.multiSelect,
-          defaultValue: ["string-value1", "string-value2"]
+          defaultValue: ["string-value1"]
         }
       });
 
@@ -450,7 +450,7 @@ describe("Init value in schema with second arg in useForm", () => {
             "Not extist in options"
           ],
           testSelectMulti2: [
-            "Exixt in options"
+            "Exist in options"
           ]
         }
       );
@@ -461,7 +461,7 @@ describe("Init value in schema with second arg in useForm", () => {
             options: []
           })}
           {formData.testSelectMulti2.render({
-            options: [{value:"Exixt in options", label:"Exixt in options"}]
+            options: [{value:"Exist in options", label:"Exist in options"}]
           })}
         </div>
       );
@@ -470,7 +470,7 @@ describe("Init value in schema with second arg in useForm", () => {
     const { container, queryByText } = render(<TestForm />);
 
     expect(queryByText("Not exist in options")).toBeFalsy();
-    expect(queryByText("Exixt in options")).toBeFalsy();
+    expect(queryByText("Exist in options")).toBeFalsy();
   });
 
   
