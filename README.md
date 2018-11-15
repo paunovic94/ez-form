@@ -22,6 +22,7 @@ Form utils
 	- prepare form data for server (withAdditionalProps option for selects)
 	- clone form data to be able to revert form to some previous state
 	- update form state - setSchemaStateValue, setSchemaStateValues (Bulk)
+	- validate function
 
 
 	Tests
@@ -30,6 +31,8 @@ Form utils
 		- default isVisible flag in schema
 		- init values with second arg
 		- label and label2
+		- select init with obj/string that is/is't in options
+		- multi select ([] with obj/string that is/is't in options)
 	* update.test
 		- update field value in state onChange
 	* validation.test

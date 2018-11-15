@@ -64,7 +64,6 @@ function Select({
   onChangeTestValue,
   disabled,
   onInputChange,
-  multi,
   name,
   ...restProps
 }) {
@@ -82,15 +81,46 @@ function Select({
         onChange={onChange}
         isDisabled={disabled}
         onInputChange={onInputChange}
-        isMulti={multi}
       />
     </div>
   );
 }
 
+function MultiSelect({
+  label,
+  error,
+  value,
+  options,
+  onChange,
+  onChangeTestValue,
+  disabled,
+  onInputChange,
+  name,
+  ...restProps
+}) {
+
+  return (
+    <div className={`TestMultiSelect ${name}`} onClick={e => onChange(onChangeTestValue)}>
+      {label && <div>Label: {label}</div>}
+      {error && <div>Error: {error}</div>}
+      <ReactSelect
+        value={value}
+        options={options}
+        onChange={onChange}
+        isDisabled={disabled}
+        onInputChange={onInputChange}
+        isMulti={true}
+      />
+    </div>
+  );
+}
+
+
 let formElements = {
   textInput: { type: InputTypes.TEXT, Component: TextInput },
-  select: { type: InputTypes.SELECT, Component: Select }
+  select: { type: InputTypes.SELECT, Component: Select },
+  multiSelect: { type: InputTypes.MULTISELECT, Component: MultiSelect }
+
 };
 
 export default formElements;

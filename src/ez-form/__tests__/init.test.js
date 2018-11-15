@@ -65,6 +65,48 @@ describe("init default value from schema", () => {
     expect(queryByText("Test Select Default")).toBeTruthy();
   });
 
+  test("Multi Select", () => {
+    function TestForm(props) {
+      const { formData } = useForm({
+        testSelectMulti: {
+          formElement: formElements.multiSelect,
+          defaultValue: [
+            { value: "test-select1", label: "Test Select1" },
+            { value: "test-select2", label: "Test Select2" }
+          ]
+        },
+        testSelectMultiString: {
+          formElement: formElements.multiSelect,
+          defaultValue: ["string-value1", "string-value2"]
+        }
+      });
+
+      return (
+        <div>
+          {formData.testSelectMulti.render({
+            options: [
+              { value: "test-select1", label: "Test Select1" },
+              { value: "test-select2", label: "Test Select2" }
+            ]
+          })}
+          {formData.testSelectMultiString.render({
+            options: [
+              { value: "string-value1", label: "string-value1" },
+              { value: "string-value2", label: "string-value2" }
+            ]
+          })}
+        </div>
+      );
+    }
+
+    const { queryByText } = render(<TestForm />);
+
+    expect(queryByText("Test Select1")).toBeTruthy();
+    expect(queryByText("Test Select2")).toBeTruthy();
+    expect(queryByText("string-value1")).toBeFalsy();
+    expect(queryByText("string-value2")).toBeFalsy();
+  });
+
   test("IsVisible flag in schema", () => {
     function TestForm(props) {
       const { formData } = useForm({
@@ -294,16 +336,16 @@ describe("Init value in schema with second arg in useForm", () => {
         {
           testSelect1: {
             formElement: formElements.select,
-            name: "testSelect1",
+            name: "testSelect1"
           },
           testSelect2: {
             formElement: formElements.select,
-            name: "testSelect2",
-          },
+            name: "testSelect2"
+          }
         },
         {
           testSelect1: "non-existing-value",
-          testSelect2: {value: "non-existing-value", label: "Not Exixt"},
+          testSelect2: { value: "non-existing-value", label: "Not Exixt" }
         }
       );
 
@@ -324,4 +366,112 @@ describe("Init value in schema with second arg in useForm", () => {
     expect(queryByText("non-existing-value")).toBeFalsy();
     expect(queryByText("Not Exixt")).toBeTruthy();
   });
+
+  test("Multi Select - init with props", () => {
+    function TestForm(props) {
+      const { formData, validate, prepareForServer } = useForm(
+        {
+          testSelectMulti1: {
+            formElement: formElements.multiSelect,
+            name: "testSelect1"
+          },
+        },
+        {
+          testSelectMulti1: [
+            { value: "test-select1", label: "Test Select1" },
+            { value: "test-select2", label: "Test Select2" }
+          ],
+        }
+      );
+
+      return (
+        <div>
+          {formData.testSelectMulti1.render({
+            options: [
+              { value: "test-select1", label: "Test Select1" },
+              { value: "test-select2", label: "Test Select2" }
+            ]
+          })}
+        </div>
+      );
+    }
+
+    const { container, queryByText } = render(<TestForm />);
+
+    expect(queryByText("Test Select1")).toBeTruthy();
+    expect(queryByText("Test Select2")).toBeTruthy();
+  });
+
+  test("Multi Select - init with [] with value that is not in options", () => {
+    function TestForm(props) {
+      const { formData, validate, prepareForServer } = useForm(
+        {
+          testSelectMulti1: {
+            formElement: formElements.multiSelect,
+            name: "testSelectMulti1"
+          }
+        },
+        {
+          testSelectMulti1: [
+            { value: "not-extist", label: "Not exist in options" }
+          ]
+        }
+      );
+
+      return (
+        <div>
+          {formData.testSelectMulti1.render({
+            options: []
+          })}
+        </div>
+      );
+    }
+
+    const { container, queryByText } = render(<TestForm />);
+
+    expect(queryByText("Not exist in options")).toBeTruthy();
+  });
+
+  test("Multi Select - init with [] with string", () => {
+    function TestForm(props) {
+      const { formData, validate, prepareForServer } = useForm(
+        {
+          testSelectMulti1: {
+            formElement: formElements.multiSelect,
+            name: "testSelectMulti1"
+          },
+          testSelectMulti2: {
+            formElement: formElements.multiSelect,
+            name: "testSelectMulti2"
+          }
+        },
+        {
+          testSelectMulti1: [
+            "Not extist in options"
+          ],
+          testSelectMulti2: [
+            "Exixt in options"
+          ]
+        }
+      );
+
+      return (
+        <div>
+          {formData.testSelectMulti1.render({
+            options: []
+          })}
+          {formData.testSelectMulti2.render({
+            options: [{value:"Exixt in options", label:"Exixt in options"}]
+          })}
+        </div>
+      );
+    }
+
+    const { container, queryByText } = render(<TestForm />);
+
+    expect(queryByText("Not exist in options")).toBeFalsy();
+    expect(queryByText("Exixt in options")).toBeFalsy();
+  });
+
+  
 });
