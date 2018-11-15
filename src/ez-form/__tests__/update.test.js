@@ -143,9 +143,5 @@ describe("Update form data on input change", () => {
         container
       }
     );
-
-    // // expect(queryByText("Test Select1")).toBeTruthy();
-    // expect(queryByText("Test Select2")).toBeTruthy();
-    // expect(queryByText("Test Remove")).not.toBeTruthy();
   });
 });

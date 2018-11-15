@@ -19,14 +19,14 @@ function isRequired({ value, message }) {
   return "";
 }
 
-function isName({ value, message }) {
+export function isName({ value, message }) {
   if (value && !/^[a-zA-Z]*$/.test(value)) {
-    return message || "Is name custom";
+    return message || "Is name default";
   }
   return "";
 }
 
-function isMaxLength({ value, args = {} }) {
+export function isMaxLength({ value, args = {} }) {
   if (value && value.length > args.maxLength) {
     return "Max length is " + args.maxLength;
   }

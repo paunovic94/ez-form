@@ -1,7 +1,8 @@
-import { render, cleanup, fireEvent } from "react-testing-library";
+import { render, cleanup, fireEvent, wait } from "react-testing-library";
 import useForm from "../index";
 import formElements from "./formTestElements";
 import React from "react";
+import { isMaxLength } from "./validation.test";
 
 afterEach(cleanup);
 
@@ -151,5 +152,171 @@ describe(" Test utiliti functions for schema", () => {
       testSelect2: null,
       testSelect3: null
     });
+  });
+
+  test.skip("Set schema state value without validation", async () => {
+    function TestForm() {
+      const { formData, setSchemaStateValue } = useForm({
+        testInputText1: {
+          formElement: formElements.textInput,
+          name: "testInputText1",
+          label: "testInputText1",
+          validationRules: [
+            {
+              fn: isMaxLength,
+              args: {
+                maxLength: 3
+              }
+            }
+          ]
+        }
+      });
+
+      return (
+        <div>
+          {formData.testInputText1.render()}
+          <button
+            onClick={() => {
+              setSchemaStateValue({
+                fullFieldName: "testInputText1",
+                newValue: "Test",
+                skipValidation: true
+              });
+            }}
+          >
+            Set schema test value
+          </button>
+        </div>
+      );
+    }
+
+    const { container, getByText, getByValue, getByLabelText } = render(
+      <TestForm />
+    );
+
+    expect(getByLabelText("Label: testInputText1").value).toBe("");
+
+    fireEvent.click(getByText("Set schema test value"));
+    let testInputText1 = await waitForElement(()=>getByValue("Test"), container);
+
+    expect(testInputText1.value).toBe("Test");
+    expect(queryByText("Error: Max length is 3")).toBeNull();
+  });
+
+  test.skip("Set schema state value with validation", async () => {
+    function TestForm() {
+      const { formData, setSchemaStateValue } = useForm({
+        testInputText1: {
+          formElement: formElements.textInput,
+          name: "testInputText1",
+          label: "testInputText1",
+          validationRules: [
+            {
+              fn: isMaxLength,
+              args: {
+                maxLength: 3
+              }
+            }
+          ]
+        },
+        testInputText2: {
+          formElement: formElements.textInput,
+          name: "testInputText2",
+          label: "testInputText2",
+          validationRules: [
+            {
+              fn: isName,
+            }
+          ]
+        }
+      });
+
+      return (
+        <div>
+          {formData.testInputText1.render()}
+          <button
+            onClick={() => {
+              setSchemaStateValue({
+                fullFieldName: "testInputText1",
+                newValue: "Test"
+              });
+              setSchemaStateValue({
+                fullFieldName: "testInputText2",
+                newValue: "Test2"
+              });
+            }}
+          >
+            Set schema test value
+          </button>
+        </div>
+      );
+    }
+
+    const {
+      container,
+      queryByText,
+      getByText,
+      getByValue,
+      getByLabelText
+    } = render(<TestForm />);
+
+    fireEvent.click(getByText("Set schema test value"));
+
+    await wait(
+      () => [
+        expect(getByLabelText("Label: testInputText1").value).toBe("Test"),
+        expect(getByLabelText("Label: testInputText2").value).toBe("Test2")
+      ],
+      {
+        container
+      }
+    ); 
+
+    expect(queryByText("Error: Max length is 3")).toBeTruthy();
+    expect(queryByText("Error: Is name default")).toBeTruthy();
+    // Question: if input 1 has validate another field and we change it with setSchemaStateValue,
+    // should we validate another field?
+  });
+
+  test.skip("Set schema state value with callback onComplete", async () => {
+    let onCompleteMock = jest.fn();
+
+    function TestForm() {
+      const { formData, setSchemaStateValue } = useForm({
+        testInputText1: {
+          formElement: formElements.textInput,
+          name: "testInputText1",
+          label: "testInputText1"
+        }
+      });
+
+      return (
+        <div>
+          {formData.testInputText1.render()}
+          <button
+            onClick={() => {
+              setSchemaStateValue({
+                fullFieldName: "testInputText1",
+                newValue: "Test",
+                skipValidation: true,
+                onComplete: onCompleteMock
+              });
+            }}
+          >
+            Set schema test value
+          </button>
+        </div>
+      );
+    }
+
+    const { container, getByText, getByValue, getByLabelText } = render(
+      <TestForm />
+    );
+
+    expect(getByLabelText("Label: testInputText1").value).toBe("");
+    fireEvent.click(getByText("Set schema test value"));
+
+    await waitForElement(()=>getByValue("Test"), container);
+    expect(onCompleteMock).toHaveBeenCalled()
   });
 });
