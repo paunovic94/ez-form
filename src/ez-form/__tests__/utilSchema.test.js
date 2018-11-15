@@ -6,7 +6,7 @@ import { isMaxLength } from "./validation.test";
 
 afterEach(cleanup);
 
-describe(" Test utiliti functions for schema", () => {
+describe("Test utiliti functions for schema", () => {
   test("Prepare for server", () => {
     let onSubmitMock = jest.fn();
 
@@ -153,7 +153,9 @@ describe(" Test utiliti functions for schema", () => {
       testSelect3: null
     });
   });
+});
 
+describe("Set schema state value", () => {
   test.skip("Set schema state value without validation", async () => {
     function TestForm() {
       const { formData, setSchemaStateValue } = useForm({
@@ -197,10 +199,52 @@ describe(" Test utiliti functions for schema", () => {
     expect(getByLabelText("Label: testInputText1").value).toBe("");
 
     fireEvent.click(getByText("Set schema test value"));
-    let testInputText1 = await waitForElement(()=>getByValue("Test"), container);
+    let testInputText1 = await waitForElement(
+      () => getByValue("Test"),
+      container
+    );
 
     expect(testInputText1.value).toBe("Test");
     expect(queryByText("Error: Max length is 3")).toBeNull();
+  });
+
+  test.skip("Set schema state select value ", async () => {
+    function TestForm() {
+      const { formData, setSchemaStateValue } = useForm({
+        testSelect: {
+          formElement: formElements.select,
+          name: "testSelect",
+          label: "testSelect"
+        }
+      });
+
+      return (
+        <div>
+          {formData.testSelect.render()}
+          <button
+            onClick={() => {
+              setSchemaStateValue({
+                fullFieldName: "testSelect",
+                newValue: { value: "Test", label: "Test" },
+                skipValidation: true
+              });
+            }}
+          >
+            Set schema test value
+          </button>
+        </div>
+      );
+    }
+
+    const { container, getByText, getByValue, getByLabelText } = render(
+      <TestForm />
+    );
+    expect(container.querySelector("input").value).toBe("");
+
+    fireEvent.click(getByText("Set schema test value"));
+    let selectInput = await waitForElement(() => getByValue("Test"), container);
+
+    expect(selectInput.value).toBe("Test");
   });
 
   test.skip("Set schema state value with validation", async () => {
@@ -225,7 +269,7 @@ describe(" Test utiliti functions for schema", () => {
           label: "testInputText2",
           validationRules: [
             {
-              fn: isName,
+              fn: isName
             }
           ]
         }
@@ -270,7 +314,7 @@ describe(" Test utiliti functions for schema", () => {
       {
         container
       }
-    ); 
+    );
 
     expect(queryByText("Error: Max length is 3")).toBeTruthy();
     expect(queryByText("Error: Is name default")).toBeTruthy();
@@ -316,7 +360,91 @@ describe(" Test utiliti functions for schema", () => {
     expect(getByLabelText("Label: testInputText1").value).toBe("");
     fireEvent.click(getByText("Set schema test value"));
 
-    await waitForElement(()=>getByValue("Test"), container);
-    expect(onCompleteMock).toHaveBeenCalled()
+    await waitForElement(() => getByValue("Test"), container);
+    expect(onCompleteMock).toHaveBeenCalled();
+  });
+
+  test.skip("Set schema state value bulk", async () => {
+    function TestForm() {
+      const { formData, setSchemaStateValueBulk } = useForm({
+        testInputText1: {
+          formElement: formElements.textInput,
+          name: "testInputText1",
+          label: "testInputText1"
+        },
+        testInputText2: {
+          formElement: formElements.textInput,
+          name: "testInputText2",
+          label: "testInputText2"
+        }
+      });
+
+      return (
+        <div>
+          {formData.testInputText1.render()}
+          <button
+            onClick={() => {
+              setSchemaStateValueBulk({
+                testInputText1: "Test 1",
+                testInputText1: "Test 2"
+              });
+            }}
+          >
+            Set schema test value
+          </button>
+        </div>
+      );
+    }
+
+    const { container, getByText, getByValue, getByLabelText } = render(
+      <TestForm />
+    );
+
+    expect(getByLabelText("Label: testInputText1").value).toBe("");
+    expect(getByLabelText("Label: testInputText2").value).toBe("");
+
+    fireEvent.click(getByText("Set schema test value"));
+
+    await waitForElement(
+      () => [getByValue("Test 1"), getByValue("Test 2")],
+      container
+    );
   });
 });
+
+// describe("Get schema state value", () => {
+//   test.skip("Get value from input field", () => {
+//     function TestForm(props) {
+//       const { formData, getSchemaStateValue } = useForm({
+//         testInputText: {
+//           formElement: formElements.textInput,
+//           defaultValue: "Test",
+//           name: "testInputText"
+//         }
+//       });
+
+//       return (
+//         <div>
+//           {formData.testInputText.render()}
+//           <button
+//             onClick={() => {
+//               {
+//                 let inputValue = getSchemaStateValue("testInputText");
+//                 expect(inputValue).toEqual("Test");
+//               }
+//             }}
+//           >
+//             Get input value
+//           </button>
+//         </div>
+//       );
+//     }
+
+//     const { container, getByText } = render(<TestForm />);
+
+//     const inputs = container.querySelectorAll("input");
+
+//     expect(inputs[0].value).toBe("Test");
+//     fireEvent.click(getByText("Get input value"));
+//   });
+// });
