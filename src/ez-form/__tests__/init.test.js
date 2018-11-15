@@ -250,7 +250,7 @@ describe("Init value in schema with second arg in useForm", () => {
     expect(getByLabelText("Label: testInputText3").value).toEqual("");
   });
 
-  test("Select", () => {
+  test("Select - init with value that is in options", () => {
     function TestForm(props) {
       const { formData } = useForm(
         {
@@ -288,61 +288,40 @@ describe("Init value in schema with second arg in useForm", () => {
     expect(queryByText("Test Select Init 2")).toBeTruthy();
   });
 
-  test("Select - init with '', undefiend, null or non existing value ", () => {
+  test("Select - init with value that isn't in options ", () => {
     function TestForm(props) {
       const { formData, validate, prepareForServer } = useForm(
         {
           testSelect1: {
             formElement: formElements.select,
             name: "testSelect1",
-            validationRules: [],
-            label: "testSelect1"
           },
           testSelect2: {
             formElement: formElements.select,
             name: "testSelect2",
-            validationRules: [],
-            label: "testSelect2"
           },
-          testSelect3: {
-            formElement: formElements.select,
-            name: "testSelect3",
-            validationRules: [],
-            label: "testSelect3"
-          },
-          testSelect4: {
-            formElement: formElements.select,
-            name: "testSelect4",
-            validationRules: [],
-            label: "testSelect4"
-          }
         },
         {
-          testSelect1: null,
-          testSelect2: undefined,
-          testSelect3: "",
-          testSelect4: "non-existing-value"
+          testSelect1: "non-existing-value",
+          testSelect2: {value: "non-existing-value", label: "Not Exixt"},
         }
       );
 
       return (
         <div>
-          {formData.testSelect1.render()}
-          {formData.testSelect2.render()}
-          {formData.testSelect3.render()}
-          {formData.testSelect4.render({
+          {formData.testSelect1.render({
+            options: []
+          })}
+          {formData.testSelect2.render({
             options: []
           })}
         </div>
       );
     }
 
-    const { container, getByLabelText, debug } = render(<TestForm />);
-    const selectInputs = container.querySelectorAll(".TestSelect input");
+    const { container, queryByText } = render(<TestForm />);
 
-    expect(selectInputs[0].value).toEqual("");
-    expect(selectInputs[1].value).toEqual("");
-    expect(selectInputs[2].value).toEqual("");
-    expect(selectInputs[3].value).toEqual("");
+    expect(queryByText("non-existing-value")).toBeFalsy();
+    expect(queryByText("Not Exixt")).toBeTruthy();
   });
 });
