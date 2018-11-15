@@ -3,7 +3,8 @@ import {
   render,
   cleanup,
   fireEvent,
-  waitForElement
+  waitForElement,
+  wait
 } from "react-testing-library";
 import useForm from "../index";
 import formElements from "./formTestElements";
@@ -13,7 +14,7 @@ afterEach(cleanup);
 describe("Update form data on input change", () => {
   test("Text Input", async () => {
     function TestForm() {
-      const {formData} = useForm({
+      const { formData } = useForm({
         testInputText1: {
           formElement: formElements.textInput
         },
@@ -30,8 +31,7 @@ describe("Update form data on input change", () => {
       );
     }
 
-    const { container, getByValue } = render(<TestForm />);
-
+    const { container, getByValue, debug } = render(<TestForm />);
     const [input1, input2] = container.querySelectorAll("input");
 
     fireEvent.change(input1, { target: { value: "test1" } });
@@ -44,7 +44,7 @@ describe("Update form data on input change", () => {
 
   test("Select", async () => {
     function TestForm() {
-      const {formData} = useForm({
+      const { formData } = useForm({
         testSelect1: {
           formElement: formElements.select
         },
@@ -83,5 +83,69 @@ describe("Update form data on input change", () => {
     });
 
     expect(queryByText("Test Default 2")).toBeNull();
+  });
+
+  test("Multi Select", async () => {
+    function TestForm() {
+      const { formData } = useForm({
+        testSelectMulti1: {
+          formElement: formElements.multiSelect,
+          name: "testSelectMulti1",
+          defaultValue: [{ value: "test-select1", label: "Test Select1" }]
+        },
+        testSelectMulti2: {
+          formElement: formElements.multiSelect,
+          name: "testSelectMulti2",
+          defaultValue: [
+            { value: "multi-select-to-remove", label: "Test Remove" }
+          ]
+        }
+      });
+
+      return (
+        <div>
+          {formData.testSelectMulti1.render({
+            options: [
+              { value: "test-select1", label: "Test Select1" },
+              { value: "test-select2", label: "Test Select2" }
+            ],
+            onChangeTestValue: [
+              { value: "test-select1", label: "Test Select1" },
+              { value: "test-select2", label: "Test Select2" }
+            ]
+          })}
+          {formData.testSelectMulti2.render({
+            options: [
+              { value: "multi-select-to-remove", label: "Test Remove" }
+            ],
+            onChangeTestValue: []
+          })}
+        </div>
+      );
+    }
+
+    const { container, getByText, queryByText, debug } = render(<TestForm />);
+    const [select1, select2] = container.querySelectorAll("input");
+
+    expect(queryByText("Test Select1")).toBeTruthy();
+    expect(queryByText("Test Remove")).toBeTruthy();
+
+    fireEvent.click(select1);
+    fireEvent.click(select2);
+
+    await wait(
+      () => [
+        expect(queryByText("Test Select1")).toBeTruthy(),
+        expect(queryByText("Test Select2")).toBeTruthy(),
+        expect(queryByText("Test Remove")).not.toBeTruthy()
+      ],
+      {
+        container
+      }
+    );
+
+    // // expect(queryByText("Test Select1")).toBeTruthy();
+    // expect(queryByText("Test Select2")).toBeTruthy();
+    // expect(queryByText("Test Remove")).not.toBeTruthy();
   });
 });
