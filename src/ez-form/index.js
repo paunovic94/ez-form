@@ -215,5 +215,6 @@ function checkIfFieldValidateAnotherField(fieldState, newFormState, setFormState
 const ValueResolvers = {
   [InputTypes.TEXT]: event => event.target.value,
   [InputTypes.SELECT]: event => event,
-  [InputTypes.MULTISELECT]: event => event,
+  [InputTypes.MULTISELECT]: event => {
+    return event},
 };
