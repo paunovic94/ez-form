@@ -3,7 +3,7 @@ import {
   render,
   cleanup,
   fireEvent,
-  waitForElement,
+  waitForElement
 } from "react-testing-library";
 import useForm from "../index";
 import formElements from "./formTestElements";
@@ -13,7 +13,7 @@ afterEach(cleanup);
 describe("Test render additional options", () => {
   test("IsVisible flag", () => {
     function TestForm(props) {
-      const {formData} = useForm({
+      const { formData } = useForm({
         testInputText1: {
           formElement: formElements.textInput,
           defaultValue: "testInputText1",
@@ -43,7 +43,7 @@ describe("Test render additional options", () => {
 
   test("IsDisabled flag", () => {
     function TestForm(props) {
-      const {formData} = useForm({
+      const { formData } = useForm({
         testInputText1: {
           formElement: formElements.textInput,
           defaultValue: "testInputText1",
@@ -91,7 +91,7 @@ describe("Test render additional options", () => {
     let handleInputChangeMock = jest.fn();
 
     function TestForm() {
-      const {formData} = useForm({
+      const { formData } = useForm({
         testInputText1: {
           formElement: formElements.textInput
         }
@@ -120,11 +120,15 @@ describe("Test render additional options", () => {
 
   test("Trigger an action on select input change", async () => {
     let handleInputChangeMock = jest.fn();
+    let handleInputChangeMultiMock = jest.fn();
 
     function TestForm() {
-      const {formData} = useForm({
+      const { formData } = useForm({
         testSelect: {
           formElement: formElements.select
+        },
+        testMultiSelect: {
+          formElement: formElements.multiSelect
         }
       });
 
@@ -137,32 +141,52 @@ describe("Test render additional options", () => {
                 label: "Test Select"
               }
             ],
-            onInputChange : handleInputChangeMock
+            onInputChange: handleInputChangeMock
+          })}
+          {formData.testMultiSelect.render({
+            options: [
+              {
+                value: "test-select-multi",
+                label: "Test Select Multi"
+              }
+            ],
+            onInputChange: handleInputChangeMultiMock
           })}
         </div>
       );
     }
 
     const { container, getByValue } = render(<TestForm />);
-    const selectInput = container.querySelector("input");
+    const selectInput = container.querySelector(".TestSelect input");
+    const multiSelectInput = container.querySelector(".TestMultiSelect input");
 
     fireEvent.change(selectInput, {
-      target: { value: "test"}
+      target: { value: "test" }
     });
-    await waitForElement(() => [getByValue("test")], {
+    fireEvent.change(multiSelectInput, {
+      target: { value: "test multi" }
+    });
+    await waitForElement(() => [getByValue("test"), getByValue("test multi")], {
       container
     });
 
     expect(handleInputChangeMock).toHaveBeenCalled();
+    expect(handleInputChangeMock.mock.calls[0][0]).toEqual("test");
+    expect(handleInputChangeMultiMock).toHaveBeenCalled();
+    expect(handleInputChangeMultiMock.mock.calls[0][0]).toEqual("test multi");
   });
 
   test("Trigger an action on select option change", async () => {
     let handleChangeOptionMock = jest.fn();
+    let handleChangeMultiOptionMock = jest.fn();
 
     function TestForm() {
-      const {formData} = useForm({
+      const { formData } = useForm({
         testSelect: {
           formElement: formElements.select
+        },
+        testMultiSelect: {
+          formElement: formElements.multiSelect
         }
       });
 
@@ -178,19 +202,50 @@ describe("Test render additional options", () => {
             onChangeTestValue: { value: "test-select", label: "Test Select" },
             onChange: handleChangeOptionMock
           })}
+          {formData.testMultiSelect.render({
+            options: [
+              {
+                value: "test-multi",
+                label: "Test multi select"
+              }
+            ],
+            onChangeTestValue: [
+              {
+                value: "test-multi",
+                label: "Test multi select"
+              }
+            ],
+            onChange: handleChangeMultiOptionMock
+          })}
         </div>
       );
     }
 
     const { container, getByText } = render(<TestForm />);
     const testSelect = container.querySelector(".TestSelect");
+    const testSelectMulti = container.querySelector(".TestMultiSelect");
 
     fireEvent.click(testSelect);
-    await waitForElement(() => getByText("Test Select"), {
-      container
-    });
+    fireEvent.click(testSelectMulti);
+
+    await waitForElement(
+      () => [getByText("Test Select"), getByText("Test multi select")],
+      {
+        container
+      }
+    );
 
     expect(handleChangeOptionMock).toHaveBeenCalled();
+    expect(handleChangeOptionMock.mock.calls[0][0]).toEqual({
+      value: "test-select",
+      label: "Test Select"
+    });
+    expect(handleChangeMultiOptionMock).toHaveBeenCalled();
+    expect(handleChangeMultiOptionMock.mock.calls[0][0]).toEqual([
+      {
+        value: "test-multi",
+        label: "Test multi select"
+      }
+    ]);
   });
-
 });
