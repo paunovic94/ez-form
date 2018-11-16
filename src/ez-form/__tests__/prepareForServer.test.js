@@ -7,7 +7,7 @@ import { isMaxLength } from "./validation.test";
 afterEach(cleanup);
 
 describe("Test utiliti functions for schema", () => {
-  test("Prepare for server - input", () => {
+  test.skip("Prepare for server - input", () => {
     let onSubmitMock = jest.fn();
 
     function TestForm(props) {
@@ -202,7 +202,75 @@ describe("Test utiliti functions for schema", () => {
     expect(onSubmitMock.mock.calls[0][0]).toEqual({
       testSelect1: null,
       testSelect2: null,
-      testSelect3: null
+      testSelect3: null,
     });
   });
+
+  test.skip("Prepare for server - multi select", () => {
+    let onSubmitMock = jest.fn();
+
+    function TestForm() {
+      const { formData, validate, prepareForServer } = useForm(
+        {
+          testMultiSelect1: {
+            formElement: formElements.multiSelect
+          },
+          testMultiSelect2: {
+            formElement: formElements.multiSelect
+          },
+          testMultiSelect3: {
+            formElement: formElements.multiSelect
+          },
+          testMultiSelect4: {
+            formElement: formElements.multiSelect
+          },
+          testMultiSelect5: {
+            formElement: formElements.multiSelect
+          },
+        },
+        {
+          testMultiSelect1: [{ value: "multi-select1", label: "Test Multi Select1" }, { value: "multi-select2", label: "Test Multi Select2" }],
+          testMultiSelect2: [],
+          testMultiSelect3: [{ value: "multi-select1", label: "Test Multi Select1" }],
+          testMultiSelect4: null,
+          testMultiSelect5: undefined,
+        }
+      );
+
+      return (
+        <div>
+          {formData.testMultiSelect1.render({
+            options:[{ value: "multi-select1", label: "Test Multi Select1" }, { value: "multi-select2", label: "Test Multi Select2" }]
+          })}
+          {formData.testMultiSelect2.render()}
+          {formData.testMultiSelect3.render({
+            options:[{ value: "multi-select1", label: "Test Multi Select1" }, { value: "multi-select2", label: "Test Multi Select2" }]
+          })}
+          {formData.testMultiSelect4.render()}
+          {formData.testMultiSelect5.render()}
+          <button
+            onClick={() => {
+              let dataForServer = prepareForServer();
+              onSubmitMock(dataForServer);
+            }}
+          >
+            Submit form
+          </button>
+        </div>
+      );
+    }
+
+    const { container, getByText, getByValue } = render(<TestForm />);
+
+    fireEvent.click(getByText("Submit form"));
+
+    expect(onSubmitMock.mock.calls[0][0]).toEqual({
+      testMultiSelect1: ["multi-select1", "multi-select2"],
+      testMultiSelect2: [],
+      testMultiSelect2: ["multi-select1"],
+      testMultiSelect4: null,
+      testMultiSelect5: null
+    });
+  });
+
 });
