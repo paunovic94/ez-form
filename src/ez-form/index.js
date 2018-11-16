@@ -100,6 +100,8 @@ export default function useForm(schema: Schema, schemaValues = {}) {
         } else if (typeof value === 'string') {
           // text input
           prepared[fieldName] = value;
+        } else {
+          prepared[fieldName] = value;
         }
       }
     });
