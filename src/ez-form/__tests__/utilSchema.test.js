@@ -412,39 +412,216 @@ describe("Set schema state value", () => {
   });
 });
 
-// describe("Get schema state value", () => {
-//   test.skip("Get value from input field", () => {
-//     function TestForm(props) {
-//       const { formData, getSchemaStateValue } = useForm({
-//         testInputText: {
-//           formElement: formElements.textInput,
-//           defaultValue: "Test",
-//           name: "testInputText"
-//         }
-//       });
+describe("Get schema state value", () => {
+  test.skip("Get value from state - input field", () => {
+    function TestForm(props) {
+      const { formData, getSchemaStateValue } = useForm({
+        testInputText1: {
+          formElement: formElements.textInput,
+          defaultValue: "Test",
+          name: "testInputText1"
+        },
+        testInputText2: {
+          formElement: formElements.textInput,
+          defaultValue: undefined,
+          name: "testInputText2"
+        }
+      });
 
-//       return (
-//         <div>
-//           {formData.testInputText.render()}
-//           <button
-//             onClick={() => {
-//               {
-//                 let inputValue = getSchemaStateValue("testInputText");
-//                 expect(inputValue).toEqual("Test");
-//               }
-//             }}
-//           >
-//             Get input value
-//           </button>
-//         </div>
-//       );
-//     }
+      return (
+        <div>
+          {formData.testInputText1.render()}
+          {formData.testInputText2.render()}
 
-//     const { container, getByText } = render(<TestForm />);
+          <button
+            onClick={() => {
+              {
+                let inputValue1 = getSchemaStateValue("testInputText1");
+                let inputValue2 = getSchemaStateValue("testInputText2");
 
-//     const inputs = container.querySelectorAll("input");
+                expect(inputValue1).toEqual("Test");
+                expect(inputValue2).toEqual("");
+              }
+            }}
+          >
+            Get input values
+          </button>
+        </div>
+      );
+    }
 
-//     expect(inputs[0].value).toBe("Test");
-//     fireEvent.click(getByText("Get input value"));
-//   });
-// });
+    const { container, getByText } = render(<TestForm />);
+
+    const inputs = container.querySelectorAll("input");
+
+    expect(inputs[0].value).toBe("Test");
+    expect(inputs[1].value).toBe("");
+
+    fireEvent.click(getByText("Get input values"));
+  });
+
+  test.skip("Get value from state - select/multi select", () => {
+    function TestForm(props) {
+      const { formData, getSchemaStateValue } = useForm({
+        testSelectString: {
+          formElement: formElements.textInput,
+          defaultValue: "Test Select",
+          name: "testSelectString"
+        },
+        testSelectObj: {
+          formElement: formElements.textInput,
+          defaultValue: { value: "test-select", label: "Test Select" },
+          name: "testSelectObj"
+        },
+        testSelectMulti: {
+          formElement: formElements.textInput,
+          defaultValue: [{ value: "test-multi", label: "Test Select Multi" }],
+          name: "testSelectMulti"
+        }
+      });
+
+      return (
+        <div>
+          {formData.testSelectString.render()}
+          {formData.testSelectObj.render()}
+          {formData.testSelectMulti.render()}
+          <button
+            onClick={() => {
+              {
+                let select1 = getSchemaStateValue("testSelectString");
+                let select2 = getSchemaStateValue("testSelectObj");
+                let select3 = getSchemaStateValue("testSelectMulti");
+
+                expect(select1).toEqual("Test Select");
+                expect(select2).toEqual({
+                  value: "test-select",
+                  label: "Test Select"
+                });
+                expect(select3).toEqual([
+                  { value: "test-multi", label: "Test Select Multi" }
+                ]);
+              }
+            }}
+          >
+            Get select values
+          </button>
+        </div>
+      );
+    }
+
+    const { container, getByText } = render(<TestForm />);
+
+    fireEvent.click(getByText("Get select values"));
+  });
+});
+
+describe.skip("Clone state schema values", () => {
+  test("cloneStateValues input", () => {
+    let initialValuesObj = {
+      testInputText1: "Test 1",
+      testInputText2: "",
+      testInputText3: undefined,
+      testInputText4: null,
+      testInputText5: [],
+      testInputText6: 1
+    };
+
+    function TestForm(props) {
+      const { formData, cloneStateValues } = useForm(
+        {
+          testInputText1: {
+            formElement: formElements.textInput
+          },
+          testInputText2: {
+            formElement: formElements.textInput
+          },
+          testInputText3: {
+            formElement: formElements.textInput
+          },
+          testInputText4: {
+            formElement: formElements.textInput
+          },
+          testInputText5: {
+            formElement: formElements.textInput
+          },
+          testInputText6: {
+            formElement: formElements.textInput
+          }
+        },
+        initialValuesObj
+      );
+
+      return (
+        <div>
+          {formData.testInputText1.render()}
+          {formData.testInputText2.render()}
+          {formData.testInputText3.render()}
+          {formData.testInputText4.render()}
+          {formData.testInputText5.render()}
+          {formData.testInputText6.render()}
+          <button
+            onClick={() => {
+              {
+                let clonedState = cloneStateValues();
+                expect(clonedState).toEqual(initialValuesObj);
+              }
+            }}
+          >
+            Clone schema values
+          </button>
+        </div>
+      );
+    }
+
+    const { container, getByText } = render(<TestForm />);
+    fireEvent.click(getByText("Clone schema values"));
+  });
+
+  test.skip("cloneStateValues select", () => {
+    function TestForm(props) {
+      const { formData, cloneStateValues } = useForm({
+        testSelectString: {
+          formElement: formElements.select,
+          defaultValue: "Test Select"
+        },
+        testSelectObj: {
+          formElement: formElements.select,
+          defaultValue: { value: "test-select", label: "Test Select" }
+        },
+        testMultiSelect1: {
+          formElement: formElements.multiSelect,
+          defaultValue: [{ value: "multi-select", label: "Test Multi Select" }]
+        },
+        testMultiSelect2: {
+          formElement: formElements.multiSelect,
+          defaultValue: []
+        }
+      });
+
+      return (
+        <div>
+          <button
+            onClick={() => {
+              {
+                let clonedState = cloneStateValues();
+                expect(clonedState).toEqual({
+                  testSelectString: "Test Select",
+                  testSelectObj: { value: "test-select", label: "Test Select" },
+                  testMultiSelect1: [
+                    { value: "multi-select", label: "Test Multi Select" }
+                  ],
+                  testMultiSelect2: []
+                });
+              }
+            }}
+          >
+            Clone schema values
+          </button>
+        </div>
+      );
+    }
+
+    const { container, getByText } = render(<TestForm />);
+    fireEvent.click(getByText("Clone schema values"));
+  });
+});

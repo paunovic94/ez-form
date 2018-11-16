@@ -471,7 +471,6 @@ describe("Validate form data on input change", () => {
           {formData.testInputText2.render()}
           <button onClick={() => {
             let isValid = validate();
-            {/* console.log(isValid, "isValid"); */}
             if(isValid){
                onSubmit();
             }
