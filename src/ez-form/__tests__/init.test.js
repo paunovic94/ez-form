@@ -107,6 +107,72 @@ describe("init default value from schema", () => {
     expect(queryByText("string-value2")).toBeFalsy();
   });
 
+  test("Checkbox", () => {
+    function TestForm(props) {
+      const { formData } = useForm({
+        checkbox1: {
+          formElement: formElements.checkbox,
+          defaultValue: true
+        },
+        checkbox2: {
+          formElement: formElements.checkbox,
+          defaultValue: false
+        },
+        checkbox3: {
+          formElement: formElements.checkbox,
+        },
+        checkbox4: {
+          formElement: formElements.checkbox,
+          defaultValue: "true"
+        },
+        checkbox5: {
+          formElement: formElements.checkbox,
+          defaultValue: "something"
+        },
+        checkbox6: {
+          formElement: formElements.checkbox,
+          defaultValue: ""
+        },
+        checkbox7: {
+          formElement: formElements.checkbox,
+          defaultValue: undefined
+        },
+        checkbox8: {
+          formElement: formElements.checkbox,
+          defaultValue: null
+        },
+      });
+
+      return (
+        <div>
+          {formData.checkbox1.render()}
+          {formData.checkbox2.render()}
+          {formData.checkbox3.render()}
+          {formData.checkbox4.render()}
+          {formData.checkbox5.render()}
+          {formData.checkbox6.render()}
+          {formData.checkbox7.render()}
+          {formData.checkbox8.render()}
+        </div>
+      );
+    }
+
+    const { container } = render(<TestForm />);
+
+    const checkboxs = container.querySelectorAll("input");
+
+    expect(checkboxs[0].type).toBe("checkbox");
+
+    expect(checkboxs[0].checked).toBeTruthy();
+    expect(checkboxs[1].checked).not.toBeTruthy();
+    expect(checkboxs[2].checked).not.toBeTruthy();
+    expect(checkboxs[3].checked).toBeTruthy();
+    expect(checkboxs[4].checked).toBeTruthy();
+    expect(checkboxs[5].checked).not.toBeTruthy();
+    expect(checkboxs[6].checked).not.toBeTruthy();
+    expect(checkboxs[7].checked).not.toBeTruthy();
+  });
+
   test("IsVisible flag in schema", () => {
     function TestForm(props) {
       const { formData } = useForm({
@@ -126,7 +192,7 @@ describe("init default value from schema", () => {
           name: "testInputText3",
           defaultValue: "testInputText3",
           isVisible: false
-        }
+        },
       });
 
       return (
