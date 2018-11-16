@@ -47,6 +47,8 @@ type Schema = { [string]: FieldMetadata };
 export const InputTypes = {
   TEXT: 'TEXT_INPUT',
   SELECT: 'SELECT_INPUT',
+  MULTISELECT: "MULTISELECT",
+  CHECKBOX: "CHECKBOX"
 };
 
 export default function useForm(schema: Schema, schemaValues = {}) {
@@ -219,4 +221,5 @@ const ValueResolvers = {
   [InputTypes.SELECT]: event => event,
   [InputTypes.MULTISELECT]: event => {
     return event},
+  [InputTypes.CHECKBOX]: event => event,
 };

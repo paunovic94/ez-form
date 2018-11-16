@@ -146,7 +146,7 @@ function Checkbox({
   id = name,
   ...restProps
 }) {
-  console.log(value, !!value);
+
   return (
     <div
       className={`Checkbox ${name}`}

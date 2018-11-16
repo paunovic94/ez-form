@@ -144,4 +144,49 @@ describe("Update form data on input change", () => {
       }
     );
   });
+
+  test("Checkbox", async () => {
+    function TestForm() {
+      const { formData } = useForm({
+        checkbox1: {
+          formElement: formElements.checkbox,
+          name: "checkbox1",
+          label: "checkbox1",
+          defaultValue: true
+        },
+      });
+
+      return (
+        <div>
+          {formData.checkbox1.render()}
+        </div>
+      );
+    }
+
+    const { container } = render(<TestForm />);
+    const checkbox1 = container.querySelector(".checkbox1 input")
+
+    expect(container.querySelector(".checkbox1 input").checked).toBeTruthy();
+    expect(container.querySelector(".checkbox1 input").type).toBe("checkbox");
+    fireEvent.change(checkbox1, { target: { checked: false, value: false } });
+
+    await wait(
+      () => [
+        expect(container.querySelector(".checkbox1 input").checked).not.toBeTruthy()
+      ],
+      {
+        container
+      }
+    );
+
+    fireEvent.change(checkbox1, { target: { checked: true, value: true } });
+    await wait(
+      () => [
+        expect(container.querySelector(".checkbox1 input").checked).toBeTruthy()
+      ],
+      {
+        container
+      }
+    );
+  });
 });
