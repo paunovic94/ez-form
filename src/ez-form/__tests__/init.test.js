@@ -107,7 +107,7 @@ describe("init default value from schema", () => {
     expect(queryByText("string-value2")).toBeFalsy();
   });
 
-  test("Checkbox", () => {
+  test("Checkbox - valid value for default value is boolean", () => {
     function TestForm(props) {
       const { formData } = useForm({
         checkbox1: {
@@ -121,26 +121,6 @@ describe("init default value from schema", () => {
         checkbox3: {
           formElement: formElements.checkbox
         },
-        checkbox4: {
-          formElement: formElements.checkbox,
-          defaultValue: "true"
-        },
-        checkbox5: {
-          formElement: formElements.checkbox,
-          defaultValue: "something"
-        },
-        checkbox6: {
-          formElement: formElements.checkbox,
-          defaultValue: ""
-        },
-        checkbox7: {
-          formElement: formElements.checkbox,
-          defaultValue: undefined
-        },
-        checkbox8: {
-          formElement: formElements.checkbox,
-          defaultValue: null
-        }
       });
 
       return (
@@ -148,11 +128,6 @@ describe("init default value from schema", () => {
           {formData.checkbox1.render()}
           {formData.checkbox2.render()}
           {formData.checkbox3.render()}
-          {formData.checkbox4.render()}
-          {formData.checkbox5.render()}
-          {formData.checkbox6.render()}
-          {formData.checkbox7.render()}
-          {formData.checkbox8.render()}
         </div>
       );
     }
@@ -166,11 +141,6 @@ describe("init default value from schema", () => {
     expect(checkboxs[0].checked).toBeTruthy();
     expect(checkboxs[1].checked).not.toBeTruthy();
     expect(checkboxs[2].checked).not.toBeTruthy();
-    expect(checkboxs[3].checked).toBeTruthy();
-    expect(checkboxs[4].checked).toBeTruthy();
-    expect(checkboxs[5].checked).not.toBeTruthy();
-    expect(checkboxs[6].checked).not.toBeTruthy();
-    expect(checkboxs[7].checked).not.toBeTruthy();
   });
 
   test("Radio group", () => {
@@ -612,5 +582,156 @@ describe("Init value in schema with second arg in useForm", () => {
 
     expect(queryByText("Not exist in options")).toBeFalsy();
     expect(queryByText("Exist in options")).toBeFalsy();
+  });
+
+  test("Checkbox - boolean is valid value for init", () => {
+    function TestForm(props) {
+      const { formData } = useForm(
+        {
+          checkbox1: {
+            formElement: formElements.checkbox
+          },
+          checkbox2: {
+            formElement: formElements.checkbox
+          }
+        },
+        {
+          checkbox1: true,
+          checkbox2: false
+        }
+      );
+
+      return (
+        <div>
+          {formData.checkbox1.render()}
+          {formData.checkbox2.render()}
+        </div>
+      );
+    }
+
+    const { container } = render(<TestForm />);
+
+    const checkboxs = container.querySelectorAll("input");
+
+    expect(checkboxs[0].type).toBe("checkbox");
+
+    expect(checkboxs[0].checked).toBeTruthy();
+    expect(checkboxs[1].checked).not.toBeTruthy();
+  });
+
+  test("Checkbox - when init with ''/undefined/null, use default value or set default value to false if does'n exist", () => {
+    function TestForm(props) {
+      const { formData } = useForm(
+        {
+          checkbox1: {
+            formElement: formElements.checkbox
+          },
+          checkbox2: {
+            formElement: formElements.checkbox
+          },
+          checkbox3: {
+            formElement: formElements.checkbox
+          },
+          checkbox4: {
+            formElement: formElements.checkbox,
+            defaultValue: true
+          },
+          checkbox5: {
+            formElement: formElements.checkbox,
+            defaultValue: true
+          },
+          checkbox6: {
+            formElement: formElements.checkbox,
+            defaultValue: true
+          }
+        },
+        {
+          checkbox1: undefined,
+          checkbox2: null,
+          checkbox3: "",
+          checkbox4: undefined,
+          checkbox5: null,
+          checkbox6: ""
+        }
+      );
+
+      return (
+        <div>
+          {formData.checkbox1.render()}
+          {formData.checkbox2.render()}
+          {formData.checkbox3.render()}
+          {formData.checkbox4.render()}
+          {formData.checkbox5.render()}
+          {formData.checkbox6.render()}
+        </div>
+      );
+    }
+
+    const { container, debug } = render(<TestForm />);
+
+    const checkboxs = container.querySelectorAll("input");
+
+    expect(checkboxs[0].type).toBe("checkbox");
+
+    expect(checkboxs[0].checked).not.toBeTruthy();
+    expect(checkboxs[1].checked).not.toBeTruthy();
+    expect(checkboxs[2].checked).not.toBeTruthy();
+    expect(checkboxs[3].checked).toBeTruthy();
+    expect(checkboxs[4].checked).toBeTruthy();
+    expect(checkboxs[5].checked).toBeTruthy();
+
+    expect(checkboxs[0].value).toBe("false");
+    expect(checkboxs[1].value).toBe("false");
+    expect(checkboxs[2].value).toBe("false");
+    expect(checkboxs[3].value).toBe("true");
+    expect(checkboxs[4].value).toBe("true");
+    expect(checkboxs[5].value).toBe("true");
+  });
+
+  test("Checkbox - console warn message if init value is not valid", () => {
+    // Valid value for init checkbox is boolean; or ''/undefined/null when is default value used
+    console.warn = jest.fn(warnMessage => {
+      return warnMessage;
+    });
+
+    function TestForm(props) {
+      const { formData } = useForm(
+        {
+          checkbox1: {
+            formElement: formElements.checkbox
+          },
+          checkbox2: {
+            formElement: formElements.checkbox
+          },
+          checkbox3: {
+            formElement: formElements.checkbox
+          },
+          checkbox4: {
+            formElement: formElements.checkbox
+          }
+        },
+        {
+          checkbox1: "text",
+          checkbox2: 1,
+          checkbox3: 0,
+          checkbox4: "true"
+        }
+      );
+
+      return (
+        <div>
+          {formData.checkbox1.render()}
+          {formData.checkbox2.render()}
+          {formData.checkbox3.render()}
+          {formData.checkbox4.render()}
+        </div>
+      );
+    }
+
+    const { container } = render(<TestForm />);
+    expect(console.warn).toHaveBeenCalled();
+    expect(console.warn.mock.calls[0][0]).toEqual(
+     "Checkbox is initialized with invalid value"
+    );
   });
 });

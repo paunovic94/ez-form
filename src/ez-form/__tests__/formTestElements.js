@@ -138,8 +138,7 @@ function MultiSelect({
 function Checkbox({
   label,
   error,
-  value,
-  isCheckbox = true,
+  value = false,
   onChange,
   disabled,
   name,
