@@ -135,10 +135,42 @@ function MultiSelect({
   );
 }
 
+function Checkbox({
+  label,
+  error,
+  value,
+  isCheckbox = true,
+  onChange,
+  disabled,
+  name,
+  id = name,
+  ...restProps
+}) {
+
+  return (
+    <div
+      className={`Checkbox ${name}`}
+    >
+      {label && <div>Label: {label}</div>}
+      {error && <div>Error: {error}</div>}
+      <input
+        type="checkbox"
+        id={id}
+        value={value}
+        checked={!!value}
+        onChange={onChange}
+        disabled={disabled}
+      />
+    </div>
+  );
+}
+
+
 let formElements = {
   textInput: { type: InputTypes.TEXT, Component: TextInput },
   select: { type: InputTypes.SELECT, Component: Select },
-  multiSelect: { type: InputTypes.MULTISELECT, Component: MultiSelect }
+  multiSelect: { type: InputTypes.MULTISELECT, Component: MultiSelect },
+  checkbox: { type: InputTypes.CHECKBOX, Component: Checkbox },
 };
 
 export default formElements;

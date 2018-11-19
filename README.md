@@ -47,3 +47,8 @@ Form utils
 		- disable component based on disabled prop in arg
 		- onChange cb for text input and selet
 		- onInputChange for select
+
+	* prepareForServer.test
+	* setSchemaStateValue.test
+	* getSchemaStateValue.test
+	* cloneStateValues.test

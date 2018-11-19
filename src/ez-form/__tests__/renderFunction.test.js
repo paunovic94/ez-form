@@ -3,7 +3,8 @@ import {
   render,
   cleanup,
   fireEvent,
-  waitForElement
+  waitForElement,
+  wait
 } from "react-testing-library";
 import useForm from "../index";
 import formElements from "./formTestElements";
@@ -247,5 +248,37 @@ describe("Test render additional options", () => {
         label: "Test multi select"
       }
     ]);
+  });
+
+  test("Trigger an action on checkbox change", async () => {
+    let handleCheckboxChangeMock = jest.fn();
+
+    function TestForm() {
+      const { formData } = useForm({
+        checkbox1: {
+          formElement: formElements.checkbox
+        }
+      });
+
+      return (
+        <div>
+          {formData.checkbox1.render({ onChange: handleCheckboxChangeMock })}
+        </div>
+      );
+    }
+
+    const { container, getByValue } = render(<TestForm />);
+
+    const input = container.querySelector("input");
+
+    fireEvent.change(input, {
+      target: { value: true, checked: true }
+    });
+
+    await wait(() => expect(container.querySelector("input").checked).toBeTruthy(), {
+      container
+    });
+
+    expect(handleCheckboxChangeMock).toHaveBeenCalled();
   });
 });
