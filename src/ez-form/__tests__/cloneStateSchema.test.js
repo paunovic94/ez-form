@@ -12,7 +12,7 @@ import {
 import useForm from "../index";
 import formElements, {formatDate} from "./formTestElements";
 
-describe.skip("Clone state schema values", () => {
+describe("Clone state schema values", () => {
     test("cloneStateValues input", () => {
       let initialValuesObj = {
         testInputText1: "Test 1",
@@ -60,7 +60,14 @@ describe.skip("Clone state schema values", () => {
               onClick={() => {
                 {
                   let clonedState = cloneStateValues();
-                  expect(clonedState).toEqual(initialValuesObj);
+                  expect(clonedState).toEqual({
+                    testInputText1: "Test 1",
+                    testInputText2: "",
+                    testInputText3: '',
+                    testInputText4: '',
+                    testInputText5: [],
+                    testInputText6: 1
+                  });
                 }
               }}
             >
@@ -74,7 +81,7 @@ describe.skip("Clone state schema values", () => {
       fireEvent.click(getByText("Clone schema values"));
     });
   
-    test.skip("cloneStateValues select", () => {
+    test("cloneStateValues select", () => {
       function TestForm(props) {
         const { formData, cloneStateValues } = useForm({
           testSelectString: {

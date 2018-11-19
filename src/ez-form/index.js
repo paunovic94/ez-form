@@ -79,11 +79,14 @@ export default function useForm(schema: Schema, schemaValues = {}) {
 
       const fieldError = validateField(field, formState);
 
-      if (isValid && (fieldError !== '')) {
+      if (isValid && fieldError !== '') {
         isValid = false;
       }
 
-      const newFormSchema = { ...formState, [fieldName]: {...field, error: fieldError} };
+      const newFormSchema = {
+        ...formState,
+        [fieldName]: { ...field, error: fieldError },
+      };
       setFormState(newFormSchema);
     });
     return isValid;
@@ -109,6 +112,15 @@ export default function useForm(schema: Schema, schemaValues = {}) {
       }
     });
     return prepared;
+  }
+
+  function cloneStateValues() {
+    let cloneValues = {};
+    Object.keys(formState).forEach(fieldName => {
+      const { value } = formState[fieldName];
+      cloneValues[fieldName] = value;
+    });
+    return cloneValues;
   }
 
   let formData = {};
@@ -153,7 +165,7 @@ export default function useForm(schema: Schema, schemaValues = {}) {
     };
   });
 
-  return { formData, validate, prepareForServer };
+  return { formData, validate, prepareForServer, cloneStateValues };
 }
 
 function initFormData(schema, schemaValues) {
@@ -170,11 +182,12 @@ function initFormData(schema, schemaValues) {
     } = schema[fieldName];
 
     formData[fieldName] = {
-      value: schemaValues[fieldName]
-        ? schemaValues[fieldName]
-        : defaultValue === undefined
-          ? ''
-          : defaultValue,
+      value:
+        schemaValues[fieldName] == null
+          ? defaultValue === undefined
+            ? ''
+            : defaultValue
+          : schemaValues[fieldName],
       handleInputValueChange: ValueResolvers[formElement.type],
       error: '',
       validationRules,
