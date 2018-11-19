@@ -388,10 +388,10 @@ describe("Init value in schema with second arg in useForm", () => {
     const inputs = container.querySelectorAll("input");
 
     expect(inputs[0].value).toBe("initText1");
-    expect(inputs[1].value).toBe(0);
-    expect(inputs[2].value).toBe(1);
-    expect(inputs[3].value).toBe(false);
-    expect(inputs[4].value).toBe(true);
+    expect(inputs[1].value).toBe("0");
+    expect(inputs[2].value).toBe("1");
+    expect(inputs[3].value).toBe("false");
+    expect(inputs[4].value).toBe("true");
   });
 
   test("Text input - init with '', undefiend, null", () => {
