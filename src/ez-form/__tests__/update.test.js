@@ -168,7 +168,7 @@ describe("Update form data on input change", () => {
 
     expect(container.querySelector(".checkbox1 input").checked).toBeTruthy();
     expect(container.querySelector(".checkbox1 input").type).toBe("checkbox");
-    fireEvent.change(checkbox1, { target: { checked: false, value: false } });
+    fireEvent.click(container.querySelector(".checkbox1 input"));
 
     await wait(
       () => [
@@ -179,7 +179,7 @@ describe("Update form data on input change", () => {
       }
     );
 
-    fireEvent.change(checkbox1, { target: { checked: true, value: true } });
+    fireEvent.click(container.querySelector(".checkbox1 input"));
     await wait(
       () => [
         expect(container.querySelector(".checkbox1 input").checked).toBeTruthy()

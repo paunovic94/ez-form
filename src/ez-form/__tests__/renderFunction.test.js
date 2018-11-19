@@ -256,7 +256,10 @@ describe("Test render additional options", () => {
     function TestForm() {
       const { formData } = useForm({
         checkbox1: {
-          formElement: formElements.checkbox
+          formElement: formElements.checkbox,
+          name: "checkbox1",
+          defaultValue: false,
+          label: "checkbox1"
         }
       });
 
@@ -267,18 +270,15 @@ describe("Test render additional options", () => {
       );
     }
 
-    const { container, getByValue } = render(<TestForm />);
-
-    const input = container.querySelector("input");
-
-    fireEvent.change(input, {
-      target: { value: true, checked: true }
-    });
-
-    await wait(() => expect(container.querySelector("input").checked).toBeTruthy(), {
+    const { container, getByValue , debug, getByLabelText} = render(<TestForm />);
+   
+    fireEvent.click( getByLabelText('Label: checkbox1'))
+    await wait(() => expect(getByLabelText('Label: checkbox1').checked).toBeTruthy(), {
       container
     });
-
+    
     expect(handleCheckboxChangeMock).toHaveBeenCalled();
+    expect(handleCheckboxChangeMock.mock.calls[0][0]).toBe(true);
+
   });
 });
