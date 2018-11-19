@@ -13,7 +13,7 @@ import useForm from "../index";
 import formElements, {formatDate} from "./formTestElements";
 
 describe("Get schema state value", () => {
-    test.skip("Get value from state - input field", () => {
+    test("Get value from state - input field", () => {
       function TestForm(props) {
         const { formData, getSchemaStateValue } = useForm({
           testInputText1: {
@@ -60,7 +60,7 @@ describe("Get schema state value", () => {
       fireEvent.click(getByText("Get input values"));
     });
   
-    test.skip("Get value from state - select/multi select", () => {
+    test("Get value from state - select/multi select", () => {
       function TestForm(props) {
         const { formData, getSchemaStateValue } = useForm({
           testSelectString: {
