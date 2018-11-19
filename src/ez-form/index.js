@@ -47,9 +47,9 @@ type Schema = { [string]: FieldMetadata };
 export const InputTypes = {
   TEXT: 'TEXT_INPUT',
   SELECT: 'SELECT_INPUT',
-  MULTISELECT: "MULTISELECT",
-  CHECKBOX: "CHECKBOX",
-  RADIOGROUP: "RADIOGROUP"
+  MULTISELECT: 'MULTISELECT',
+  CHECKBOX: 'CHECKBOX',
+  RADIOGROUP: 'RADIOGROUP',
 };
 
 export default function useForm(schema: Schema, schemaValues = {}) {
@@ -123,6 +123,11 @@ export default function useForm(schema: Schema, schemaValues = {}) {
     return cloneValues;
   }
 
+  function getSchemaStateValue(fieldName) {
+    if (!fieldName) throw new Error('getSchemaStateValue: fieldName param required');
+    return formState[fieldName].value;
+  }
+
   let formData = {};
   Object.keys(schema).forEach(fieldName => {
     const { formElement, name, label, label2 } = schema[fieldName];
@@ -165,7 +170,13 @@ export default function useForm(schema: Schema, schemaValues = {}) {
     };
   });
 
-  return { formData, validate, prepareForServer, cloneStateValues };
+  return {
+    formData,
+    validate,
+    prepareForServer,
+    cloneStateValues,
+    getSchemaStateValue,
+  };
 }
 
 function initFormData(schema, schemaValues) {
@@ -234,9 +245,19 @@ const ValueResolvers = {
   [InputTypes.TEXT]: event => event.target.value,
   [InputTypes.SELECT]: event => event,
   [InputTypes.MULTISELECT]: event => {
+<<<<<<< HEAD
     return event},
   [InputTypes.CHECKBOX]: event => {
     return event.target.checked},
   [InputTypes.RADIOGROUP]: event => {
     return event.target.checked},
+=======
+    return event;
+  },
+  [InputTypes.CHECKBOX]: event => event,
+  [InputTypes.RADIOGROUP]: event => {
+    console.log(event, 'ev');
+    return event;
+  },
+>>>>>>> 4287b8c1d8770dbf1f193d15ebac47557d640d94
 };
