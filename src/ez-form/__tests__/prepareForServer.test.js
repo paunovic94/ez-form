@@ -6,8 +6,8 @@ import { isMaxLength } from "./validation.test";
 
 afterEach(cleanup);
 
-describe("Test utiliti functions for schema", () => {
-  test.skip("Prepare for server - input", () => {
+describe("Prepare for server", () => {
+  test("Input", () => {
     let onSubmitMock = jest.fn();
 
     function TestForm(props) {
@@ -29,6 +29,10 @@ describe("Test utiliti functions for schema", () => {
           testInputText5: {
             formElement: formElements.textInput,
             name: "testInputText5"
+          },
+          testInputText6: {
+            formElement: formElements.textInput,
+            name: "testInputText5"
           }
         },
         {
@@ -36,7 +40,8 @@ describe("Test utiliti functions for schema", () => {
           testInputText2: "",
           testInputText3: undefined,
           testInputText4: null,
-          testInputText5: 1
+          testInputText5: 1,
+          testInputText6: true
         }
       );
 
@@ -47,6 +52,7 @@ describe("Test utiliti functions for schema", () => {
           {formData.testInputText3.render()}
           {formData.testInputText4.render()}
           {formData.testInputText5.render()}
+          {formData.testInputText6.render()}
           <button
             onClick={() => {
               let dataForServer = prepareForServer();
@@ -67,11 +73,12 @@ describe("Test utiliti functions for schema", () => {
       testInputText2: null,
       testInputText3: null,
       testInputText4: null,
-      testInputText5: 1
+      testInputText5: 1,
+      testInputText6: true
     });
   });
 
-  test("Prepare for server - select", () => {
+  test("Select", () => {
     let onSubmitMock = jest.fn();
 
     function TestForm() {
@@ -155,7 +162,7 @@ describe("Test utiliti functions for schema", () => {
     });
   });
 
-  test("Prepare for server - select - returns null for '', null and undefined in state", () => {
+  test("Select - returns null for '', null and undefined in state", () => {
     let onSubmitMock = jest.fn();
 
     function TestForm() {
@@ -202,11 +209,11 @@ describe("Test utiliti functions for schema", () => {
     expect(onSubmitMock.mock.calls[0][0]).toEqual({
       testSelect1: null,
       testSelect2: null,
-      testSelect3: null,
+      testSelect3: null
     });
   });
 
-  test.skip("Prepare for server - multi select", () => {
+  test.skip("Multi select", () => {
     let onSubmitMock = jest.fn();
 
     function TestForm() {
@@ -226,25 +233,36 @@ describe("Test utiliti functions for schema", () => {
           },
           testMultiSelect5: {
             formElement: formElements.multiSelect
-          },
+          }
         },
         {
-          testMultiSelect1: [{ value: "multi-select1", label: "Test Multi Select1" }, { value: "multi-select2", label: "Test Multi Select2" }],
+          testMultiSelect1: [
+            { value: "multi-select1", label: "Test Multi Select1" },
+            { value: "multi-select2", label: "Test Multi Select2" }
+          ],
           testMultiSelect2: [],
-          testMultiSelect3: [{ value: "multi-select1", label: "Test Multi Select1" }],
+          testMultiSelect3: [
+            { value: "multi-select1", label: "Test Multi Select1" }
+          ],
           testMultiSelect4: null,
-          testMultiSelect5: undefined,
+          testMultiSelect5: undefined
         }
       );
 
       return (
         <div>
           {formData.testMultiSelect1.render({
-            options:[{ value: "multi-select1", label: "Test Multi Select1" }, { value: "multi-select2", label: "Test Multi Select2" }]
+            options: [
+              { value: "multi-select1", label: "Test Multi Select1" },
+              { value: "multi-select2", label: "Test Multi Select2" }
+            ]
           })}
           {formData.testMultiSelect2.render()}
           {formData.testMultiSelect3.render({
-            options:[{ value: "multi-select1", label: "Test Multi Select1" }, { value: "multi-select2", label: "Test Multi Select2" }]
+            options: [
+              { value: "multi-select1", label: "Test Multi Select1" },
+              { value: "multi-select2", label: "Test Multi Select2" }
+            ]
           })}
           {formData.testMultiSelect4.render()}
           {formData.testMultiSelect5.render()}
@@ -273,4 +291,66 @@ describe("Test utiliti functions for schema", () => {
     });
   });
 
+  test("Checkbox", () => {
+    let onSubmitMock = jest.fn();
+
+    function TestForm(props) {
+      const { formData, validate, prepareForServer } = useForm(
+        {
+          checkbox1: {
+            formElement: formElements.checkbox,
+            defaultValue: true
+          },
+          checkbox2: {
+            formElement: formElements.checkbox
+          },
+          checkbox3: {
+            formElement: formElements.checkbox
+          },
+          checkbox4: {
+            formElement: formElements.checkbox
+          },
+          checkbox5: {
+            formElement: formElements.checkbox
+          }
+        },
+        {
+          checkbox1: "true",
+          checkbox2: true,
+          checkbox3: undefined,
+          checkbox4: null,
+          checkbox5: ""
+        }
+      );
+
+      return (
+        <div>
+          {formData.checkbox1.render()}
+          {formData.checkbox2.render()}
+          {formData.checkbox3.render()}
+          {formData.checkbox4.render()}
+          {formData.checkbox5.render()}
+          <button
+            onClick={() => {
+              let dataForServer = prepareForServer();
+              onSubmitMock(dataForServer);
+            }}
+          >
+            Submit form
+          </button>
+        </div>
+      );
+    }
+    const { container, getByText, getByValue } = render(<TestForm />);
+
+    fireEvent.click(getByText("Submit form"));
+
+    expect(onSubmitMock.mock.calls[0][0]).toEqual({
+      checkbox1: "true",
+      checkbox2: true,
+      checkbox3: null,
+      checkbox4: null,
+      checkbox5: null
+    });
+  });
 });

@@ -121,4 +121,61 @@ describe.skip("Clone state schema values", () => {
       const { container, getByText } = render(<TestForm />);
       fireEvent.click(getByText("Clone schema values"));
     });
+
+    test("Checkbox", () => {
+      let onSubmitMock = jest.fn();
+      let initialValuesObj = {
+        checkbox1: "true",
+        checkbox2: true,
+        checkbox3: undefined,
+        checkbox4: null,
+        checkbox5: ""
+      };
+  
+      function TestForm(props) {
+        const { formData, validate, cloneStateValues } = useForm(
+          {
+            checkbox1: {
+              formElement: formElements.checkbox,
+              defaultValue: true
+            },
+            checkbox2: {
+              formElement: formElements.checkbox
+            },
+            checkbox3: {
+              formElement: formElements.checkbox
+            },
+            checkbox4: {
+              formElement: formElements.checkbox
+            },
+            checkbox5: {
+              formElement: formElements.checkbox
+            }
+          },
+          initialValuesObj
+        );
+  
+        return (
+          <div>
+            {formData.checkbox1.render()}
+            {formData.checkbox2.render()}
+            {formData.checkbox3.render()}
+            {formData.checkbox4.render()}
+            {formData.checkbox5.render()}
+            <button
+              onClick={() => {
+                let clonedState = cloneStateValues();
+                  expect(clonedState).toEqual(initialValuesObj);
+              }}
+            >
+              Submit form
+            </button>
+          </div>
+        );
+      }
+
+      const { container, getByText, getByValue } = render(<TestForm />);
+      fireEvent.click(getByText("Clone schema values"));
+    });
+  
   });

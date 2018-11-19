@@ -250,7 +250,7 @@ describe("Test render additional options", () => {
     ]);
   });
 
-  test.skip("Trigger an action on checkbox change", async () => {
+  test("Trigger an action on checkbox change", async () => {
     let handleCheckboxChangeMock = jest.fn();
 
     function TestForm() {
