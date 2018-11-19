@@ -235,8 +235,8 @@ const ValueResolvers = {
   [InputTypes.SELECT]: event => event,
   [InputTypes.MULTISELECT]: event => {
     return event},
-  [InputTypes.CHECKBOX]: event => event,
+  [InputTypes.CHECKBOX]: event => {
+    return event.target.checked},
   [InputTypes.RADIOGROUP]: event => {
-    console.log(event, "ev");
-    return event},
+    return event.target.checked},
 };

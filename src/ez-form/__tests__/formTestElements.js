@@ -146,14 +146,15 @@ function Checkbox({
   id = name,
   ...restProps
 }) {
+
   return (
     <div className={`Checkbox ${name}`}>
-      {label && <div>Label: {label}</div>}
+      {label && <label htmlFor={id}>Label: {label}</label>}
       {error && <div>Error: {error}</div>}
       <input
         type="checkbox"
+        value={value}
         id={id}
-        value={value || ""}
         checked={!!value}
         onChange={onChange}
         disabled={disabled}
