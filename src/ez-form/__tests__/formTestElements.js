@@ -146,17 +146,14 @@ function Checkbox({
   id = name,
   ...restProps
 }) {
-
   return (
-    <div
-      className={`Checkbox ${name}`}
-    >
+    <div className={`Checkbox ${name}`}>
       {label && <div>Label: {label}</div>}
       {error && <div>Error: {error}</div>}
       <input
         type="checkbox"
         id={id}
-        value={value}
+        value={value || ""}
         checked={!!value}
         onChange={onChange}
         disabled={disabled}
@@ -165,12 +162,44 @@ function Checkbox({
   );
 }
 
+function RadioGroup({
+  label: groupLabel,
+  error,
+  value: selectedValue,
+  onChange,
+  disabled,
+  name,
+  id = name,
+  options = []
+}) {
+  return (
+    <div className={`RadioGroup ${name}`}>
+      {groupLabel && <div>Label: {groupLabel}</div>}
+      {error && <div>Error: {error}</div>}
+      {options.length && options.map(({ label, value }, idx) => (
+        <div  className={`RadioElement`} key={idx}>
+          <input
+            type="radio"
+            id={name + "_" + idx}
+            name={name}
+            value={value}
+            checked={String(selectedValue) === String(value)}
+            onChange={onChange}
+            disabled={disabled}
+          />
+          <label htmlFor={name + "_" + idx}>{label}</label>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 let formElements = {
   textInput: { type: InputTypes.TEXT, Component: TextInput },
   select: { type: InputTypes.SELECT, Component: Select },
   multiSelect: { type: InputTypes.MULTISELECT, Component: MultiSelect },
   checkbox: { type: InputTypes.CHECKBOX, Component: Checkbox },
+  radioGroup: { type: InputTypes.RADIOGROUP, Component: RadioGroup }
 };
 
 export default formElements;

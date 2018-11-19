@@ -32,7 +32,11 @@ describe("Prepare for server", () => {
           },
           testInputText6: {
             formElement: formElements.textInput,
-            name: "testInputText5"
+            name: "testInputText6"
+          },
+          testInputText7: {
+            formElement: formElements.textInput,
+            name: "testInputText7"
           }
         },
         {
@@ -41,7 +45,8 @@ describe("Prepare for server", () => {
           testInputText3: undefined,
           testInputText4: null,
           testInputText5: 1,
-          testInputText6: true
+          testInputText6: false,
+          testInputText7: 0
         }
       );
 
@@ -53,6 +58,7 @@ describe("Prepare for server", () => {
           {formData.testInputText4.render()}
           {formData.testInputText5.render()}
           {formData.testInputText6.render()}
+          {formData.testInputText7.render()}
           <button
             onClick={() => {
               let dataForServer = prepareForServer();
@@ -74,7 +80,8 @@ describe("Prepare for server", () => {
       testInputText3: null,
       testInputText4: null,
       testInputText5: 1,
-      testInputText6: true
+      testInputText6: false,
+      testInputText7: 0
     });
   });
 

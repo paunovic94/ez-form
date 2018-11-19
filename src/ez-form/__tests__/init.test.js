@@ -119,7 +119,7 @@ describe("init default value from schema", () => {
           defaultValue: false
         },
         checkbox3: {
-          formElement: formElements.checkbox,
+          formElement: formElements.checkbox
         },
         checkbox4: {
           formElement: formElements.checkbox,
@@ -140,7 +140,7 @@ describe("init default value from schema", () => {
         checkbox8: {
           formElement: formElements.checkbox,
           defaultValue: null
-        },
+        }
       });
 
       return (
@@ -173,6 +173,61 @@ describe("init default value from schema", () => {
     expect(checkboxs[7].checked).not.toBeTruthy();
   });
 
+  test("Radio group", () => {
+    function TestForm(props) {
+      const { formData } = useForm({
+        radioGroup1: {
+          formElement: formElements.radioGroup,
+          name: "radioGroup1"
+        },
+        radioGroup2: {
+          formElement: formElements.radioGroup,
+          defaultValue: "option1",
+          name: "radioGroup2"
+        },
+        radioGroup3: {
+          formElement: formElements.radioGroup,
+          defaultValue: "non-existing-option",
+          name: "radioGroup3"
+        }
+      });
+
+      return (
+        <div>
+          {formData.radioGroup1.render()}
+          {formData.radioGroup2.render({
+            options: [
+              { value: "option1", label: "Option 1" },
+              { value: "option2", label: "Option 2" }
+            ]
+          })}
+          {formData.radioGroup3.render({
+            options: [{ value: "radio3-option1", label: "Radio 3 Option 1" }]
+          })}
+        </div>
+      );
+    }
+
+    const { container, getByLabelText, debug } = render(<TestForm />);
+
+    const radioGroups = container.querySelectorAll(".RadioGroup");
+
+    // First group
+    expect(radioGroups[0]).toBeTruthy();
+
+    // Second group
+    expect(getByLabelText("Option 1").type).toBe("radio");
+    expect(getByLabelText("Option 1").checked).toBeTruthy();
+    expect(getByLabelText("Option 1").value).toBe("option1");
+
+    expect(getByLabelText("Option 2").type).toBe("radio");
+    expect(getByLabelText("Option 2").checked).not.toBeTruthy();
+    expect(getByLabelText("Option 2").value).toBe("option2");
+
+    // Third group
+    expect(getByLabelText("Radio 3 Option 1").checked).not.toBeTruthy();
+  });
+
   test("IsVisible flag in schema", () => {
     function TestForm(props) {
       const { formData } = useForm({
@@ -192,7 +247,7 @@ describe("init default value from schema", () => {
           name: "testInputText3",
           defaultValue: "testInputText3",
           isVisible: false
-        },
+        }
       });
 
       return (
@@ -294,15 +349,36 @@ describe("Init value in schema with second arg in useForm", () => {
           testInputText2: {
             formElement: formElements.textInput,
             name: "testInputText2"
+          },
+          testInputText3: {
+            formElement: formElements.textInput,
+            name: "testInputText3"
+          },
+          testInputText4: {
+            formElement: formElements.textInput,
+            name: "testInputText4"
+          },
+          testInputText5: {
+            formElement: formElements.textInput,
+            name: "testInputText5"
           }
         },
-        { testInputText1: "initText1", testInputText2: "initText2" }
+        {
+          testInputText1: "initText1",
+          testInputText2: 0,
+          testInputText3: 1,
+          testInputText4: false,
+          testInputText5: true
+        }
       );
 
       return (
         <div>
           {formData.testInputText1.render()}
           {formData.testInputText2.render()}
+          {formData.testInputText3.render()}
+          {formData.testInputText4.render()}
+          {formData.testInputText5.render()}
         </div>
       );
     }
@@ -312,7 +388,10 @@ describe("Init value in schema with second arg in useForm", () => {
     const inputs = container.querySelectorAll("input");
 
     expect(inputs[0].value).toBe("initText1");
-    expect(inputs[1].value).toBe("initText2");
+    expect(inputs[1].value).toBe(0);
+    expect(inputs[2].value).toBe(1);
+    expect(inputs[3].value).toBe(false);
+    expect(inputs[4].value).toBe(true);
   });
 
   test("Text input - init with '', undefiend, null", () => {
@@ -440,13 +519,13 @@ describe("Init value in schema with second arg in useForm", () => {
           testSelectMulti1: {
             formElement: formElements.multiSelect,
             name: "testSelect1"
-          },
+          }
         },
         {
           testSelectMulti1: [
             { value: "test-select1", label: "Test Select1" },
             { value: "test-select2", label: "Test Select2" }
-          ],
+          ]
         }
       );
 
@@ -512,12 +591,8 @@ describe("Init value in schema with second arg in useForm", () => {
           }
         },
         {
-          testSelectMulti1: [
-            "Not extist in options"
-          ],
-          testSelectMulti2: [
-            "Exist in options"
-          ]
+          testSelectMulti1: ["Not extist in options"],
+          testSelectMulti2: ["Exist in options"]
         }
       );
 
@@ -527,7 +602,7 @@ describe("Init value in schema with second arg in useForm", () => {
             options: []
           })}
           {formData.testSelectMulti2.render({
-            options: [{value:"Exist in options", label:"Exist in options"}]
+            options: [{ value: "Exist in options", label: "Exist in options" }]
           })}
         </div>
       );
@@ -538,6 +613,4 @@ describe("Init value in schema with second arg in useForm", () => {
     expect(queryByText("Not exist in options")).toBeFalsy();
     expect(queryByText("Exist in options")).toBeFalsy();
   });
-
-  
 });
