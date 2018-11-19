@@ -132,8 +132,8 @@ describe("Clone state schema values", () => {
     test("Checkbox", () => {
       let onSubmitMock = jest.fn();
       let initialValuesObj = {
-        checkbox1: "true",
-        checkbox2: true,
+        checkbox1: true,
+        checkbox2: false,
         checkbox3: undefined,
         checkbox4: null,
         checkbox5: ""
@@ -144,7 +144,6 @@ describe("Clone state schema values", () => {
           {
             checkbox1: {
               formElement: formElements.checkbox,
-              defaultValue: true
             },
             checkbox2: {
               formElement: formElements.checkbox
@@ -172,10 +171,16 @@ describe("Clone state schema values", () => {
             <button
               onClick={() => {
                 let clonedState = cloneStateValues();
-                  expect(clonedState).toEqual(initialValuesObj);
+                  expect(clonedState).toEqual({
+                    checkbox1: true,
+                    checkbox2: false,
+                    checkbox3: "",
+                    checkbox4: "",
+                    checkbox5: ""
+                  });
               }}
             >
-              Submit form
+              Clone schema values
             </button>
           </div>
         );

@@ -306,7 +306,6 @@ describe("Prepare for server", () => {
         {
           checkbox1: {
             formElement: formElements.checkbox,
-            defaultValue: true
           },
           checkbox2: {
             formElement: formElements.checkbox
@@ -322,7 +321,7 @@ describe("Prepare for server", () => {
           }
         },
         {
-          checkbox1: "true",
+          checkbox1: false,
           checkbox2: true,
           checkbox3: undefined,
           checkbox4: null,
@@ -353,7 +352,7 @@ describe("Prepare for server", () => {
     fireEvent.click(getByText("Submit form"));
 
     expect(onSubmitMock.mock.calls[0][0]).toEqual({
-      checkbox1: "true",
+      checkbox1: false,
       checkbox2: true,
       checkbox3: null,
       checkbox4: null,
