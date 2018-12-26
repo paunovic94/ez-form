@@ -1,20 +1,21 @@
-import React, { useState } from 'react';
-import type { ComponentType } from 'react';
+// @flow
+import React, { useState } from "react";
+import type { ComponentType } from "react";
 
 type IntlMessageDescriptor = {
   id: string,
   defaultMessage: string,
-  description: ?string,
+  description: ?string
 };
 
 type IntlMessage = {
   descriptor: IntlMessageDescriptor,
-  values: ?{},
+  values: ?{}
 };
 
 type FormElement = {
   type: string,
-  Component: ComponentType<{ value: any, error: string, onChange: any => void }>,
+  Component: ComponentType<{ value: any, error: string, onChange: any => void }>
 };
 
 type Label = string | IntlMessage;
@@ -27,11 +28,11 @@ type ValidationRule = {
     args: {},
     fieldName: string,
     state: {},
-    validationArgs: {},
+    validationArgs: {}
   }) => string,
   message: ?ErrorMessage,
   args: ?{},
-  validateAnotherField: ?string,
+  validateAnotherField: ?string
 };
 
 type FieldMetadata = {
@@ -39,28 +40,30 @@ type FieldMetadata = {
   formElement: FormElement,
   label: ?Label,
   label2: ?Label,
-  validationRules: ?Array<ValidationRule>,
+  validationRules: ?Array<ValidationRule>
 };
 
 type Schema = { [string]: FieldMetadata };
 
 export const InputTypes = {
-  TEXT: 'TEXT_INPUT',
-  SELECT: 'SELECT_INPUT',
-  MULTISELECT: 'MULTISELECT',
-  CHECKBOX: 'CHECKBOX',
-  RADIOGROUP: 'RADIOGROUP',
+  TEXT: "TEXT_INPUT",
+  SELECT: "SELECT_INPUT",
+  MULTISELECT: "MULTISELECT",
+  CHECKBOX: "CHECKBOX",
+  RADIOGROUP: "RADIOGROUP"
 };
 
 export default function useForm(schema: Schema, schemaValues = {}) {
-  let [formState, setFormState] = useState(() => initFormData(schema, schemaValues));
+  let [formState, setFormState] = useState(() =>
+    initFormData(schema, schemaValues)
+  );
 
   function handleChange({ event, fieldName, onComplete }) {
     const fieldState = formState[fieldName];
     const newValue = fieldState.handleInputValueChange(event);
     let changedFiledState = {
       ...fieldState,
-      value: newValue,
+      value: newValue
     };
 
     changedFiledState.error = validateField(changedFiledState, formState);
@@ -79,13 +82,13 @@ export default function useForm(schema: Schema, schemaValues = {}) {
 
       const fieldError = validateField(field, formState);
 
-      if (isValid && fieldError !== '') {
+      if (isValid && fieldError !== "") {
         isValid = false;
       }
 
       const newFormSchema = {
         ...formState,
-        [fieldName]: { ...field, error: fieldError },
+        [fieldName]: { ...field, error: fieldError }
       };
       setFormState(newFormSchema);
     });
@@ -97,13 +100,17 @@ export default function useForm(schema: Schema, schemaValues = {}) {
     Object.keys(formState).forEach(fieldName => {
       const { value } = formState[fieldName];
 
-      if (value === undefined || value === null || value === '') {
+      if (value === undefined || value === null || value === "") {
         prepared[fieldName] = null;
       } else {
-        if (value && typeof value === 'object' && value.hasOwnProperty('value')) {
+        if (
+          value &&
+          typeof value === "object" &&
+          value.hasOwnProperty("value")
+        ) {
           // select
           prepared[fieldName] = value.value;
-        } else if (typeof value === 'string') {
+        } else if (typeof value === "string") {
           // text input
           prepared[fieldName] = value;
         } else {
@@ -124,7 +131,8 @@ export default function useForm(schema: Schema, schemaValues = {}) {
   }
 
   function getSchemaStateValue(fieldName) {
-    if (!fieldName) throw new Error('getSchemaStateValue: fieldName param required');
+    if (!fieldName)
+      throw new Error("getSchemaStateValue: fieldName param required");
     return formState[fieldName].value;
   }
 
@@ -132,9 +140,14 @@ export default function useForm(schema: Schema, schemaValues = {}) {
   Object.keys(schema).forEach(fieldName => {
     const { formElement, name, label, label2 } = schema[fieldName];
     formData[fieldName] = {
-      render: ({ useSecondLabel, isVisible, disabled, ...additionalProps } = {}) => {
+      render: ({
+        useSecondLabel,
+        isVisible,
+        disabled,
+        ...additionalProps
+      } = {}) => {
         if (
-          typeof isVisible === 'boolean' &&
+          typeof isVisible === "boolean" &&
           isVisible !== formState[fieldName].isVisible
         ) {
           setFormState({
@@ -142,8 +155,8 @@ export default function useForm(schema: Schema, schemaValues = {}) {
             [fieldName]: {
               ...formState[fieldName],
               isVisible: isVisible,
-              error: '',
-            },
+              error: ""
+            }
           });
         }
 
@@ -160,13 +173,13 @@ export default function useForm(schema: Schema, schemaValues = {}) {
                 handleChange({
                   event,
                   fieldName,
-                  onComplete: additionalProps.onChange,
+                  onComplete: additionalProps.onChange
                 });
               }}
             />
           )
         );
-      },
+      }
     };
   });
 
@@ -175,7 +188,7 @@ export default function useForm(schema: Schema, schemaValues = {}) {
     validate,
     prepareForServer,
     cloneStateValues,
-    getSchemaStateValue,
+    getSchemaStateValue
   };
 }
 
@@ -189,22 +202,22 @@ function initFormData(schema, schemaValues) {
       validationRules = [],
       isVisible = true,
       disabled = false,
-      useSecondLabel = false,
+      useSecondLabel = false
     } = schema[fieldName];
 
     formData[fieldName] = {
       value:
         schemaValues[fieldName] == null
           ? defaultValue === undefined
-            ? ''
+            ? ""
             : defaultValue
           : schemaValues[fieldName],
       handleInputValueChange: ValueResolvers[formElement.type],
-      error: '',
+      error: "",
       validationRules,
       isVisible,
       disabled,
-      useSecondLabel,
+      useSecondLabel
     };
   });
 
@@ -213,7 +226,7 @@ function initFormData(schema, schemaValues) {
 
 function validateField(fieldState, formState) {
   for (let rule of fieldState.validationRules) {
-    if (rule.validateAnotherField) return '';
+    if (rule.validateAnotherField) return "";
     if (rule.args && rule.args.dependencyFieldName) {
       rule.args.dependencyFieldValue =
         formState[rule.args.dependencyFieldName].value;
@@ -221,21 +234,25 @@ function validateField(fieldState, formState) {
     let error = rule.fn({
       value: fieldState.value,
       args: rule.args,
-      message: rule.message,
+      message: rule.message
     });
     if (error) return error;
   }
-  return '';
+  return "";
 }
 
-function checkIfFieldValidateAnotherField(fieldState, newFormState, setFormState) {
+function checkIfFieldValidateAnotherField(
+  fieldState,
+  newFormState,
+  setFormState
+) {
   for (let rule of fieldState.validationRules) {
     if (rule.validateAnotherField) {
       const anotherFieldName = rule.validateAnotherField;
       const error = validateField(newFormState[anotherFieldName], newFormState);
       setFormState({
         ...newFormState,
-        [anotherFieldName]: { ...newFormState[anotherFieldName], error: error },
+        [anotherFieldName]: { ...newFormState[anotherFieldName], error: error }
       });
     }
   }
@@ -245,9 +262,12 @@ const ValueResolvers = {
   [InputTypes.TEXT]: event => event.target.value,
   [InputTypes.SELECT]: event => event,
   [InputTypes.MULTISELECT]: event => {
-    return event},
+    return event;
+  },
   [InputTypes.CHECKBOX]: event => {
-    return event.target.checked},
+    return event.target.checked;
+  },
   [InputTypes.RADIOGROUP]: event => {
-    return event.target.checked},
+    return event.target.checked;
+  }
 };

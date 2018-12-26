@@ -13,13 +13,14 @@
     "react-testing-library": "5.2.3"
   },
   "devDependencies": {
-    "flow-bin": "^0.85.0"
+    "flow-bin": "0.89.0"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "flow": "flow"
   },
   "browserslist": [
     ">0.2%",
