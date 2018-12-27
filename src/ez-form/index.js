@@ -312,13 +312,7 @@ function checkIfFieldValidateAnotherField(
 const ValueResolvers = {
   [InputTypes.TEXT]: event => event.target.value,
   [InputTypes.SELECT]: event => event,
-  [InputTypes.MULTISELECT]: event => {
-    return event;
-  },
-  [InputTypes.CHECKBOX]: event => {
-    return event.target.checked;
-  },
-  [InputTypes.RADIOGROUP]: event => {
-    return event.target.checked;
-  }
+  [InputTypes.MULTISELECT]: event => event,
+  [InputTypes.CHECKBOX]: event => event.target.checked,
+  [InputTypes.RADIOGROUP]: event => event.target.checked
 };
