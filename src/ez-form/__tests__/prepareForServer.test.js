@@ -292,7 +292,7 @@ describe("Prepare for server", () => {
     expect(onSubmitMock.mock.calls[0][0]).toEqual({
       testMultiSelect1: ["multi-select1", "multi-select2"],
       testMultiSelect2: [],
-      testMultiSelect2: ["multi-select1"],
+      testMultiSelect3: ["multi-select1"],
       testMultiSelect4: null,
       testMultiSelect5: null
     });
@@ -313,19 +313,11 @@ describe("Prepare for server", () => {
           checkbox3: {
             formElement: formElements.checkbox
           },
-          checkbox4: {
-            formElement: formElements.checkbox
-          },
-          checkbox5: {
-            formElement: formElements.checkbox
-          }
         },
         {
           checkbox1: false,
           checkbox2: true,
           checkbox3: undefined,
-          checkbox4: null,
-          checkbox5: ""
         }
       );
 
@@ -334,8 +326,6 @@ describe("Prepare for server", () => {
           {formData.checkbox1.render()}
           {formData.checkbox2.render()}
           {formData.checkbox3.render()}
-          {formData.checkbox4.render()}
-          {formData.checkbox5.render()}
           <button
             onClick={() => {
               let dataForServer = prepareForServer();
@@ -354,9 +344,7 @@ describe("Prepare for server", () => {
     expect(onSubmitMock.mock.calls[0][0]).toEqual({
       checkbox1: false,
       checkbox2: true,
-      checkbox3: null,
-      checkbox4: null,
-      checkbox5: null
+      checkbox3: false,
     });
   });
 });

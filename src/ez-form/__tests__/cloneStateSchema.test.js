@@ -135,8 +135,6 @@ describe("Clone state schema values", () => {
         checkbox1: true,
         checkbox2: false,
         checkbox3: undefined,
-        checkbox4: null,
-        checkbox5: ""
       };
   
       function TestForm(props) {
@@ -151,12 +149,6 @@ describe("Clone state schema values", () => {
             checkbox3: {
               formElement: formElements.checkbox
             },
-            checkbox4: {
-              formElement: formElements.checkbox
-            },
-            checkbox5: {
-              formElement: formElements.checkbox
-            }
           },
           initialValuesObj
         );
@@ -166,17 +158,13 @@ describe("Clone state schema values", () => {
             {formData.checkbox1.render()}
             {formData.checkbox2.render()}
             {formData.checkbox3.render()}
-            {formData.checkbox4.render()}
-            {formData.checkbox5.render()}
             <button
               onClick={() => {
                 let clonedState = cloneStateValues();
                   expect(clonedState).toEqual({
                     checkbox1: true,
                     checkbox2: false,
-                    checkbox3: "",
-                    checkbox4: "",
-                    checkbox5: ""
+                    checkbox3: false,
                   });
               }}
             >

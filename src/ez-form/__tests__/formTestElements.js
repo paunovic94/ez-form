@@ -2,6 +2,10 @@ import React from "react";
 import ReactSelect from "react-select";
 import { InputTypes } from "../index";
 
+test("Not a test file, just avoiding Jest error", () => {
+  expect(true).toBe(true);
+});
+
 export function formatDate(date) {
   date = new Date(date);
   var monthNames = [
@@ -145,7 +149,6 @@ function Checkbox({
   id = name,
   ...restProps
 }) {
-
   return (
     <div className={`Checkbox ${name}`}>
       {label && <label htmlFor={id}>Label: {label}</label>}
@@ -176,20 +179,21 @@ function RadioGroup({
     <div className={`RadioGroup ${name}`}>
       {groupLabel && <div>Label: {groupLabel}</div>}
       {error && <div>Error: {error}</div>}
-      {options.length && options.map(({ label, value }, idx) => (
-        <div  className={`RadioElement`} key={idx}>
-          <input
-            type="radio"
-            id={name + "_" + idx}
-            name={name}
-            value={value}
-            checked={String(selectedValue) === String(value)}
-            onChange={onChange}
-            disabled={disabled}
-          />
-          <label htmlFor={name + "_" + idx}>{label}</label>
-        </div>
-      ))}
+      {options.length &&
+        options.map(({ label, value }, idx) => (
+          <div className={`RadioElement`} key={idx}>
+            <input
+              type="radio"
+              id={name + "_" + idx}
+              name={name}
+              value={value}
+              checked={String(selectedValue) === String(value)}
+              onChange={onChange}
+              disabled={disabled}
+            />
+            <label htmlFor={name + "_" + idx}>{label}</label>
+          </div>
+        ))}
     </div>
   );
 }

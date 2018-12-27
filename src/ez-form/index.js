@@ -36,14 +36,25 @@ type ValidationRule = {
 };
 
 type FieldMetadata = {
+  name: string,
   defaultValue: string | number | boolean | Array<string> | void,
   formElement: FormElement,
   label: ?Label,
   label2: ?Label,
-  validationRules: ?Array<ValidationRule>
+  validationRules: ?Array<ValidationRule>,
+  useSecondLabel: ?boolean,
+  disabled: ?boolean,
+  isVisible: ?boolean
 };
 
 type Schema = { [string]: FieldMetadata };
+
+type InputType =
+  | "TEXT_INPUT"
+  | "SELECT_INPUT"
+  | "MULTISELECT"
+  | "CHECKBOX"
+  | "RADIOGROUP";
 
 export const InputTypes = {
   TEXT: "TEXT_INPUT",
@@ -53,7 +64,10 @@ export const InputTypes = {
   RADIOGROUP: "RADIOGROUP"
 };
 
-export default function useForm(schema: Schema, schemaValues = {}) {
+export default function useForm(
+  schema: Schema,
+  schemaValues: { [string]: any } = {}
+) {
   let [formState, setFormState] = useState(() =>
     initFormData(schema, schemaValues)
   );
@@ -130,7 +144,7 @@ export default function useForm(schema: Schema, schemaValues = {}) {
     return cloneValues;
   }
 
-  function getSchemaStateValue(fieldName) {
+  function getSchemaStateValue(fieldName: string) {
     if (!fieldName)
       throw new Error("getSchemaStateValue: fieldName param required");
     return formState[fieldName].value;
@@ -206,12 +220,11 @@ function initFormData(schema, schemaValues) {
     } = schema[fieldName];
 
     formData[fieldName] = {
-      value:
-        schemaValues[fieldName] == null
-          ? defaultValue === undefined
-            ? ""
-            : defaultValue
-          : schemaValues[fieldName],
+      value: getInitValue({
+        initValue: schemaValues[fieldName],
+        defaultValue,
+        type: formElement.type
+      }),
       handleInputValueChange: ValueResolvers[formElement.type],
       error: "",
       validationRules,
@@ -222,6 +235,44 @@ function initFormData(schema, schemaValues) {
   });
 
   return formData;
+}
+
+/**
+ * init/defaultValue expected to be either undefined or boolean!
+ *
+ * @param initValue
+ * @param defaultValue
+ * @param type
+ * @return {*}
+ */
+function getInitValue({ initValue, defaultValue, type }) {
+  if (type === InputTypes.CHECKBOX) {
+    if (typeof initValue === "boolean") return initValue;
+    if (initValue !== undefined) {
+      throw new Error(
+        `Checkbox initialization failed. Invalid initValue (${JSON.stringify(
+          initValue
+        )})`
+      );
+    }
+
+    if (typeof defaultValue === "boolean") return defaultValue;
+    if (defaultValue !== undefined) {
+      throw new Error(
+        `Checkbox initialization failed. Invalid defaultValue (${JSON.stringify(
+          defaultValue
+        )})`
+      );
+    }
+
+    return false;
+  }
+
+  return initValue == null
+    ? defaultValue === undefined
+      ? ""
+      : defaultValue
+    : initValue;
 }
 
 function validateField(fieldState, formState) {
