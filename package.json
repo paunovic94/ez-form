@@ -1,31 +1,42 @@
 {
-  "name": "new",
+  "name": "ez-form",
   "version": "1.0.0",
-  "description": "",
-  "keywords": [],
-  "main": "src/index.js",
-  "dependencies": {
-    "eslint-plugin-react-hooks": "0.0.0",
-    "react": "16.7.0-alpha.0 - next",
-    "react-dom": "16.7.0-alpha.0 - next",
-    "react-scripts": "2.0.3",
-    "react-select": "2.1.1",
-    "react-testing-library": "5.2.3"
+  "description": "useForm - custom react hook for handling complex forms",
+  "main": "lib/index.umd.js",
+  "module": "dist/react-lib.esm.js",
+  "sideEffects": false,
+  "browser": "dist/react-lib.umd.js",
+  "scripts": {
+    "test": "jest",
+    "prebuild": "rm -rf ./dist",
+    "build": "rollup -c"
+  },
+  "author": "EZDerm WebDev team",
+  "license": "ISC",
+  "peerDependencies": {
+    "react": "16.7.0-alpha.2",
+    "react-dom": "16.7.0-alpha.2"
   },
   "devDependencies": {
-    "flow-bin": "0.89.0"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject",
-    "flow": "flow"
-  },
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not ie <= 11",
-    "not op_mini all"
-  ]
+    "@babel/cli": "^7.1.5",
+    "@babel/core": "^7.2.2",
+    "@babel/plugin-proposal-class-properties": "^7.1.0",
+    "@babel/preset-env": "^7.1.6",
+    "@babel/preset-flow": "^7.0.0",
+    "@babel/preset-react": "^7.0.0",
+    "babel-core": "^7.0.0-bridge.0",
+    "babel-jest": "^23.6.0",
+    "babel-loader": "^8.0.4",
+    "eslint-plugin-react-hooks": "0.0.0",
+    "flow-bin": "0.89.0",
+    "jest": "^23.6.0",
+    "react": "16.7.0-alpha.2",
+    "react-dom": "16.7.0-alpha.2",
+    "react-select": "^2.2.0",
+    "react-testing-library": "5.4.2",
+    "rollup": "^0.67.3",
+    "rollup-plugin-babel": "^4.0.3",
+    "rollup-plugin-commonjs": "^9.2.0",
+    "rollup-plugin-node-resolve": "^3.4.0"
+  }
 }
