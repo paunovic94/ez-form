@@ -8,7 +8,7 @@
   "browser": "dist/react-lib.umd.js",
   "scripts": {
     "test": "jest",
-    "prebuild": "rm -rf ./dist",
+    "prebuild": "eslint src/index.js && flow && rm -rf ./dist",
     "build": "rollup -c"
   },
   "author": "EZDerm WebDev team",
