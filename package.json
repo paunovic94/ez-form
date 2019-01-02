@@ -9,7 +9,8 @@
   "scripts": {
     "test": "jest",
     "prebuild": "eslint src/index.js && flow && rm -rf ./dist",
-    "build": "rollup -c"
+    "build": "rollup -c",
+    "prepublish": "npm run build"
   },
   "author": "EZDerm WebDev team",
   "license": "ISC",
