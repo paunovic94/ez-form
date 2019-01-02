@@ -1,21 +1,21 @@
 // @flow
-import React, { useState } from "react";
-import type { ComponentType } from "react";
+import React, {useState} from 'react';
+import type {ComponentType} from 'react';
 
 type IntlMessageDescriptor = {
   id: string,
   defaultMessage: string,
-  description: ?string
+  description: ?string,
 };
 
 type IntlMessage = {
   descriptor: IntlMessageDescriptor,
-  values: ?{}
+  values: ?{},
 };
 
 type FormElement = {
   type: string,
-  Component: ComponentType<{ value: any, error: string, onChange: any => void }>
+  Component: ComponentType<{value: any, error: string, onChange: any => void}>,
 };
 
 type Label = string | IntlMessage;
@@ -28,11 +28,11 @@ type ValidationRule = {
     args: {},
     fieldName: string,
     state: {},
-    validationArgs: {}
+    validationArgs: {},
   }) => string,
   message: ?ErrorMessage,
   args: ?{},
-  validateAnotherField: ?string
+  validateAnotherField: ?string,
 };
 
 type FieldMetadata = {
@@ -44,44 +44,44 @@ type FieldMetadata = {
   validationRules: ?Array<ValidationRule>,
   useSecondLabel: ?boolean,
   disabled: ?boolean,
-  isVisible: ?boolean
+  isVisible: ?boolean,
 };
 
-type Schema = { [string]: FieldMetadata };
+type Schema = {[string]: FieldMetadata};
 
 type InputType =
-  | "TEXT_INPUT"
-  | "SELECT_INPUT"
-  | "MULTISELECT"
-  | "CHECKBOX"
-  | "RADIOGROUP";
+  | 'TEXT_INPUT'
+  | 'SELECT_INPUT'
+  | 'MULTISELECT'
+  | 'CHECKBOX'
+  | 'RADIOGROUP';
 
 export const InputTypes = {
-  TEXT: "TEXT_INPUT",
-  SELECT: "SELECT_INPUT",
-  MULTISELECT: "MULTISELECT",
-  CHECKBOX: "CHECKBOX",
-  RADIOGROUP: "RADIOGROUP"
+  TEXT: 'TEXT_INPUT',
+  SELECT: 'SELECT_INPUT',
+  MULTISELECT: 'MULTISELECT',
+  CHECKBOX: 'CHECKBOX',
+  RADIOGROUP: 'RADIOGROUP',
 };
 
 export default function useForm(
   schema: Schema,
-  schemaValues: { [string]: any } = {}
+  schemaValues: {[string]: any} = {}
 ) {
   let [formState, setFormState] = useState(() =>
     initFormData(schema, schemaValues)
   );
 
-  function handleChange({ event, fieldName, onComplete }) {
+  function handleChange({event, fieldName, onComplete}) {
     const fieldState = formState[fieldName];
     const newValue = fieldState.handleInputValueChange(event);
     let changedFiledState = {
       ...fieldState,
-      value: newValue
+      value: newValue,
     };
 
     changedFiledState.error = validateField(changedFiledState, formState);
-    const newFormState = { ...formState, [fieldName]: changedFiledState };
+    const newFormState = {...formState, [fieldName]: changedFiledState};
     setFormState(newFormState);
     checkIfFieldValidateAnotherField(fieldState, newFormState, setFormState);
     onComplete && onComplete(newValue);
@@ -96,13 +96,13 @@ export default function useForm(
 
       const fieldError = validateField(field, formState);
 
-      if (isValid && fieldError !== "") {
+      if (isValid && fieldError !== '') {
         isValid = false;
       }
 
       const newFormSchema = {
         ...formState,
-        [fieldName]: { ...field, error: fieldError }
+        [fieldName]: {...field, error: fieldError},
       };
       setFormState(newFormSchema);
     });
@@ -112,19 +112,19 @@ export default function useForm(
   function prepareForServer() {
     let prepared = {};
     Object.keys(formState).forEach(fieldName => {
-      const { value } = formState[fieldName];
+      const {value} = formState[fieldName];
 
-      if (value === undefined || value === null || value === "") {
+      if (value === undefined || value === null || value === '') {
         prepared[fieldName] = null;
       } else {
         if (
           value &&
-          typeof value === "object" &&
-          value.hasOwnProperty("value")
+          typeof value === 'object' &&
+          value.hasOwnProperty('value')
         ) {
           // select
           prepared[fieldName] = value.value;
-        } else if (typeof value === "string") {
+        } else if (typeof value === 'string') {
           // text input
           prepared[fieldName] = value;
         } else {
@@ -138,7 +138,7 @@ export default function useForm(
   function cloneStateValues() {
     let cloneValues = {};
     Object.keys(formState).forEach(fieldName => {
-      const { value } = formState[fieldName];
+      const {value} = formState[fieldName];
       cloneValues[fieldName] = value;
     });
     return cloneValues;
@@ -146,13 +146,13 @@ export default function useForm(
 
   function getSchemaStateValue(fieldName: string) {
     if (!fieldName)
-      throw new Error("getSchemaStateValue: fieldName param required");
+      throw new Error('getSchemaStateValue: fieldName param required');
     return formState[fieldName].value;
   }
 
   let formData = {};
   Object.keys(schema).forEach(fieldName => {
-    const { formElement, name, label, label2 } = schema[fieldName];
+    const {formElement, name, label, label2} = schema[fieldName];
     formData[fieldName] = {
       render: ({
         useSecondLabel,
@@ -161,7 +161,7 @@ export default function useForm(
         ...additionalProps
       } = {}) => {
         if (
-          typeof isVisible === "boolean" &&
+          typeof isVisible === 'boolean' &&
           isVisible !== formState[fieldName].isVisible
         ) {
           setFormState({
@@ -169,8 +169,8 @@ export default function useForm(
             [fieldName]: {
               ...formState[fieldName],
               isVisible: isVisible,
-              error: ""
-            }
+              error: '',
+            },
           });
         }
 
@@ -187,13 +187,13 @@ export default function useForm(
                 handleChange({
                   event,
                   fieldName,
-                  onComplete: additionalProps.onChange
+                  onComplete: additionalProps.onChange,
                 });
               }}
             />
           )
         );
-      }
+      },
     };
   });
 
@@ -202,7 +202,7 @@ export default function useForm(
     validate,
     prepareForServer,
     cloneStateValues,
-    getSchemaStateValue
+    getSchemaStateValue,
   };
 }
 
@@ -216,21 +216,21 @@ function initFormData(schema, schemaValues) {
       validationRules = [],
       isVisible = true,
       disabled = false,
-      useSecondLabel = false
+      useSecondLabel = false,
     } = schema[fieldName];
 
     formData[fieldName] = {
       value: getInitValue({
         initValue: schemaValues[fieldName],
         defaultValue,
-        type: formElement.type
+        type: formElement.type,
       }),
       handleInputValueChange: ValueResolvers[formElement.type],
-      error: "",
+      error: '',
       validationRules,
       isVisible,
       disabled,
-      useSecondLabel
+      useSecondLabel,
     };
   });
 
@@ -245,9 +245,9 @@ function initFormData(schema, schemaValues) {
  * @param type
  * @return {*}
  */
-function getInitValue({ initValue, defaultValue, type }) {
+function getInitValue({initValue, defaultValue, type}) {
   if (type === InputTypes.CHECKBOX) {
-    if (typeof initValue === "boolean") return initValue;
+    if (typeof initValue === 'boolean') return initValue;
     if (initValue !== undefined) {
       throw new Error(
         `Checkbox initialization failed. Invalid initValue (${JSON.stringify(
@@ -256,7 +256,7 @@ function getInitValue({ initValue, defaultValue, type }) {
       );
     }
 
-    if (typeof defaultValue === "boolean") return defaultValue;
+    if (typeof defaultValue === 'boolean') return defaultValue;
     if (defaultValue !== undefined) {
       throw new Error(
         `Checkbox initialization failed. Invalid defaultValue (${JSON.stringify(
@@ -270,14 +270,14 @@ function getInitValue({ initValue, defaultValue, type }) {
 
   return initValue == null
     ? defaultValue === undefined
-      ? ""
+      ? ''
       : defaultValue
     : initValue;
 }
 
 function validateField(fieldState, formState) {
   for (let rule of fieldState.validationRules) {
-    if (rule.validateAnotherField) return "";
+    if (rule.validateAnotherField) return '';
     if (rule.args && rule.args.dependencyFieldName) {
       rule.args.dependencyFieldValue =
         formState[rule.args.dependencyFieldName].value;
@@ -285,11 +285,11 @@ function validateField(fieldState, formState) {
     let error = rule.fn({
       value: fieldState.value,
       args: rule.args,
-      message: rule.message
+      message: rule.message,
     });
     if (error) return error;
   }
-  return "";
+  return '';
 }
 
 function checkIfFieldValidateAnotherField(
@@ -303,7 +303,7 @@ function checkIfFieldValidateAnotherField(
       const error = validateField(newFormState[anotherFieldName], newFormState);
       setFormState({
         ...newFormState,
-        [anotherFieldName]: { ...newFormState[anotherFieldName], error: error }
+        [anotherFieldName]: {...newFormState[anotherFieldName], error: error},
       });
     }
   }
@@ -314,5 +314,5 @@ const ValueResolvers = {
   [InputTypes.SELECT]: event => event,
   [InputTypes.MULTISELECT]: event => event,
   [InputTypes.CHECKBOX]: event => event.target.checked,
-  [InputTypes.RADIOGROUP]: event => event.target.checked
+  [InputTypes.RADIOGROUP]: event => event.target.checked,
 };
