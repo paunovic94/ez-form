@@ -1,6 +1,7 @@
 {
-  "name": "ez-form",
+  "name": "@ezderm/ez-form",
   "version": "1.0.0",
+  "private": false,
   "description": "useForm - custom react hook for handling complex forms",
   "main": "lib/index.umd.js",
   "module": "dist/react-lib.esm.js",

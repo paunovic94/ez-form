@@ -52,3 +52,6 @@ Form utils
 	* setSchemaStateValue.test
 	* getSchemaStateValue.test
 	* cloneStateValues.test
+
+
+	* npm publish --access public
