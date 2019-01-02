@@ -45,6 +45,7 @@ jspm_packages
 
 # Build directory
 build
+dist
 
 # Jetbrains Utils files
 .idea
