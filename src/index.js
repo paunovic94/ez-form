@@ -35,9 +35,13 @@ type ValidationRule = {
   validateAnotherField: ?string,
 };
 
+type SelectValue = string | {value: string | number , label: string} | null;
+
+type SchemaValue = string | number | boolean | Array<string> | SelectValue | void;
+
 type FieldMetadata = {
   name: string,
-  defaultValue: string | number | boolean | Array<string> | void,
+  defaultValue: SchemaValue,
   formElement: FormElement,
   label: ?Label,
   label2: ?Label,
@@ -49,12 +53,19 @@ type FieldMetadata = {
 
 type Schema = {[string]: FieldMetadata};
 
-type InputType =
-  | 'TEXT_INPUT'
-  | 'SELECT_INPUT'
-  | 'MULTISELECT'
-  | 'CHECKBOX'
-  | 'RADIOGROUP';
+// type InputType =
+//   | 'TEXT_INPUT'
+//   | 'SELECT_INPUT'
+//   | 'MULTISELECT'
+//   | 'CHECKBOX'
+//   | 'RADIOGROUP';
+
+type SetSchemaStateArgs = {
+  fullFieldName: string,
+  newValue: SchemaValue,
+  skipValidation: boolean,
+  onComplete: Function,
+};
 
 export const InputTypes = {
   TEXT: 'TEXT_INPUT',
@@ -84,6 +95,38 @@ export default function useForm(
     const newFormState = {...formState, [fieldName]: changedFiledState};
     setFormState(newFormState);
     checkIfFieldValidateAnotherField(fieldState, newFormState, setFormState);
+    onComplete && onComplete(newValue);
+  }
+
+  function setSchemaStateValue({
+    fullFieldName,
+    newValue,
+    skipValidation = false,
+    onComplete,
+  }: SetSchemaStateArgs) {
+    if (!fullFieldName)
+      throw new Error('setSchemaStateValue: fullFieldName param required');
+
+    setFormState(prevState => {
+      const fieldState = prevState[fullFieldName];
+      let changedFiledState = {
+        ...fieldState,
+        value: newValue,
+      };
+      if (!skipValidation) {
+        changedFiledState.error = validateField(changedFiledState, formState);
+      }
+      const newFormState = {...formState, [fullFieldName]: changedFiledState};
+      if (!skipValidation) {
+        checkIfFieldValidateAnotherField(
+          fieldState,
+          newFormState,
+          setFormState
+        );
+      }
+
+      return {...prevState, [fullFieldName]: changedFiledState};
+    });
     onComplete && onComplete(newValue);
   }
 
@@ -203,6 +246,7 @@ export default function useForm(
     prepareForServer,
     cloneStateValues,
     getSchemaStateValue,
+    setSchemaStateValue,
   };
 }
 

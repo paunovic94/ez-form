@@ -11,9 +11,10 @@ import {
 } from "react-testing-library";
 import useForm from "../index";
 import formElements, {formatDate} from "./formTestElements";
+import {isMaxLength, isName} from "./validation.test";
 
 describe("Set schema state value", () => {
-    test.skip("Set schema state value without validation", async () => {
+    test("Set schema state value without validation", async () => {
       function TestForm() {
         const { formData, setSchemaStateValue } = useForm({
           testInputText1: {
@@ -49,7 +50,7 @@ describe("Set schema state value", () => {
         );
       }
   
-      const { container, getByText, getByValue, getByLabelText } = render(
+      const { container, getByText, getByValue, getByLabelText, queryByText } = render(
         <TestForm />
       );
   
@@ -65,7 +66,7 @@ describe("Set schema state value", () => {
       expect(queryByText("Error: Max length is 3")).toBeNull();
     });
   
-    test.skip("Set schema state select value ", async () => {
+    test("Set schema state select value ", async () => {
       function TestForm() {
         const { formData, setSchemaStateValue } = useForm({
           testSelect: {
@@ -93,18 +94,16 @@ describe("Set schema state value", () => {
         );
       }
   
-      const { container, getByText, getByValue, getByLabelText } = render(
+      const { container, getByText, getByValue, getByLabelText, queryByText } = render(
         <TestForm />
       );
       expect(container.querySelector("input").value).toBe("");
   
       fireEvent.click(getByText("Set schema test value"));
-      let selectInput = await waitForElement(() => getByValue("Test"), container);
-  
-      expect(selectInput.value).toBe("Test");
+      await wait(() => expect(queryByText("Test")).toBeTruthy(), container);
     });
   
-    test.skip("Set schema state value with validation", async () => {
+    test("Set schema state value with validation", async () => {
       function TestForm() {
         const { formData, setSchemaStateValue } = useForm({
           testInputText1: {
@@ -135,6 +134,7 @@ describe("Set schema state value", () => {
         return (
           <div>
             {formData.testInputText1.render()}
+            {formData.testInputText2.render()}
             <button
               onClick={() => {
                 setSchemaStateValue({
@@ -179,7 +179,7 @@ describe("Set schema state value", () => {
       // should we validate another field?
     });
   
-    test.skip("Set schema state value with callback onComplete", async () => {
+    test("Set schema state value with callback onComplete", async () => {
       let onCompleteMock = jest.fn();
   
       function TestForm() {
