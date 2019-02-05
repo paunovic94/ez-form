@@ -57,14 +57,14 @@ describe("Update form data on input change", () => {
       return (
         <div>
           {formData.testSelect1.render({
-            options: [
+            selectOptions: [
               { value: "option-default", label: "Test Default 1" },
               { value: "option-1", label: "Test 1" }
             ],
             onChangeTestValue: { value: "option-1", label: "Test 1" }
           })}
           {formData.testSelect2.render({
-            options: [{ value: "option-default", label: "Test Default 2" }],
+            selectOptions: [{ value: "option-default", label: "Test Default 2" }],
             onChangeTestValue: null
           })}
         </div>
@@ -105,7 +105,7 @@ describe("Update form data on input change", () => {
       return (
         <div>
           {formData.testSelectMulti1.render({
-            options: [
+            selectOptions: [
               { value: "test-select1", label: "Test Select1" },
               { value: "test-select2", label: "Test Select2" }
             ],
@@ -115,7 +115,7 @@ describe("Update form data on input change", () => {
             ]
           })}
           {formData.testSelectMulti2.render({
-            options: [
+            selectOptions: [
               { value: "multi-select-to-remove", label: "Test Remove" }
             ],
             onChangeTestValue: []

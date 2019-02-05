@@ -72,7 +72,7 @@ describe("Test render additional options", () => {
           {formData.testInputText2.render({ disabled: false })}
           {formData.testInputText3.render()}
           {formData.testSelect.render({
-            options: [{ value: "test-select", label: "Test Select" }],
+            selectOptions: [{ value: "test-select", label: "Test Select" }],
             disabled: false
           })}
         </div>
@@ -136,7 +136,7 @@ describe("Test render additional options", () => {
       return (
         <div>
           {formData.testSelect.render({
-            options: [
+            selectOptions: [
               {
                 value: "test-select",
                 label: "Test Select"
@@ -145,7 +145,7 @@ describe("Test render additional options", () => {
             onInputChange: handleInputChangeMock
           })}
           {formData.testMultiSelect.render({
-            options: [
+            selectOptions: [
               {
                 value: "test-select-multi",
                 label: "Test Select Multi"
@@ -194,7 +194,7 @@ describe("Test render additional options", () => {
       return (
         <div>
           {formData.testSelect.render({
-            options: [
+            selectOptions: [
               {
                 value: "test-select",
                 label: "Test Select"
@@ -204,7 +204,7 @@ describe("Test render additional options", () => {
             onChange: handleChangeOptionMock
           })}
           {formData.testMultiSelect.render({
-            options: [
+            selectOptions: [
               {
                 value: "test-multi",
                 label: "Test multi select"

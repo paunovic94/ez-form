@@ -50,10 +50,10 @@ describe("init default value from schema", () => {
       return (
         <div>
           {formData.testSelectStringValue.render({
-            options: [{ value: "test-select", label: "Test Select" }]
+            selectOptions: [{ value: "test-select", label: "Test Select" }]
           })}
           {formData.testSelectObjectValue.render({
-            options: [{ value: "test-select", label: "Test Select" }]
+            selectOptions: [{ value: "test-select", label: "Test Select" }]
           })}
         </div>
       );
@@ -84,13 +84,13 @@ describe("init default value from schema", () => {
       return (
         <div>
           {formData.testSelectMulti.render({
-            options: [
+            selectOptions: [
               { value: "test-select1", label: "Test Select1" },
               { value: "test-select2", label: "Test Select2" }
             ]
           })}
           {formData.testSelectMultiString.render({
-            options: [
+            selectOptions: [
               { value: "string-value1", label: "string-value1" },
               { value: "string-value2", label: "string-value2" }
             ]
@@ -430,10 +430,10 @@ describe("Init value in schema with second arg in useForm", () => {
       return (
         <div>
           {formData.testSelectStringValue.render({
-            options: [{ value: "test-select", label: "Test Select Init 1" }]
+            selectOptions: [{ value: "test-select", label: "Test Select Init 1" }]
           })}
           {formData.testSelectObjectValue.render({
-            options: [{ value: "test-select", label: "Test Select Init 2" }]
+            selectOptions: [{ value: "test-select", label: "Test Select Init 2" }]
           })}
         </div>
       );
@@ -445,7 +445,7 @@ describe("Init value in schema with second arg in useForm", () => {
     expect(queryByText("Test Select Init 2")).toBeTruthy();
   });
 
-  test("Select - init with value that isn't in options ", () => {
+  test("Select - init with value that isn't in selectOptions ", () => {
     function TestForm(props) {
       const { formData, validate, prepareForServer } = useForm(
         {
@@ -467,10 +467,10 @@ describe("Init value in schema with second arg in useForm", () => {
       return (
         <div>
           {formData.testSelect1.render({
-            options: []
+            selectOptions: []
           })}
           {formData.testSelect2.render({
-            options: []
+            selectOptions: []
           })}
         </div>
       );
@@ -502,7 +502,7 @@ describe("Init value in schema with second arg in useForm", () => {
       return (
         <div>
           {formData.testSelectMulti1.render({
-            options: [
+            selectOptions: [
               { value: "test-select1", label: "Test Select1" },
               { value: "test-select2", label: "Test Select2" }
             ]
@@ -528,7 +528,7 @@ describe("Init value in schema with second arg in useForm", () => {
         },
         {
           testSelectMulti1: [
-            { value: "not-extist", label: "Not exist in options" }
+            { value: "not-extist", label: "Not exist in selectOptions" }
           ]
         }
       );
@@ -536,7 +536,7 @@ describe("Init value in schema with second arg in useForm", () => {
       return (
         <div>
           {formData.testSelectMulti1.render({
-            options: []
+            selectOptions: []
           })}
         </div>
       );
@@ -544,7 +544,7 @@ describe("Init value in schema with second arg in useForm", () => {
 
     const { container, queryByText } = render(<TestForm />);
 
-    expect(queryByText("Not exist in options")).toBeTruthy();
+    expect(queryByText("Not exist in selectOptions")).toBeTruthy();
   });
 
   test("Multi Select - init with [] with string", () => {
@@ -561,18 +561,18 @@ describe("Init value in schema with second arg in useForm", () => {
           }
         },
         {
-          testSelectMulti1: ["Not extist in options"],
-          testSelectMulti2: ["Exist in options"]
+          testSelectMulti1: ["Not extist in selectOptions"],
+          testSelectMulti2: ["Exist in selectOptions"]
         }
       );
 
       return (
         <div>
           {formData.testSelectMulti1.render({
-            options: []
+            selectOptions: []
           })}
           {formData.testSelectMulti2.render({
-            options: [{ value: "Exist in options", label: "Exist in options" }]
+            selectOptions: [{ value: "Exist in options", label: "Exist in options" }]
           })}
         </div>
       );

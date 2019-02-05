@@ -125,16 +125,16 @@ describe("Prepare for server", () => {
       return (
         <div>
           {formData.testSelectString.render({
-            options: [
+            selectOptions: [
               { value: "testSelectString", label: "Test Select String" }
             ]
           })}
           {formData.testSelectString2.render()}
           {formData.testSelectObj1.render({
-            options: [{ value: "test-select-obj", label: "Test Select Object" }]
+            selectOptions: [{ value: "test-select-obj", label: "Test Select Object" }]
           })}
           {formData.testSelectObj2.render({
-            options: [
+            selectOptions: [
               {
                 value: {},
                 label: "Test Select Nested Obj"
@@ -142,7 +142,7 @@ describe("Prepare for server", () => {
             ]
           })}
           {formData.testSelectObj3.render({
-            options: []
+            selectOptions: []
           })}
           <button
             onClick={() => {
@@ -259,14 +259,14 @@ describe("Prepare for server", () => {
       return (
         <div>
           {formData.testMultiSelect1.render({
-            options: [
+            selectOptions: [
               { value: "multi-select1", label: "Test Multi Select1" },
               { value: "multi-select2", label: "Test Multi Select2" }
             ]
           })}
           {formData.testMultiSelect2.render()}
           {formData.testMultiSelect3.render({
-            options: [
+            selectOptions: [
               { value: "multi-select1", label: "Test Multi Select1" },
               { value: "multi-select2", label: "Test Multi Select2" }
             ]

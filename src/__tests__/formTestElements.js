@@ -78,7 +78,7 @@ function Select({
   label,
   error,
   value,
-  options,
+  selectOptions,
   onChange,
   onChangeTestValue,
   disabled,
@@ -86,8 +86,8 @@ function Select({
   name,
   ...restProps
 }) {
-  if (typeof value === "string" && options) {
-    value = options.find(option => option.value === value);
+  if (typeof value === "string" && selectOptions) {
+    value = selectOptions.find(option => option.value === value);
   }
 
   return (
@@ -99,7 +99,7 @@ function Select({
       {error && <div>Error: {error}</div>}
       <ReactSelect
         value={value}
-        options={options}
+        options={selectOptions}
         onChange={onChange}
         isDisabled={disabled}
         onInputChange={onInputChange}
@@ -112,7 +112,7 @@ function MultiSelect({
   label,
   error,
   value,
-  options,
+  selectOptions,
   onChange,
   onChangeTestValue,
   disabled,
@@ -129,7 +129,7 @@ function MultiSelect({
       {error && <div>Error: {error}</div>}
       <ReactSelect
         value={value}
-        options={options}
+        options={selectOptions}
         onChange={onChange}
         isDisabled={disabled}
         onInputChange={onInputChange}

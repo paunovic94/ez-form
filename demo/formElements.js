@@ -20,16 +20,16 @@ function TextInput({ label, error, fontSize, ...restProps }) {
   );
 }
 
-function Select({ label, error, value, options, ...restProps }) {
+function Select({ label, error, value, selectOptions, ...restProps }) {
   if (typeof value === "string") {
-    value = options.find(option => option.value === value);
+    value = selectOptions.find(option => option.value === value);
   }
 
   return (
     <div className="TestSelect">
       {label && <div>Label: {label}</div>}
       {error && <div>Error: {error}</div>}
-      <ReactSelect value={value} options={options} {...restProps} />
+      <ReactSelect value={value} options={selectOptions} {...restProps} />
     </div>
   );
 }

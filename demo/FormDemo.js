@@ -41,7 +41,7 @@ export default function FormDemo() {
       <div>{formData.lastName.render({ fontSize: 11 })}</div>
       <div>
         {formData.country.render({
-          options: [
+          selectOptions: [
             { value: "SERBIA", label: "Serbia" },
             { value: "GREECE", label: "Greece" }
           ]
