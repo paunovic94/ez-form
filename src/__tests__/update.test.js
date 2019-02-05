@@ -4,7 +4,7 @@ import {
   cleanup,
   fireEvent,
   waitForElement,
-  wait
+  wait,
 } from "react-testing-library";
 import useForm from "../index";
 import formElements from "./formTestElements";
@@ -188,5 +188,30 @@ describe("Update form data on input change", () => {
         container
       }
     );
+  });
+
+  test("Text Area", async () => {
+    function TestForm() {
+      const { formData } = useForm({
+        testAreaText1: {
+          formElement: formElements.textArea
+        },
+      });
+
+      return (
+        <div>
+          {formData.testAreaText1.render()}
+        </div>
+      );
+    }
+
+    const { container, getByText, debug } = render(<TestForm />);
+    const [textarea1] = container.querySelectorAll('textarea');
+
+    textarea1.innerHTML = 'test1';
+
+    await waitForElement(() => [getByText('test1'), ], {
+      container
+    });
   });
 });

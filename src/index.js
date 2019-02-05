@@ -35,9 +35,15 @@ type ValidationRule = {
   validateAnotherField: ?string,
 };
 
-type SelectValue = string | {value: string | number , label: string} | null;
+type SelectValue = string | {value: string | number, label: string} | null;
 
-type SchemaValue = string | number | boolean | Array<string> | SelectValue | void;
+type SchemaValue =
+  | string
+  | number
+  | boolean
+  | Array<string>
+  | SelectValue
+  | void;
 
 type FieldMetadata = {
   name: string,
@@ -59,6 +65,7 @@ type Schema = {[string]: FieldMetadata};
 //   | 'MULTISELECT'
 //   | 'CHECKBOX'
 //   | 'RADIOGROUP';
+//   | 'TEXT_AREA
 
 type SetSchemaStateArgs = {
   fullFieldName: string,
@@ -73,6 +80,7 @@ export const InputTypes = {
   MULTISELECT: 'MULTISELECT',
   CHECKBOX: 'CHECKBOX',
   RADIOGROUP: 'RADIOGROUP',
+  TEXTAREA: 'TEXT_AREA',
 };
 
 export default function useForm(
@@ -262,7 +270,6 @@ function initFormData(schema, schemaValues) {
       disabled = false,
       useSecondLabel = false,
     } = schema[fieldName];
-
     formData[fieldName] = {
       value: getInitValue({
         initValue: schemaValues[fieldName],
@@ -359,4 +366,5 @@ const ValueResolvers = {
   [InputTypes.MULTISELECT]: event => event,
   [InputTypes.CHECKBOX]: event => event.target.checked,
   [InputTypes.RADIOGROUP]: event => event.target.checked,
+  [InputTypes.TEXTAREA]: event => event.target.value,
 };

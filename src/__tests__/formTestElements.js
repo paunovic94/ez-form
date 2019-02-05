@@ -1,33 +1,33 @@
-import React from "react";
-import ReactSelect from "react-select";
-import { InputTypes } from "../index";
+import React from 'react';
+import ReactSelect from 'react-select';
+import {InputTypes} from '../index';
 
-test("Not a test file, just avoiding Jest error", () => {
+test('Not a test file, just avoiding Jest error', () => {
   expect(true).toBe(true);
 });
 
 export function formatDate(date) {
   date = new Date(date);
   var monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December"
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
 
   var day = date.getDate();
   var monthIndex = date.getMonth();
   var year = date.getFullYear();
 
-  return day + " " + monthNames[monthIndex] + " " + year;
+  return day + ' ' + monthNames[monthIndex] + ' ' + year;
 }
 
 function TextInput({
@@ -40,12 +40,12 @@ function TextInput({
   disabled,
   ...restProps
 }) {
-  label = typeof label === "object" ? label.descriptor.defaultMessage : label;
-  error = typeof error === "object" ? error.descriptor.defaultMessage : error;
+  label = typeof label === 'object' ? label.descriptor.defaultMessage : label;
+  error = typeof error === 'object' ? error.descriptor.defaultMessage : error;
 
   if (
     name &&
-    name.toLowerCase().includes("date") &&
+    name.toLowerCase().includes('date') &&
     !isNaN(Date.parse(value))
   ) {
     value = formatDate(value);
@@ -65,8 +65,8 @@ function TextInput({
         value={value}
         onChange={onChange}
         style={{
-          background: error ? "coral" : "white",
-          fontSize: fontSize || 16
+          background: error ? 'coral' : 'white',
+          fontSize: fontSize || 16,
         }}
         disabled={disabled}
       />
@@ -86,15 +86,14 @@ function Select({
   name,
   ...restProps
 }) {
-  if (typeof value === "string" && selectOptions) {
+  if (typeof value === 'string' && selectOptions) {
     value = selectOptions.find(option => option.value === value);
   }
 
   return (
     <div
       className={`TestSelect ${name}`}
-      onClick={e => onChange(onChangeTestValue)}
-    >
+      onClick={e => onChange(onChangeTestValue)}>
       {label && <div>Label: {label}</div>}
       {error && <div>Error: {error}</div>}
       <ReactSelect
@@ -123,8 +122,7 @@ function MultiSelect({
   return (
     <div
       className={`TestMultiSelect ${name}`}
-      onClick={e => onChange(onChangeTestValue)}
-    >
+      onClick={e => onChange(onChangeTestValue)}>
       {label && <div>Label: {label}</div>}
       {error && <div>Error: {error}</div>}
       <ReactSelect
@@ -173,37 +171,88 @@ function RadioGroup({
   disabled,
   name,
   id = name,
-  options = []
+  options = [],
 }) {
   return (
     <div className={`RadioGroup ${name}`}>
       {groupLabel && <div>Label: {groupLabel}</div>}
       {error && <div>Error: {error}</div>}
       {options.length &&
-        options.map(({ label, value }, idx) => (
+        options.map(({label, value}, idx) => (
           <div className={`RadioElement`} key={idx}>
             <input
               type="radio"
-              id={name + "_" + idx}
+              id={name + '_' + idx}
               name={name}
               value={value}
               checked={String(selectedValue) === String(value)}
               onChange={onChange}
               disabled={disabled}
             />
-            <label htmlFor={name + "_" + idx}>{label}</label>
+            <label htmlFor={name + '_' + idx}>{label}</label>
           </div>
         ))}
     </div>
   );
 }
 
+function TextArea({
+  name,
+  id = name,
+  label,
+  value,
+  disabled = false,
+  readOnly = false,
+  error,
+  onChange,
+  className,
+  appendTextOnFocus,
+  onFocus,
+  ...restProps
+}) {
+  label = typeof label === 'object' ? label.descriptor.defaultMessage : label;
+  error = typeof error === 'object' ? error.descriptor.defaultMessage : error;
+  return (
+    <div className={`TestTextInput ${name}`}>
+      {label && (
+        <label htmlFor={id} className="Label">
+          Label: {label}
+        </label>
+      )}
+      {error && <div className="Error">Error: {error}</div>}
+      <textarea
+        id={id}
+        className={className}
+        name={name}
+        placeholder=""
+        value={value}
+        title={error}
+        readOnly={readOnly}
+        onChange={onChange}
+        style={{
+          background: error ? 'coral' : 'white',
+          fontSize: 16,
+        }}
+        disabled={disabled}
+        onFocus={(e) => {
+          if (typeof appendTextOnFocus === 'function' && onChange) {
+            appendTextOnFocus();
+            onChange(e);
+          }
+          onFocus && onFocus(e);
+        }}
+      />
+    </div>
+  );
+}
+
 let formElements = {
-  textInput: { type: InputTypes.TEXT, Component: TextInput },
-  select: { type: InputTypes.SELECT, Component: Select },
-  multiSelect: { type: InputTypes.MULTISELECT, Component: MultiSelect },
-  checkbox: { type: InputTypes.CHECKBOX, Component: Checkbox },
-  radioGroup: { type: InputTypes.RADIOGROUP, Component: RadioGroup }
+  textInput: {type: InputTypes.TEXT, Component: TextInput},
+  select: {type: InputTypes.SELECT, Component: Select},
+  multiSelect: {type: InputTypes.MULTISELECT, Component: MultiSelect},
+  checkbox: {type: InputTypes.CHECKBOX, Component: Checkbox},
+  radioGroup: {type: InputTypes.RADIOGROUP, Component: RadioGroup},
+  textArea: {type: InputTypes.TEXTAREA, Component: TextArea},
 };
 
 export default formElements;
