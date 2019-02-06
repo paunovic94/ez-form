@@ -219,7 +219,7 @@ describe('Prepare for server', () => {
     });
   });
 
-  test.skip('Multi select', () => {
+  test('Multi select', () => {
     let onSubmitMock = jest.fn();
 
     function TestForm() {

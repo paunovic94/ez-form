@@ -164,7 +164,6 @@ export default function useForm(
     let prepared = {};
     Object.keys(formState).forEach(fieldName => {
       const {value} = formState[fieldName];
-
       if (value === undefined || value === null || value === '') {
         prepared[fieldName] = null;
       } else {
@@ -175,7 +174,12 @@ export default function useForm(
         ) {
           // select
           prepared[fieldName] = value.value;
-        } else if (typeof value === 'string') {
+        } else if(Array.isArray(value)){
+          prepared[fieldName] = value.map(item =>
+            item && typeof item === 'object' ? item.value : item
+          );
+        }
+        else if (typeof value === 'string') {
           // text input
           prepared[fieldName] = value;
         } else {

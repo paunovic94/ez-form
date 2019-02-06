@@ -63,17 +63,17 @@ describe('Get schema state value', () => {
     function TestForm(props) {
       const {formData, getSchemaStateValue} = useForm({
         testSelectString: {
-          formElement: formElements.textInput,
+          formElement: formElements.select,
           defaultValue: 'Test Select',
           name: 'testSelectString',
         },
         testSelectObj: {
-          formElement: formElements.textInput,
+          formElement: formElements.select,
           defaultValue: {value: 'test-select', label: 'Test Select'},
           name: 'testSelectObj',
         },
         testSelectMulti: {
-          formElement: formElements.textInput,
+          formElement: formElements.multiSelect,
           defaultValue: [{value: 'test-multi', label: 'Test Select Multi'}],
           name: 'testSelectMulti',
         },
