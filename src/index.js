@@ -22,14 +22,15 @@ type Label = string | IntlMessage;
 type ErrorMessage = string | IntlMessage;
 
 type ValidationRule = {
-  fn: ({
+  fn: (
     value: string,
     message: IntlMessage,
     args: {},
-    fieldName: string,
     state: {},
+    _props: {},
+    fieldName: string,
     validationArgs: {},
-  }) => string,
+  ) => string,
   message: ?ErrorMessage,
   args: ?{},
   validateAnotherField: ?string,
@@ -228,7 +229,7 @@ export default function useForm(
             },
           });
         }
-
+        
         return (
           formState[fieldName].isVisible && (
             <formElement.Component
@@ -337,11 +338,11 @@ function validateField(fieldState, formState) {
       rule.args.dependencyFieldValue =
         formState[rule.args.dependencyFieldName].value;
     }
-    let error = rule.fn({
-      value: fieldState.value,
-      args: rule.args,
-      message: rule.message,
-    });
+    let error = rule.fn(
+      fieldState.value,
+      rule.message,
+      rule.args,
+    );
     if (error) return error;
   }
   return '';

@@ -12,27 +12,27 @@ import {
 import useForm from "../index";
 import formElements, {formatDate} from "./formTestElements";
 
-function isRequired({ value, message }) {
+function isRequired( value, message, args ) {
   if (!value) {
     return message || "Is required default";
   }
   return "";
 }
 
-export function isName({ value, message }) {
+export function isName( value, message, args) {
   if (value && !/^[a-zA-Z]*$/.test(value)) {
     return message || "Is name default";
   }
   return "";
 }
 
-export function isMaxLength({ value, args = {} }) {
+export function isMaxLength( value, message, args = {}) {
   if (value && value.length > args.maxLength) {
     return "Max length is " + args.maxLength;
   }
 }
 
-function isStartDateBeforeEndDate({ value, args, message }) {
+function isStartDateBeforeEndDate( value, message, args ) {
   let endDate = args.dependencyFieldValue;
   if (!endDate) return;
 
@@ -45,7 +45,7 @@ function isStartDateBeforeEndDate({ value, args, message }) {
   }
 }
 
-function isEndDateBeforeStartDate({ value, args, message }) {
+function isEndDateBeforeStartDate( value,message, args) {
   let startDate = args.dependencyFieldValue;
   if (!startDate) return;
 
@@ -88,7 +88,6 @@ describe("Validate form data on input change", () => {
           ]
         }
       });
-
       return (
         <div>
           {formData.testInputText1.render()}
