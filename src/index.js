@@ -152,11 +152,12 @@ export default function useForm(
         isValid = false;
       }
 
-      const newFormSchema = {
-        ...formState,
-        [fieldName]: {...field, error: fieldError},
-      };
-      setFormState(newFormSchema);
+      setFormState(prevFormState => {
+        return {
+          ...prevFormState,
+          [fieldName]: {...field, error: fieldError},
+        };
+      });
     });
     return isValid;
   }
