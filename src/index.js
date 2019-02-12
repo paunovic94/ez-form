@@ -374,5 +374,5 @@ const ValueResolvers = {
   [InputTypes.CHECKBOX]: event => event.target.checked,
   [InputTypes.RADIOGROUP]: event => event.target.checked,
   [InputTypes.TEXTAREA]: event => event.target.value,
-  [InputTypes.DATEPICKER]: event => event.target.value,
+  [InputTypes.DATEPICKER]: event => event.currentTarget.value,
 };
