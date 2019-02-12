@@ -76,7 +76,7 @@ type SetSchemaStateArgs = {
 };
 
 type SetSchemaStateValueBulkArgs = {
-  valuesMap: object,
+  valuesMap: {[string]: SchemaValue},
   skipValidation: boolean,
   onComplete: Function,
 }
