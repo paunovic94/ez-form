@@ -11,8 +11,10 @@ import {
 } from 'react-testing-library';
 import useForm from '../index';
 import formElements, {formatDate} from './formTestElements';
-import {isMaxLength, isName} from './validation.test';
+import {isMaxLength, isName, isRequired} from './validation.test';
 
+afterEach(cleanup);
+ 
 describe('Set schema state value', () => {
   test('Set schema state value without validation', async () => {
     function TestForm() {
@@ -225,7 +227,7 @@ describe('Set schema state value', () => {
     expect(onCompleteMock).toHaveBeenCalled();
   });
 
-  test.skip('Set schema state value bulk', async () => {
+  test('Set schema state value bulk', async () => {
     function TestForm() {
       const {formData, setSchemaStateValueBulk} = useForm({
         testInputText1: {
@@ -238,16 +240,30 @@ describe('Set schema state value', () => {
           name: 'testInputText2',
           label: 'testInputText2',
         },
+        select1: {
+          formElement: formElements.select,
+          name: 'select1',
+          label: 'select1',
+        }
       });
 
       return (
         <div>
           {formData.testInputText1.render()}
+          {formData.testInputText2.render()}
+          {formData.select1.render()}
           <button
             onClick={() => {
               setSchemaStateValueBulk({
-                testInputText1: 'Test 1',
-                testInputText1: 'Test 2',
+                valuesMap: {
+                  testInputText1: 'Test 1',
+                  testInputText2: 'Test 2',
+                  select1:{
+                    value: "select_val",
+                    label: "select_label"
+                  }
+                },
+                skipValidation: true,
               });
             }}>
             Set schema test value
@@ -262,13 +278,115 @@ describe('Set schema state value', () => {
 
     expect(getByLabelText('Label: testInputText1').value).toBe('');
     expect(getByLabelText('Label: testInputText2').value).toBe('');
+    expect(container.querySelector('.TestSelect input').value).toBe('');
 
     fireEvent.click(getByText('Set schema test value'));
 
     await waitForElement(
-      () => [getByValue('Test 1'), getByValue('Test 2')],
+      () => [getByValue('Test 1'), getByValue('Test 2'), getByText('select_label')],
       container
     );
+  });
+
+  test('Set schema state value bulk with validation', async () => {
+    function TestForm() {
+      const {formData, setSchemaStateValueBulk} = useForm({
+        testInputText1: {
+          formElement: formElements.textInput,
+          name: 'testInputText1',
+          label: 'testInputText1',
+        },
+        testInputText2: {
+          formElement: formElements.textInput,
+          name: 'testInputText2',
+          label: 'testInputText2',
+          validationRules: [
+            {
+              fn: isRequired,
+            },
+          ],
+        },
+      });
+
+      return (
+        <div>
+          {formData.testInputText1.render()}
+          {formData.testInputText2.render()}
+          <button
+            onClick={() => {
+              setSchemaStateValueBulk({
+                valuesMap: {
+                  testInputText1: 'Test 1',
+                  testInputText2: '',
+                },
+                // skipValidation: false,
+              });
+            }}>
+            Set schema test value
+          </button>
+        </div>
+      );
+    }
+
+    const {container, getByText, getByValue, getByLabelText, debug} = render(
+      <TestForm />
+    );
+
+    expect(getByLabelText('Label: testInputText1').value).toBe('');
+    expect(getByLabelText('Label: testInputText2').value).toBe('');
+
+    fireEvent.click(getByText('Set schema test value'));
+
+    await waitForElement(() => [getByValue('Test 1')], container);
+
+    let errorMessage2 = container.querySelector('.testInputText2 > .Error');
+    expect(errorMessage2.innerHTML).toBe('Error: Is required default');
+  });
+
+  test('Set schema state value bulk with onComplete cb', async () => {
+    const onCompleteMock = jest.fn();
+    function TestForm() {
+      const {formData, setSchemaStateValueBulk} = useForm({
+        testInputText1: {
+          formElement: formElements.textInput,
+          name: 'testInputText1',
+          label: 'testInputText1',
+        },
+        testInputText2: {
+          formElement: formElements.textInput,
+          name: 'testInputText2',
+          label: 'testInputText2',
+          
+        },
+      });
+
+      return (
+        <div>
+          {formData.testInputText1.render()}
+          {formData.testInputText2.render()}
+          <button
+            onClick={() => {
+              setSchemaStateValueBulk({
+                valuesMap: {
+                  testInputText1: 'Test 1',
+                  testInputText2: 'Test 2',
+                },
+                onComplete: onCompleteMock
+              });
+            }}>
+            Set schema test value
+          </button>
+        </div>
+      );
+    }
+
+    const {container, getByText, getByValue} = render(
+      <TestForm />
+    );
+    fireEvent.click(getByText('Set schema test value'));
+
+    await waitForElement(() => [getByValue('Test 1'), getByValue('Test 2')], container);
+    expect(onCompleteMock).toHaveBeenCalled();
   });
 
   test('Set schema state value without validation - text area', async () => {
@@ -317,13 +435,9 @@ describe('Set schema state value', () => {
     expect(getByLabelText('Label: textArea1').value).toBe('');
 
     fireEvent.click(getByText('Set schema test value'));
-    let textArea1 = await waitForElement(
-      () => getByText('Test'),
-      container
-    );
+    let textArea1 = await waitForElement(() => getByText('Test'), container);
 
     expect(textArea1.innerHTML).toBe('Test');
     expect(queryByText('Error: Max length is 3')).toBeNull();
   });
-
 });

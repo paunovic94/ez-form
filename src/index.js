@@ -29,7 +29,7 @@ type ValidationRule = {
     state: {},
     _props: {},
     fieldName: string,
-    validationArgs: {},
+    validationArgs: {}
   ) => string,
   message: ?ErrorMessage,
   args: ?{},
@@ -75,6 +75,12 @@ type SetSchemaStateArgs = {
   onComplete: Function,
 };
 
+type SetSchemaStateValueBulkArgs = {
+  valuesMap: object,
+  skipValidation: boolean,
+  onComplete: Function,
+}
+
 export const InputTypes = {
   TEXT: 'TEXT_INPUT',
   SELECT: 'SELECT_INPUT',
@@ -82,7 +88,7 @@ export const InputTypes = {
   CHECKBOX: 'CHECKBOX',
   RADIOGROUP: 'RADIOGROUP',
   TEXTAREA: 'TEXT_AREA',
-  DATEPICKER: "DATEPICKER"
+  DATEPICKER: 'DATEPICKER',
 };
 
 export default function useForm(
@@ -124,6 +130,7 @@ export default function useForm(
         value: newValue,
       };
       if (!skipValidation) {
+        
         changedFiledState.error = validateField(changedFiledState, formState);
       }
       const newFormState = {...formState, [fullFieldName]: changedFiledState};
@@ -138,6 +145,26 @@ export default function useForm(
       return {...prevState, [fullFieldName]: changedFiledState};
     });
     onComplete && onComplete(newValue);
+  }
+
+  function setSchemaStateValueBulk({
+    valuesMap,
+    skipValidation = false,
+    onComplete,
+  }: SetSchemaStateValueBulkArgs) {
+    if (!valuesMap)
+      throw new Error('setSchemaStateValueBulk: valuesMap param required');
+    if(typeof valuesMap !== "object")
+      throw new Error('setSchemaStateValueBulk: invalid valuesMap');
+
+    Object.entries(valuesMap).forEach(([key, value]) =>
+      setSchemaStateValue({
+        fullFieldName: key,
+        newValue: value,
+        skipValidation,
+        onComplete
+      })
+    );
   }
 
   function validate() {
@@ -177,12 +204,11 @@ export default function useForm(
         ) {
           // select
           prepared[fieldName] = value.value;
-        } else if(Array.isArray(value)){
+        } else if (Array.isArray(value)) {
           prepared[fieldName] = value.map(item =>
             item && typeof item === 'object' ? item.value : item
           );
-        }
-        else if (typeof value === 'string') {
+        } else if (typeof value === 'string') {
           // text input
           prepared[fieldName] = value;
         } else {
@@ -231,7 +257,7 @@ export default function useForm(
             },
           });
         }
-        
+
         return (
           formState[fieldName].isVisible && (
             <formElement.Component
@@ -262,6 +288,7 @@ export default function useForm(
     cloneStateValues,
     getSchemaStateValue,
     setSchemaStateValue,
+    setSchemaStateValueBulk
   };
 }
 
@@ -340,11 +367,7 @@ function validateField(fieldState, formState) {
       rule.args.dependencyFieldValue =
         formState[rule.args.dependencyFieldName].value;
     }
-    let error = rule.fn(
-      fieldState.value,
-      rule.message,
-      rule.args,
-    );
+    let error = rule.fn(fieldState.value, rule.message, rule.args);
     if (error) return error;
   }
   return '';

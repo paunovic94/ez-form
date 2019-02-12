@@ -12,7 +12,7 @@ import {
 import useForm from '../index';
 import formElements, {formatDate} from './formTestElements';
 
-function isRequired(value, message, args) {
+export function isRequired(value, message, args) {
   if (!value) {
     return message || 'Is required default';
   }
