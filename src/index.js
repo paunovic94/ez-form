@@ -132,7 +132,9 @@ export default function useForm(
         ...fieldState,
         value: newValue,
       };
-      if (!skipValidation) {
+      if (skipValidation) {
+        changedFiledState.error = '';
+      } else {
         changedFiledState.error = validateField(changedFiledState, formState);
       }
       const newFormState = {...formState, [fullFieldName]: changedFiledState};
