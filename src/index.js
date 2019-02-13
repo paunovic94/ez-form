@@ -36,7 +36,7 @@ type ValidationRule = {
   validateAnotherField: ?string,
 };
 
-type SelectValue = string | {value: string | number, label: string} | null;
+// type SelectValue = string | {value: string | number, label: string} | null;
 
 type SchemaValue =
   | string
@@ -75,11 +75,14 @@ type SetSchemaStateArgs = {
   onComplete: Function,
 };
 
+type ValuesMap = {[string]: SchemaValue};
+
 type SetSchemaStateValueBulkArgs = {
-  valuesMap: {[string]: SchemaValue},
+  valuesMap: ValuesMap,
   skipValidation: boolean,
   onComplete: Function,
 }
+
 
 export const InputTypes = {
   TEXT: 'TEXT_INPUT',
