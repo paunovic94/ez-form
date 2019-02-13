@@ -36,7 +36,7 @@ type ValidationRule = {
   validateAnotherField: ?string,
 };
 
-// type SelectValue = string | {value: string | number, label: string} | null;
+type SelectValue = string | {value: string | number, label: string} | null;
 
 type SchemaValue =
   | string
@@ -44,7 +44,8 @@ type SchemaValue =
   | boolean
   | Array<string>
   | SelectValue
-  | void;
+  | void
+  | {};
 
 type FieldMetadata = {
   name: string,
@@ -81,8 +82,7 @@ type SetSchemaStateValueBulkArgs = {
   valuesMap: ValuesMap,
   skipValidation: boolean,
   onComplete: Function,
-}
-
+};
 
 export const InputTypes = {
   TEXT: 'TEXT_INPUT',
@@ -133,7 +133,6 @@ export default function useForm(
         value: newValue,
       };
       if (!skipValidation) {
-        
         changedFiledState.error = validateField(changedFiledState, formState);
       }
       const newFormState = {...formState, [fullFieldName]: changedFiledState};
@@ -157,17 +156,26 @@ export default function useForm(
   }: SetSchemaStateValueBulkArgs) {
     if (!valuesMap)
       throw new Error('setSchemaStateValueBulk: valuesMap param required');
-    if(typeof valuesMap !== "object")
+    if (typeof valuesMap !== 'object')
       throw new Error('setSchemaStateValueBulk: invalid valuesMap');
 
-    Object.entries(valuesMap).forEach(([key, value]) =>
-      setSchemaStateValue({
+    Object.entries(valuesMap).forEach(([key, value]) => {
+      if (
+        typeof value !== 'string' &&
+        typeof value !== 'number' &&
+        typeof value !== 'boolean' &&
+        typeof value !== 'object'
+      ) {
+        throw new Error('setSchemaStateValueBulk: invalid value in valuesMap');
+      }
+
+      return setSchemaStateValue({
         fullFieldName: key,
         newValue: value,
         skipValidation,
-        onComplete
-      })
-    );
+        onComplete,
+      });
+    });
   }
 
   function validate() {
@@ -291,7 +299,7 @@ export default function useForm(
     cloneStateValues,
     getSchemaStateValue,
     setSchemaStateValue,
-    setSchemaStateValueBulk
+    setSchemaStateValueBulk,
   };
 }
 
