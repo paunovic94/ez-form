@@ -145,6 +145,7 @@ function Checkbox({
   disabled,
   name,
   id = name,
+  checked,
   ...restProps
 }) {
   return (
@@ -155,7 +156,7 @@ function Checkbox({
         type="checkbox"
         value={value}
         id={id}
-        checked={!!value}
+        checked={checked}
         onChange={onChange}
         disabled={disabled}
       />
@@ -234,7 +235,7 @@ function TextArea({
           fontSize: 16,
         }}
         disabled={disabled}
-        onFocus={(e) => {
+        onFocus={e => {
           if (typeof appendTextOnFocus === 'function' && onChange) {
             appendTextOnFocus();
             onChange(e);

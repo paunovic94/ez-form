@@ -132,11 +132,13 @@ export default function useForm(
         ...fieldState,
         value: newValue,
       };
+
       if (skipValidation) {
         changedFiledState.error = '';
       } else {
         changedFiledState.error = validateField(changedFiledState, formState);
       }
+
       const newFormState = {...formState, [fullFieldName]: changedFiledState};
       if (!skipValidation) {
         checkIfFieldValidateAnotherField(
@@ -271,6 +273,11 @@ export default function useForm(
           });
         }
 
+        const checked =
+          formElement.type === InputTypes.CHECKBOX
+            ? formState[fieldName].value
+            : undefined;
+            
         return (
           formState[fieldName].isVisible && (
             <formElement.Component
@@ -279,6 +286,7 @@ export default function useForm(
               error={formState[fieldName].error}
               disabled={disabled}
               label={useSecondLabel ? label2 : label}
+              checked={checked}
               {...additionalProps}
               onChange={event => {
                 handleChange({
@@ -380,7 +388,11 @@ function validateField(fieldState, formState) {
       rule.args.dependencyFieldValue =
         formState[rule.args.dependencyFieldName].value;
     }
-    let error = rule.fn(fieldState.value, rule.message, rule.args);
+    let error = rule.fn(
+      fieldState.value,
+      rule.message,
+      rule.args,
+    );
     if (error) return error;
   }
   return '';
