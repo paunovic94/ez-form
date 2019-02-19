@@ -9,10 +9,16 @@ import {
   queryByTestId,
   wait,
 } from 'react-testing-library';
-import useForm, {getNestedValue} from '../index';
+import useForm from '../index';
 import formElements, {formatDate} from './formTestElements';
 
-
+export function getNestedValue(state, name) {
+  if (!state) return;
+  return name.split('.').reduce((acc, key) => {
+    if (acc) return acc[key];
+    return acc;
+  }, state);
+}
 
 export function isRequired(value, message, args) {
   if (!value) {

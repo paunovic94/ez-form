@@ -84,12 +84,21 @@ type SetSchemaStateValueBulkArgs = {
   onComplete: Function,
 };
 
-export function getNestedValue(state, name) {
-  if (!state) return;
-  return name.split('.').reduce((acc, key) => {
-    if (acc) return acc[key];
-    return acc;
-  }, state);
+export function getIn(path: string | Array<string>, obj: {} = {}) {
+  if (!path || path.length === 0) {
+    throw new Error('getIn: path param is required');
+  }
+
+  if (typeof path === 'string') {
+    path = path.split('.');
+  }
+
+  let res = obj;
+  for (let key of path) {
+    if (res == null) return;
+    res = res[key];
+  }
+  return res;
 }
 
 export const InputTypes = {
@@ -190,7 +199,7 @@ export default function useForm(
     });
   }
 
-  function validate(dependencyArgs) {
+  function validate(dependencyArgs: {}) {
     let isValid = true;
     Object.keys(formState).forEach(fieldName => {
       const field = formState[fieldName];
@@ -395,12 +404,10 @@ function validateField(fieldState, formState, dependencyArgs = {}) {
     if (rule.validateAnotherField) return '';
 
     // Validation with dependency
-    let dependencyField = getNestedValue(rule, 'args.dependencyField');
-    let dependencyValue = getNestedValue(rule, 'args.dependencyValue');
-    let dependencyInValidationArgs = getNestedValue(
-      rule,
-      'args.dependencyInValidationArgs'
-    );
+    let dependencyField = rule.args && rule.args.dependencyField;
+    let dependencyValue = rule.args && rule.args.dependencyValue;
+    let dependencyInValidationArgs =
+      rule.args && rule.args.dependencyInValidationArgs;
     if (
       dependencyInValidationArgs &&
       dependencyArgs[dependencyField] !== dependencyValue
@@ -411,10 +418,9 @@ function validateField(fieldState, formState, dependencyArgs = {}) {
     if (
       dependencyField &&
       (dependencyValue !== undefined &&
-        getNestedValue(formState, `${dependencyField}.value`) !==
-          dependencyValue) &&
+        getIn('value', formState[dependencyField]) !== dependencyValue) &&
       (dependencyValue === undefined &&
-        !getNestedValue(formState, `${dependencyField}.value`))
+        !getIn('value', formState[dependencyField]))
     ) {
       // skip to next rule
       continue;
