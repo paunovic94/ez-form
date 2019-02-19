@@ -9,8 +9,10 @@ import {
   queryByTestId,
   wait,
 } from 'react-testing-library';
-import useForm from '../index';
+import useForm, {getNestedValue} from '../index';
 import formElements, {formatDate} from './formTestElements';
+
+
 
 export function isRequired(value, message, args) {
   if (!value) {
@@ -32,31 +34,31 @@ export function isMaxLength(value, message, args = {}) {
   }
 }
 
-function isStartDateBeforeEndDate(value, message, args) {
-  let endDate = args.dependencyFieldValue;
-  if (!endDate) return;
+function isStartDateBeforeEndDate(value, message, args, state) {
+  const endDate = getNestedValue(state, `${args.endDate}.value`);
 
   if (!message) {
     message = 'Start date should be before end date';
   }
-
   if (value && new Date(endDate) < new Date(value)) {
     return message;
   }
 }
 
-function isEndDateBeforeStartDate(value, message, args) {
-  let startDate = args.dependencyFieldValue;
-  if (!startDate) return;
 
+function isEndDateAfterStartDate(value, message, args, state) {
+  const startDate = getNestedValue(state, `${args.startDate}.value`);
   if (!message) {
     message = 'End date should be after end date';
   }
+
+  if (!startDate) return;
 
   if (value && new Date(startDate) > new Date(value)) {
     return message;
   }
 }
+
 
 afterEach(cleanup);
 
@@ -280,7 +282,7 @@ describe('Validate form data on input change', () => {
             {
               fn: isStartDateBeforeEndDate,
               args: {
-                dependencyFieldName: 'endDate',
+                endDate: 'endDate',
               },
             },
           ],
@@ -326,7 +328,7 @@ describe('Validate form data on input change', () => {
             {
               fn: isStartDateBeforeEndDate,
               args: {
-                dependencyFieldName: 'endDate',
+                endDate: 'endDate',
               },
             },
             {
@@ -340,9 +342,9 @@ describe('Validate form data on input change', () => {
           defaultValue: new Date(2017, 11, 31),
           validationRules: [
             {
-              fn: isEndDateBeforeStartDate,
+              fn: isEndDateAfterStartDate,
               args: {
-                dependencyFieldName: 'startDate',
+                startDate: 'startDate',
               },
             },
             {
@@ -435,7 +437,7 @@ describe('Validate form data on input change', () => {
     expect(onSubmit).toHaveBeenCalled();
   });
 
-  test.skip('Validate function', async () => {
+  test('Validate function', async () => {
     let onSubmit = jest.fn();
 
     function TestForm() {
@@ -575,4 +577,179 @@ describe('Validate form data on input change', () => {
 
     expect(onSubmit).toHaveBeenCalled();
   });
+
+
+  test('Validation with dependency with passed dependency value ', async () => {
+    function TestForm() {
+      const {formData} = useForm({
+        testInputText1: {
+          formElement: formElements.textInput,
+          defaultValue: 'text1',
+          name: 'testInputText1',
+          validationRules: [
+            {
+              fn: isRequired,
+              args:{
+                dependencyField: 'testInputText2',
+                dependencyValue: 'test2',
+              }
+            },
+          ],
+        },
+        testInputText2: {
+          formElement: formElements.textInput,
+          name: 'testInputText2',
+          defaultValue: "test2"
+        },
+      });
+      return (
+        <div>
+          {formData.testInputText1.render()}
+          {formData.testInputText2.render()}
+        </div>
+      );
+    }
+
+    const {container, getByValue} = render(<TestForm />);
+
+    const [input1] = container.querySelectorAll('input');
+    const [inputWrapper1] = container.querySelectorAll(
+      '.TestTextInput'
+    );
+
+    fireEvent.change(input1, {target: {value: ''}});
+
+    await waitForElement(() => getByValue(''), {
+      inputWrapper1,
+    });
+
+    let errorMessage1 = container.querySelector('.testInputText1 > .Error');
+    expect(errorMessage1.innerHTML).toBe('Error: Is required default');
+  });
+
+
+  test('Validation with dependency - validate only if dependency field exist in state', async () => {
+    function TestForm() {
+      const {formData} = useForm({
+        testInputText1: {
+          formElement: formElements.textInput,
+          defaultValue: 'text1',
+          name: 'testInputText1',
+          validationRules: [
+            {
+              fn: isRequired,
+              args:{
+                dependencyField: 'testInputText2',
+              }
+            },
+          ],
+        },
+        testInputText2: {
+          formElement: formElements.textInput,
+          name: 'testInputText2',
+          defaultValue: "test2"
+        },
+      });
+      return (
+        <div>
+          {formData.testInputText1.render()}
+          {formData.testInputText2.render()}
+        </div>
+      );
+    }
+
+    const {container, getByValue} = render(<TestForm />);
+
+    const [input1, input2] = container.querySelectorAll('input');
+    const [inputWrapper1, inputWrapper2] = container.querySelectorAll(
+      '.TestTextInput'
+    );
+
+    fireEvent.change(input1, {target: {value: ''}});
+
+    await waitForElement(() => getByValue(''), {
+      inputWrapper1,
+    });
+
+    let errorMessage1 = container.querySelector('.testInputText1 > .Error');
+    expect(errorMessage1.innerHTML).toBe('Error: Is required default');
+  });
+
+
+  test('Validate function with passed dependency field', async () => {
+    let onSubmit = jest.fn();
+
+    function TestForm() {
+      const {formData, validate} = useForm({
+        testInputText1: {
+          formElement: formElements.textInput,
+          name: 'testInputText1',
+          validationRules: [
+            {
+              fn: isMaxLength,
+              args: {
+                maxLength: 3,
+              },
+            },
+          ],
+        },
+        testInputText2: {
+          formElement: formElements.textInput,
+          name: 'testInputText2',
+          validationRules: [
+            {
+              fn: isRequired,
+              args: {
+                dependencyInValidationArgs: true,
+                dependencyField: "testField",
+                dependencyValue: "testValue"
+              }
+            },
+          ],
+        },
+      });
+
+      return (
+        <div>
+          {formData.testInputText1.render()}
+          {formData.testInputText2.render()}
+          <button
+            onClick={() => {
+              let isValid = validate({testField: "testValue"});
+              if (isValid) {
+                onSubmit();
+              }
+            }}>
+            Submit form 1
+          </button>
+          <button
+            onClick={() => {
+              let isValid = validate({testField: ""});
+              if (isValid) {
+                onSubmit();
+              }
+            }}>
+            Submit form 2
+          </button>
+        </div>
+      );
+    }
+
+    const {container, getByText, getByValue} = render(<TestForm />);
+    fireEvent.click(getByText('Submit form 1'));
+    expect(onSubmit).not.toHaveBeenCalled();
+
+    let errorMessage1 = container.querySelector('.testInputText1 > .Error');
+    expect(errorMessage1).toBeNull();
+
+    let errorMessage2 = container.querySelector('.testInputText2 > .Error');
+    expect(errorMessage2.innerHTML).toBe('Error: Is required default');
+
+
+    fireEvent.click(getByText('Submit form 2'));
+    expect(container.querySelector('.testInputText2 > .Error')).toBeNull();
+  });
+
+
+
 });

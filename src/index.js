@@ -84,6 +84,14 @@ type SetSchemaStateValueBulkArgs = {
   onComplete: Function,
 };
 
+export function getNestedValue(state, name) {
+  if (!state) return;
+  return name.split('.').reduce((acc, key) => {
+    if (acc) return acc[key];
+    return acc;
+  }, state);
+}
+
 export const InputTypes = {
   TEXT: 'TEXT_INPUT',
   SELECT: 'SELECT_INPUT',
@@ -182,14 +190,14 @@ export default function useForm(
     });
   }
 
-  function validate() {
+  function validate(dependencyArgs) {
     let isValid = true;
     Object.keys(formState).forEach(fieldName => {
       const field = formState[fieldName];
 
       if (!field.validationRules) return;
 
-      const fieldError = validateField(field, formState);
+      const fieldError = validateField(field, formState, dependencyArgs);
 
       if (isValid && fieldError !== '') {
         isValid = false;
@@ -277,7 +285,7 @@ export default function useForm(
           formElement.type === InputTypes.CHECKBOX
             ? formState[fieldName].value
             : undefined;
-            
+
         return (
           formState[fieldName].isVisible && (
             <formElement.Component
@@ -381,21 +389,45 @@ function getInitValue({initValue, defaultValue, type}) {
     : initValue;
 }
 
-function validateField(fieldState, formState) {
+function validateField(fieldState, formState, dependencyArgs = {}) {
+  let fieldError = '';
   for (let rule of fieldState.validationRules) {
     if (rule.validateAnotherField) return '';
-    if (rule.args && rule.args.dependencyFieldName) {
-      rule.args.dependencyFieldValue =
-        formState[rule.args.dependencyFieldName].value;
-    }
-    let error = rule.fn(
-      fieldState.value,
-      rule.message,
-      rule.args,
+
+    // Validation with dependency
+    let dependencyField = getNestedValue(rule, 'args.dependencyField');
+    let dependencyValue = getNestedValue(rule, 'args.dependencyValue');
+    let dependencyInValidationArgs = getNestedValue(
+      rule,
+      'args.dependencyInValidationArgs'
     );
-    if (error) return error;
+    if (
+      dependencyInValidationArgs &&
+      dependencyArgs[dependencyField] !== dependencyValue
+    ) {
+      // skip to next rule
+      continue;
+    }
+    if (
+      dependencyField &&
+      (dependencyValue !== undefined &&
+        getNestedValue(formState, `${dependencyField}.value`) !==
+          dependencyValue) &&
+      (dependencyValue === undefined &&
+        !getNestedValue(formState, `${dependencyField}.value`))
+    ) {
+      // skip to next rule
+      continue;
+    }
+
+    fieldError = rule.fn(fieldState.value, rule.message, rule.args, formState);
+
+    if (fieldError) {
+      // break on the first error
+      break;
+    }
   }
-  return '';
+  return fieldError;
 }
 
 function checkIfFieldValidateAnotherField(

@@ -25,6 +25,10 @@ Form utils
 	* validate function
 
 
+Differences with original schema:
+	* withDependancy validation: no wraper function withDependancy, instead we skip validator function if args have dependencyField and dependency value is different than in state or the state value is falsy
+	* if we pass dependencyInValidationArgs: true in val rule args, than compare dependencyValue with value passed as arg in validate function
+
 	Tests
 	* init.test
 		- init default value from schema (keep value in state)
@@ -42,6 +46,7 @@ Form utils
 		- args property for validation func (based on another schema field or fixed arg)
 		- validate another field 
 		- prevent cyclically validation with validate another field (validate another field only on field change)
+		- with dependancy validation
 	* render.test
 		- render componet based on is Visible prop in arg
 		- disable component based on disabled prop in arg

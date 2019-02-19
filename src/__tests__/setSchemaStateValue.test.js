@@ -507,7 +507,7 @@ describe('Set schema state value', () => {
     expect(queryByText('Error: Max length is 3')).toBeNull();
   });
 
-  test.only('Set schema state value bulk and reset errors', async () => {
+  test('Set schema state value bulk and reset errors', async () => {
     function TestForm() {
       const {formData, setSchemaStateValueBulk} = useForm({
         testInputText1: {
