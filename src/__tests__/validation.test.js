@@ -137,6 +137,7 @@ describe('Validate form data on input change', () => {
     expect(errorMessage2.innerHTML).toBe('Error: Is name custom');
   });
 
+
   test('useForm treat intl error message and string same', async () => {
     // Intl error messages are handled in components from formElemet
     function TestForm() {
@@ -585,6 +586,8 @@ describe('Validate form data on input change', () => {
   });
 
 
+
+
   test('Validation with dependency with passed dependency value ', async () => {
     function TestForm() {
       const {formData} = useForm({
@@ -757,5 +760,44 @@ describe('Validate form data on input change', () => {
   });
 
 
+  test('Test validate function when field is valid but rule returns undefined, not empty string', async () => {
+    let onSubmit = jest.fn();
+
+    function TestForm() {
+      const {formData, validate} = useForm({
+        testInputText1: {
+          formElement: formElements.textInput,
+          name: 'testInputText1',
+          defaultValue: "valid value",
+          validationRules: [
+            {
+              fn: isMaxLength,
+              args: {
+                maxLength: 15
+              }
+            },
+          ],
+        },
+      });
+      return (
+        <div>
+          {formData.testInputText1.render()}
+          <button
+            onClick={() => {
+              let isValid = validate();
+              if (isValid) {
+                onSubmit();
+              }
+            }}>
+            Submit form
+          </button>
+        </div>
+      );
+    }
+
+    const {getByText} = render(<TestForm />);
+    fireEvent.click(getByText("Submit form"));
+    expect(onSubmit).toHaveBeenCalled();
+  });
 
 });

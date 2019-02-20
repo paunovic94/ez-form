@@ -204,7 +204,7 @@ export default function useForm(
     Object.keys(formState).forEach(fieldName => {
       const field = formState[fieldName];
 
-      if (!field.validationRules) return;
+      if (!field.validationRules || field.validationRules.length === 0) return;
 
       const fieldError = validateField(field, formState, dependencyArgs);
 
@@ -426,10 +426,16 @@ function validateField(fieldState, formState, dependencyArgs = {}) {
       continue;
     }
 
-    fieldError = rule.fn(fieldState.value, rule.message, rule.args, formState);
+    let errorMessage = rule.fn(
+      fieldState.value,
+      rule.message,
+      rule.args,
+      formState
+    );
 
-    if (fieldError) {
+    if (errorMessage) {
       // break on the first error
+      fieldError = errorMessage;
       break;
     }
   }
