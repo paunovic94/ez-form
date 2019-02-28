@@ -400,43 +400,56 @@ function getInitValue({initValue, defaultValue, type}) {
 
 function validateField(fieldState, formState, dependencyArgs = {}) {
   let fieldError = '';
-  for (let rule of fieldState.validationRules) {
-    if (rule.validateAnotherField) return '';
 
-    // Validation with dependency
-    let dependencyField = rule.args && rule.args.dependencyField;
-    let dependencyValue = rule.args && rule.args.dependencyValue;
-    let dependencyInValidationArgs =
-      rule.args && rule.args.dependencyInValidationArgs;
-    if (
-      dependencyInValidationArgs &&
-      dependencyArgs[dependencyField] !== dependencyValue
-    ) {
-      // skip to next rule
-      continue;
-    }
-    if (
-      dependencyField &&
-      (dependencyValue !== undefined &&
-        getIn('value', formState[dependencyField]) !== dependencyValue) &&
-      (dependencyValue === undefined &&
-        !getIn('value', formState[dependencyField]))
-    ) {
-      // skip to next rule
-      continue;
+  if (fieldState) {
+    // we don't validate field which is not visible!
+    if (!fieldState.isVisible) {
+      return '';
     }
 
-    let errorMessage = rule.fn(
-      fieldState.value,
-      rule.message,
-      rule.args,
-      formState
-    );
+    for (let rule of fieldState.validationRules) {
+      if (rule.validateAnotherField) return '';
 
-    if (errorMessage) {
-      // break on the first error
-      fieldError = errorMessage;
-      break;
+      // Validation with dependency
+      let dependencyField = rule.args && rule.args.dependencyField;
+      let dependencyValue = rule.args && rule.args.dependencyValue;
+      let dependencyInValidationArgs =
+        rule.args && rule.args.dependencyInValidationArgs;
+
+      // Skip to next rule
+      if (dependencyInValidationArgs) {
+      // if dependency value is defined in validation fn args and it is different than dependency value in state
+        if (dependencyArgs[dependencyField] !== dependencyValue) {
+          continue;
+        }
+      } else if (
+        // if dependency value is defined in args but different than dependency value in state
+        dependencyField &&
+        dependencyValue !== undefined &&
+        getIn('value', formState[dependencyField]) !== dependencyValue
+      ) {
+        continue;
+      } else if (
+        // if dependency value is not defined in args and different than dependency value in state doesn't exist
+        dependencyField &&
+        dependencyValue === undefined &&
+        !getIn('value', formState[dependencyField])
+      ) {
+        continue;
+      }
+
+      let errorMessage = rule.fn(
+        fieldState.value,
+        rule.message,
+        rule.args,
+        formState
+      );
+
+      if (errorMessage) {
+        // break on the first error
+        fieldError = errorMessage;
+        break;
+      }
     }
   }
   return fieldError;
