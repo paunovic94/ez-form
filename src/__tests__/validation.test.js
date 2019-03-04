@@ -51,7 +51,6 @@ function isStartDateBeforeEndDate(value, message, args, state) {
   }
 }
 
-
 function isEndDateAfterStartDate(value, message, args, state) {
   const startDate = getNestedValue(state, `${args.startDate}.value`);
   if (!message) {
@@ -64,7 +63,6 @@ function isEndDateAfterStartDate(value, message, args, state) {
     return message;
   }
 }
-
 
 afterEach(cleanup);
 
@@ -136,7 +134,6 @@ describe('Validate form data on input change', () => {
     expect(errorMessage1).toBeNull();
     expect(errorMessage2.innerHTML).toBe('Error: Is name custom');
   });
-
 
   test('useForm treat intl error message and string same', async () => {
     // Intl error messages are handled in components from formElemet
@@ -401,27 +398,140 @@ describe('Validate form data on input change', () => {
       expect(container.querySelector('.endDate > .Error')).toBeNull(),
     ]);
   });
+});
+
+describe('Validate function', () => {
+  test('Validate all fields in schema', async () => {
+    let onSubmit = jest.fn();
+
+    function TestForm() {
+      const {formData, validate} = useForm({
+        a: {
+          formElement: formElements.textInput,
+          name: 'a',
+          validationRules: [
+            {
+              fn: isMaxLength,
+              args: {
+                maxLength: 3,
+              },
+            },
+            {
+              validateAnotherField: 'b',
+            },
+          ],
+        },
+        b: {
+          formElement: formElements.textInput,
+          name: 'b',
+          validationRules: [
+            {
+              fn: isRequired,
+            },
+          ],
+        },
+      });
+
+      return (
+        <div>
+          {formData.a.render()}
+          {formData.b.render()}
+          <button
+            onClick={() => {
+              let isValid = validate();
+              if (isValid) {
+                onSubmit();
+              }
+            }}>
+            Submit form
+          </button>
+        </div>
+      );
+    }
+
+    const {container, getByText, getByValue} = render(<TestForm />);
+    fireEvent.click(getByText('Submit form'));
+
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(container.querySelector('.a > .Error')).toBeNull();
+    expect(container.querySelector('.b > .Error').innerHTML).toBe('Error: Is required default');
+
+    // Fix error
+    fireEvent.change(container.querySelector('.b > input'), {target: {value: 'testInputText2'}});
+    await waitForElement(() => getByValue('testInputText2'), {
+      container,
+    });
+    fireEvent.click(getByText('Submit form'));
+
+    expect(container.querySelector('.a > .Error')).toBeNull();
+    expect(container.querySelector('.b > .Error')).toBeNull();
+    expect(onSubmit).toHaveBeenCalled();
+  });
+
+  test("Don't validate field that has isVisible false flag", () => {
+    let onSubmit = jest.fn();
+
+    function TestForm() {
+      const {formData, validate} = useForm({
+        a: {
+          formElement: formElements.textInput,
+          name: 'a',
+          isVisible: false,
+          validationRules: [
+            {
+              fn: isRequired,
+            },
+          ],
+        },
+        b: {
+          formElement: formElements.textInput,
+          name: 'b',
+        },
+      });
+
+      return (
+        <div>
+          {formData.a.render()}
+          {formData.b.render()}
+          <button
+            onClick={() => {
+              let isValid = validate();
+              if (isValid) {
+                onSubmit();
+              }
+            }}>
+            Submit form
+          </button>
+        </div>
+      );
+    }
+
+    const {container, getByText} = render(<TestForm />);
+
+    fireEvent.click(getByText('Submit form'));
+    expect(onSubmit).toHaveBeenCalled();
+  });
 
   test('Validate function is returning true when there are no validation rules', async () => {
     let onSubmit = jest.fn();
 
     function TestForm() {
       const {formData, validate} = useForm({
-        testInputText1: {
+        a: {
           formElement: formElements.textInput,
-          name: 'testInputText1',
+          name: 'a',
         },
-        testInputText2: {
+        b: {
           formElement: formElements.textInput,
-          name: 'testInputText2',
+          name: 'b',
           validationRules: [],
         },
       });
 
       return (
         <div>
-          {formData.testInputText1.render()}
-          {formData.testInputText2.render()}
+          {formData.a.render()}
+          {formData.b.render()}
           <button
             onClick={() => {
               let isValid = validate();
@@ -444,106 +554,30 @@ describe('Validate form data on input change', () => {
     expect(onSubmit).toHaveBeenCalled();
   });
 
-  test('Validate function', async () => {
-    let onSubmit = jest.fn();
-
-    function TestForm() {
-      const {formData, validate} = useForm({
-        testInputText1: {
-          formElement: formElements.textInput,
-          name: 'testInputText1',
-          validationRules: [
-            {
-              fn: isMaxLength,
-              args: {
-                maxLength: 3,
-              },
-            },
-            {
-              validateAnotherField: 'testInputText2',
-            },
-          ],
-        },
-        testInputText2: {
-          formElement: formElements.textInput,
-          name: 'testInputText2',
-          validationRules: [
-            {
-              fn: isRequired,
-            },
-          ],
-        },
-      });
-
-      return (
-        <div>
-          {formData.testInputText1.render()}
-          {formData.testInputText2.render()}
-          <button
-            onClick={() => {
-              let isValid = validate();
-              if (isValid) {
-                onSubmit();
-              }
-            }}>
-            Submit form
-          </button>
-        </div>
-      );
-    }
-
-    const {container, getByText, getByValue} = render(<TestForm />);
-    fireEvent.click(getByText('Submit form'));
-    expect(onSubmit).not.toHaveBeenCalled();
-
-    let errorMessage1 = container.querySelector('.testInputText1 > .Error');
-    expect(errorMessage1).toBeNull();
-
-    let errorMessage2 = container.querySelector('.testInputText2 > .Error');
-    expect(errorMessage2.innerHTML).toBe('Error: Is required default');
-
-    // Fix error
-    let testInputText2 = container.querySelector('.testInputText2 > input');
-    fireEvent.change(testInputText2, {target: {value: 'testInputText2'}});
-    await waitForElement(() => getByValue('testInputText2'), {
-      container,
-    });
-
-    fireEvent.click(getByText('Submit form'));
-
-    errorMessage1 = container.querySelector('.testInputText1 > .Error');
-    expect(errorMessage1).toBeNull();
-
-    errorMessage2 = container.querySelector('.testInputText2 > .Error');
-    expect(errorMessage2).toBeNull();
-
-    expect(onSubmit).toHaveBeenCalled();
-  });
-
   test('Validate function - one field is valid, other is not valid', async () => {
     let onSubmit = jest.fn();
 
     function TestForm() {
       const {formData, validate} = useForm({
-        testInputText1: {
+        a: {
           formElement: formElements.textInput,
-          name: 'testInputText1',
+          name: 'a',
           validationRules: [
             {
               fn: isRequired,
             },
           ],
         },
-        testInputText2: {
+        b: {
           formElement: formElements.textInput,
-          name: 'testInputText2',
+          name: 'b',
         },
       });
 
       return (
         <div>
-          {formData.testInputText1.render()}
-          {formData.testInputText2.render()}
+          {formData.a.render()}
+          {formData.b.render()}
           <button
             onClick={() => {
               let isValid = validate();
@@ -558,230 +592,46 @@ describe('Validate form data on input change', () => {
     }
 
     const {container, getByText, getByValue} = render(<TestForm />);
+
     fireEvent.click(getByText('Submit form'));
     expect(onSubmit).not.toHaveBeenCalled();
-
-    let errorMessage1 = container.querySelector('.testInputText1 > .Error');
-    expect(errorMessage1).not.toBeNull();
-
-    let errorMessage2 = container.querySelector('.testInputText2 > .Error');
-    expect(errorMessage2).toBeNull();
+    expect(container.querySelector('.a > .Error')).not.toBeNull();
+    expect(container.querySelector('.b > .Error')).toBeNull();
 
     // Fix error
-    let testInputText1 = container.querySelector('.testInputText1 > input');
-    fireEvent.change(testInputText1, {target: {value: 'tt'}});
+    fireEvent.change(container.querySelector('.a > input'), {target: {value: 'tt'}});
     await waitForElement(() => getByValue('tt'), {
       container,
     });
 
     fireEvent.click(getByText('Submit form'));
-
-    errorMessage1 = container.querySelector('.testInputText1 > .Error');
-    expect(errorMessage1).toBeNull();
-
-    errorMessage2 = container.querySelector('.testInputText2 > .Error');
-    expect(errorMessage2).toBeNull();
-
+    expect(container.querySelector('.a > .Error')).toBeNull();
+    expect(container.querySelector('.b > .Error')).toBeNull();
     expect(onSubmit).toHaveBeenCalled();
   });
-
-
-
-
-  test('Validation with dependency with passed dependency value ', async () => {
-    function TestForm() {
-      const {formData} = useForm({
-        testInputText1: {
-          formElement: formElements.textInput,
-          defaultValue: 'text1',
-          name: 'testInputText1',
-          validationRules: [
-            {
-              fn: isRequired,
-              args:{
-                dependencyField: 'testInputText2',
-                dependencyValue: 'test2',
-              }
-            },
-          ],
-        },
-        testInputText2: {
-          formElement: formElements.textInput,
-          name: 'testInputText2',
-          defaultValue: "test2"
-        },
-      });
-      return (
-        <div>
-          {formData.testInputText1.render()}
-          {formData.testInputText2.render()}
-        </div>
-      );
-    }
-
-    const {container, getByValue} = render(<TestForm />);
-
-    const [input1] = container.querySelectorAll('input');
-    const [inputWrapper1] = container.querySelectorAll(
-      '.TestTextInput'
-    );
-
-    fireEvent.change(input1, {target: {value: ''}});
-
-    await waitForElement(() => getByValue(''), {
-      inputWrapper1,
-    });
-
-    let errorMessage1 = container.querySelector('.testInputText1 > .Error');
-    expect(errorMessage1.innerHTML).toBe('Error: Is required default');
-  });
-
-
-  test('Validation with dependency - validate only if dependency field exist in state', async () => {
-    function TestForm() {
-      const {formData} = useForm({
-        testInputText1: {
-          formElement: formElements.textInput,
-          defaultValue: 'text1',
-          name: 'testInputText1',
-          validationRules: [
-            {
-              fn: isRequired,
-              args:{
-                dependencyField: 'testInputText2',
-              }
-            },
-          ],
-        },
-        testInputText2: {
-          formElement: formElements.textInput,
-          name: 'testInputText2',
-          defaultValue: "test2"
-        },
-      });
-      return (
-        <div>
-          {formData.testInputText1.render()}
-          {formData.testInputText2.render()}
-        </div>
-      );
-    }
-
-    const {container, getByValue} = render(<TestForm />);
-
-    const [input1, input2] = container.querySelectorAll('input');
-    const [inputWrapper1, inputWrapper2] = container.querySelectorAll(
-      '.TestTextInput'
-    );
-
-    fireEvent.change(input1, {target: {value: ''}});
-
-    await waitForElement(() => getByValue(''), {
-      inputWrapper1,
-    });
-
-    let errorMessage1 = container.querySelector('.testInputText1 > .Error');
-    expect(errorMessage1.innerHTML).toBe('Error: Is required default');
-  });
-
-
-  test('Validate function with passed dependency field', async () => {
-    let onSubmit = jest.fn();
-
-    function TestForm() {
-      const {formData, validate} = useForm({
-        testInputText1: {
-          formElement: formElements.textInput,
-          name: 'testInputText1',
-          validationRules: [
-            {
-              fn: isMaxLength,
-              args: {
-                maxLength: 3,
-              },
-            },
-          ],
-        },
-        testInputText2: {
-          formElement: formElements.textInput,
-          name: 'testInputText2',
-          validationRules: [
-            {
-              fn: isRequired,
-              args: {
-                dependencyInValidationArgs: true,
-                dependencyField: "testField",
-                dependencyValue: "testValue"
-              }
-            },
-          ],
-        },
-      });
-
-      return (
-        <div>
-          {formData.testInputText1.render()}
-          {formData.testInputText2.render()}
-          <button
-            onClick={() => {
-              let isValid = validate({testField: "testValue"});
-              if (isValid) {
-                onSubmit();
-              }
-            }}>
-            Submit form 1
-          </button>
-          <button
-            onClick={() => {
-              let isValid = validate({testField: ""});
-              if (isValid) {
-                onSubmit();
-              }
-            }}>
-            Submit form 2
-          </button>
-        </div>
-      );
-    }
-
-    const {container, getByText, getByValue} = render(<TestForm />);
-    fireEvent.click(getByText('Submit form 1'));
-    expect(onSubmit).not.toHaveBeenCalled();
-
-    let errorMessage1 = container.querySelector('.testInputText1 > .Error');
-    expect(errorMessage1).toBeNull();
-
-    let errorMessage2 = container.querySelector('.testInputText2 > .Error');
-    expect(errorMessage2.innerHTML).toBe('Error: Is required default');
-
-
-    fireEvent.click(getByText('Submit form 2'));
-    expect(container.querySelector('.testInputText2 > .Error')).toBeNull();
-  });
-
 
   test('Test validate function when field is valid but rule returns undefined, not empty string', async () => {
     let onSubmit = jest.fn();
 
     function TestForm() {
       const {formData, validate} = useForm({
-        testInputText1: {
+        a: {
           formElement: formElements.textInput,
-          name: 'testInputText1',
-          defaultValue: "valid value",
+          name: 'a',
+          defaultValue: 'A',
           validationRules: [
             {
               fn: isMaxLength,
               args: {
-                maxLength: 15
-              }
+                maxLength: 15,
+              },
             },
           ],
         },
       });
       return (
         <div>
-          {formData.testInputText1.render()}
+          {formData.a.render()}
           <button
             onClick={() => {
               let isValid = validate();
@@ -796,8 +646,7 @@ describe('Validate form data on input change', () => {
     }
 
     const {getByText} = render(<TestForm />);
-    fireEvent.click(getByText("Submit form"));
+    fireEvent.click(getByText('Submit form'));
     expect(onSubmit).toHaveBeenCalled();
   });
-
 });
