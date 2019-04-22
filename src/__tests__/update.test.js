@@ -1,26 +1,26 @@
-import React from "react";
+import React from 'react';
 import {
   render,
   cleanup,
   fireEvent,
   waitForElement,
   wait,
-} from "react-testing-library";
-import useForm from "../index";
-import formElements from "./formTestElements";
+} from 'react-testing-library';
+import useForm from '../index';
+import formElements from './formTestElements';
 
 afterEach(cleanup);
 
-describe("Update form data on input change", () => {
-  test("Text Input", async () => {
+describe('Update form data on input change', () => {
+  test('Text Input', async () => {
     function TestForm() {
-      const { formData } = useForm({
+      const {formData} = useForm({
         testInputText1: {
-          formElement: formElements.textInput
+          formElement: formElements.textInput,
         },
         testInputText2: {
-          formElement: formElements.textInput
-        }
+          formElement: formElements.textInput,
+        },
       });
 
       return (
@@ -31,187 +31,226 @@ describe("Update form data on input change", () => {
       );
     }
 
-    const { container, getByValue, debug } = render(<TestForm />);
-    const [input1, input2] = container.querySelectorAll("input");
+    const {container, getByValue, debug} = render(<TestForm />);
+    const [input1, input2] = container.querySelectorAll('input');
 
-    fireEvent.change(input1, { target: { value: "test1" } });
-    fireEvent.change(input2, { target: { value: "test2" } });
+    fireEvent.change(input1, {target: {value: 'test1'}});
+    fireEvent.change(input2, {target: {value: 'test2'}});
 
-    await waitForElement(() => [getByValue("test1"), getByValue("test2")], {
-      container
+    await waitForElement(() => [getByValue('test1'), getByValue('test2')], {
+      container,
     });
   });
 
-  test("Select", async () => {
+  test('Select', async () => {
     function TestForm() {
-      const { formData } = useForm({
+      const {formData} = useForm({
         testSelect1: {
-          formElement: formElements.select
+          formElement: formElements.select,
         },
         testSelect2: {
           formElement: formElements.select,
-          defaultValue: "option-default"
-        }
+          defaultValue: 'option-default',
+        },
       });
 
       return (
         <div>
           {formData.testSelect1.render({
             selectOptions: [
-              { value: "option-default", label: "Test Default 1" },
-              { value: "option-1", label: "Test 1" }
+              {value: 'option-default', label: 'Test Default 1'},
+              {value: 'option-1', label: 'Test 1'},
             ],
-            onChangeTestValue: { value: "option-1", label: "Test 1" }
+            onChangeTestValue: {value: 'option-1', label: 'Test 1'},
           })}
           {formData.testSelect2.render({
-            selectOptions: [{ value: "option-default", label: "Test Default 2" }],
-            onChangeTestValue: null
+            selectOptions: [{value: 'option-default', label: 'Test Default 2'}],
+            onChangeTestValue: null,
           })}
         </div>
       );
     }
 
-    const { container, getByText, queryByText } = render(<TestForm />);
+    const {container, getByText, queryByText} = render(<TestForm />);
 
-    const [select1, select2] = container.querySelectorAll(".TestSelect");
+    const [select1, select2] = container.querySelectorAll('.TestSelect');
 
     fireEvent.click(select1);
     fireEvent.click(select2);
 
-    await waitForElement(() => getByText("Test 1"), {
-      container
+    await waitForElement(() => getByText('Test 1'), {
+      container,
     });
 
-    expect(queryByText("Test Default 2")).toBeNull();
+    expect(queryByText('Test Default 2')).toBeNull();
   });
 
-  test("Multi Select", async () => {
+  test('Multi Select', async () => {
     function TestForm() {
-      const { formData } = useForm({
+      const {formData} = useForm({
         testSelectMulti1: {
           formElement: formElements.multiSelect,
-          name: "testSelectMulti1",
-          defaultValue: [{ value: "test-select1", label: "Test Select1" }]
+          name: 'testSelectMulti1',
+          defaultValue: [{value: 'test-select1', label: 'Test Select1'}],
         },
         testSelectMulti2: {
           formElement: formElements.multiSelect,
-          name: "testSelectMulti2",
+          name: 'testSelectMulti2',
           defaultValue: [
-            { value: "multi-select-to-remove", label: "Test Remove" }
-          ]
-        }
+            {value: 'multi-select-to-remove', label: 'Test Remove'},
+          ],
+        },
       });
 
       return (
         <div>
           {formData.testSelectMulti1.render({
             selectOptions: [
-              { value: "test-select1", label: "Test Select1" },
-              { value: "test-select2", label: "Test Select2" }
+              {value: 'test-select1', label: 'Test Select1'},
+              {value: 'test-select2', label: 'Test Select2'},
             ],
             onChangeTestValue: [
-              { value: "test-select1", label: "Test Select1" },
-              { value: "test-select2", label: "Test Select2" }
-            ]
+              {value: 'test-select1', label: 'Test Select1'},
+              {value: 'test-select2', label: 'Test Select2'},
+            ],
           })}
           {formData.testSelectMulti2.render({
             selectOptions: [
-              { value: "multi-select-to-remove", label: "Test Remove" }
+              {value: 'multi-select-to-remove', label: 'Test Remove'},
             ],
-            onChangeTestValue: []
+            onChangeTestValue: [],
           })}
         </div>
       );
     }
 
-    const { container, getByText, queryByText, debug } = render(<TestForm />);
-    const [select1, select2] = container.querySelectorAll("input");
+    const {container, getByText, queryByText, debug} = render(<TestForm />);
+    const [select1, select2] = container.querySelectorAll('input');
 
-    expect(queryByText("Test Select1")).toBeTruthy();
-    expect(queryByText("Test Remove")).toBeTruthy();
+    expect(queryByText('Test Select1')).toBeTruthy();
+    expect(queryByText('Test Remove')).toBeTruthy();
 
     fireEvent.click(select1);
     fireEvent.click(select2);
 
     await wait(
       () => [
-        expect(queryByText("Test Select1")).toBeTruthy(),
-        expect(queryByText("Test Select2")).toBeTruthy(),
-        expect(queryByText("Test Remove")).not.toBeTruthy()
+        expect(queryByText('Test Select1')).toBeTruthy(),
+        expect(queryByText('Test Select2')).toBeTruthy(),
+        expect(queryByText('Test Remove')).not.toBeTruthy(),
       ],
       {
-        container
+        container,
       }
     );
   });
 
-  test("Checkbox", async () => {
+  test('Checkbox', async () => {
     function TestForm() {
-      const { formData } = useForm({
+      const {formData} = useForm({
         checkbox1: {
           formElement: formElements.checkbox,
-          name: "checkbox1",
-          label: "checkbox1",
-          defaultValue: true
+          name: 'checkbox1',
+          label: 'checkbox1',
+          defaultValue: true,
         },
       });
 
-      return (
-        <div>
-          {formData.checkbox1.render()}
-        </div>
-      );
+      return <div>{formData.checkbox1.render()}</div>;
     }
 
-    const { container } = render(<TestForm />);
-    const checkbox1 = container.querySelector(".checkbox1 input")
+    const {container} = render(<TestForm />);
 
-    expect(container.querySelector(".checkbox1 input").checked).toBeTruthy();
-    expect(container.querySelector(".checkbox1 input").type).toBe("checkbox");
-    fireEvent.click(container.querySelector(".checkbox1 input"));
+    expect(container.querySelector('.checkbox1 input').checked).toBeTruthy();
+    expect(container.querySelector('.checkbox1 input').type).toBe('checkbox');
+    fireEvent.click(container.querySelector('.checkbox1 input'));
 
     await wait(
       () => [
-        expect(container.querySelector(".checkbox1 input").checked).not.toBeTruthy()
+        expect(
+          container.querySelector('.checkbox1 input').checked
+        ).not.toBeTruthy(),
       ],
       {
-        container
+        container,
       }
     );
 
-    fireEvent.click(container.querySelector(".checkbox1 input"));
+    fireEvent.click(container.querySelector('.checkbox1 input'));
     await wait(
       () => [
-        expect(container.querySelector(".checkbox1 input").checked).toBeTruthy()
+        expect(
+          container.querySelector('.checkbox1 input').checked
+        ).toBeTruthy(),
       ],
       {
-        container
+        container,
       }
     );
   });
 
-  test("Text Area", async () => {
+  test('Text Area', async () => {
     function TestForm() {
-      const { formData } = useForm({
+      const {formData} = useForm({
         testAreaText1: {
-          formElement: formElements.textArea
+          formElement: formElements.textArea,
         },
       });
 
-      return (
-        <div>
-          {formData.testAreaText1.render()}
-        </div>
-      );
+      return <div>{formData.testAreaText1.render()}</div>;
     }
 
-    const { container, getByText, debug } = render(<TestForm />);
+    const {container, getByText, debug} = render(<TestForm />);
     const [textarea1] = container.querySelectorAll('textarea');
 
     textarea1.innerHTML = 'test1';
 
-    await waitForElement(() => [getByText('test1'), ], {
-      container
+    await waitForElement(() => [getByText('test1')], {
+      container,
     });
+  });
+
+  test('RadioGroup', async () => {
+    function TestForm() {
+      const {formData} = useForm({
+        radioGroup1: {
+          formElement: formElements.radioGroup,
+          name: 'radioGroup',
+          label: 'radioGroup',
+          defaultValue: 'option1',
+        },
+      });
+
+      return (
+        <div>
+          {formData.radioGroup1.render({
+            options: [
+              {value: 'option1', label: 'Option 1'},
+              {value: 'option2', label: 'Option 2'},
+            ],
+          })}
+        </div>
+      );
+    }
+
+    const {getByLabelText} = render(<TestForm />);
+
+    expect(getByLabelText('Option 1').type).toBe('radio');
+    expect(getByLabelText('Option 1').checked).toBe(true);
+    expect(getByLabelText('Option 1').value).toBe('option1');
+
+    expect(getByLabelText('Option 2').type).toBe('radio');
+    expect(getByLabelText('Option 2').checked).toBe(false);
+    expect(getByLabelText('Option 2').value).toBe('option2');
+
+    fireEvent.click(getByLabelText('Option 2'));
+
+    expect(getByLabelText('Option 2').checked).toBe(true);
+    expect(getByLabelText('Option 1').checked).toBe(false);
+
+    fireEvent.click(getByLabelText('Option 1'));
+
+    expect(getByLabelText('Option 2').checked).toBe(false);
+    expect(getByLabelText('Option 1').checked).toBe(true);
   });
 });

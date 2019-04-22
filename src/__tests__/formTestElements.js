@@ -171,7 +171,6 @@ function RadioGroup({
   onChange,
   disabled,
   name,
-  id = name,
   options = [],
 }) {
   return (
