@@ -345,7 +345,7 @@ describe('Prepare for server', () => {
     });
   });
 
-  test('Input', () => {
+  test('Text area', () => {
     let onSubmitMock = jest.fn();
     function TestForm(props) {
       const {formData, validate, prepareForServer} = useForm(
@@ -420,4 +420,67 @@ describe('Prepare for server', () => {
       textArea7: 0,
     });
   });
+
+  test('Prepare for server trims off leading & trailing spaces', ()=>{
+    let onSubmitMock = jest.fn();
+    function TestForm(props) {
+      const {formData, validate, prepareForServer} = useForm(
+        {
+          textArea1: {
+            formElement: formElements.textArea,
+          },
+          textArea2: {
+            formElement: formElements.textArea,
+          },
+          textArea3: {
+            formElement: formElements.textArea,
+          },
+          textInput1: {
+            formElement: formElements.textInput,
+          },
+          textInput2: {
+            formElement: formElements.textInput,
+          },
+          textInput3: {
+            formElement: formElements.textInput,
+          },
+        },
+        {
+          textArea1: ' Test area      ',
+          textArea2: '\n\nTest area\n',
+          textArea3: '\tTest area\t',
+          textInput1: ' Test input      ',
+          textInput2: '\n\nTest input\n',
+          textInput3: '\tTest input\t',
+        }
+      );
+
+      return (
+        <div>
+          {formData.textArea1.render()}
+          {formData.textInput1.render()}
+          <button
+            onClick={() => {
+              let dataForServer = prepareForServer();
+              onSubmitMock(dataForServer);
+            }}>
+            Submit form
+          </button>
+        </div>
+      );
+    }
+    const {container, getByText, } = render(<TestForm />);
+
+    fireEvent.click(getByText('Submit form'));
+
+    expect(onSubmitMock.mock.calls[0][0]).toEqual({
+      textArea1: 'Test area',
+      textArea2: 'Test area',
+      textArea3: 'Test area',
+      textInput1: 'Test input',
+      textInput2: 'Test input',
+      textInput3: 'Test input',
+    });
+  });
+
 });

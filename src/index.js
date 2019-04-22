@@ -101,6 +101,19 @@ export function getIn(path: string | Array<string>, obj: {} = {}) {
   return res;
 }
 
+/**
+ * Trims off leading & trailing spaces
+ *
+ * @param {string} value
+ * @return {*}
+ */
+export function trim(value: string) {
+  if (typeof value === 'string') {
+    value = value.replace(/^\s+/, '').replace(/\s+$/, '');
+  }
+  return value;
+}
+
 export const InputTypes = {
   TEXT: 'TEXT_INPUT',
   SELECT: 'SELECT_INPUT',
@@ -241,8 +254,8 @@ export default function useForm(
             item && typeof item === 'object' ? item.value : item
           );
         } else if (typeof value === 'string') {
-          // text input
-          prepared[fieldName] = value;
+          // text input, text area
+          prepared[fieldName] = trim(value);
         } else {
           prepared[fieldName] = value;
         }
