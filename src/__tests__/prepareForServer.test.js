@@ -1,8 +1,7 @@
-import {render, cleanup, fireEvent, wait} from 'react-testing-library';
+import {render, cleanup, fireEvent, wait} from '@testing-library/react';
 import useForm from '../index';
 import formElements from './formTestElements';
 import React from 'react';
-import {isMaxLength} from './validation.test';
 
 afterEach(cleanup);
 
@@ -69,7 +68,7 @@ describe('Prepare for server', () => {
         </div>
       );
     }
-    const {container, getByText, getByValue} = render(<TestForm />);
+    const {getByText} = render(<TestForm />);
 
     fireEvent.click(getByText('Submit form'));
 
@@ -156,7 +155,7 @@ describe('Prepare for server', () => {
       );
     }
 
-    const {container, getByText, getByValue} = render(<TestForm />);
+    const {getByText} = render(<TestForm />);
 
     fireEvent.click(getByText('Submit form'));
 
@@ -208,7 +207,7 @@ describe('Prepare for server', () => {
       );
     }
 
-    const {container, getByText, getByValue} = render(<TestForm />);
+    const {getByText} = render(<TestForm />);
 
     fireEvent.click(getByText('Submit form'));
 
@@ -283,7 +282,7 @@ describe('Prepare for server', () => {
       );
     }
 
-    const {container, getByText, getByValue} = render(<TestForm />);
+    const {getByText} = render(<TestForm />);
 
     fireEvent.click(getByText('Submit form'));
 
@@ -334,7 +333,7 @@ describe('Prepare for server', () => {
         </div>
       );
     }
-    const {container, getByText, getByValue} = render(<TestForm />);
+    const {getByText} = render(<TestForm />);
 
     fireEvent.click(getByText('Submit form'));
 
@@ -406,7 +405,7 @@ describe('Prepare for server', () => {
         </div>
       );
     }
-    const {container, getByText, } = render(<TestForm />);
+    const {container, getByText} = render(<TestForm />);
 
     fireEvent.click(getByText('Submit form'));
 
@@ -421,7 +420,7 @@ describe('Prepare for server', () => {
     });
   });
 
-  test('Prepare for server trims off leading & trailing spaces', ()=>{
+  test('Prepare for server trims off leading & trailing spaces', () => {
     let onSubmitMock = jest.fn();
     function TestForm(props) {
       const {formData, validate, prepareForServer} = useForm(
@@ -469,7 +468,7 @@ describe('Prepare for server', () => {
         </div>
       );
     }
-    const {container, getByText, } = render(<TestForm />);
+    const {container, getByText} = render(<TestForm />);
 
     fireEvent.click(getByText('Submit form'));
 
@@ -482,5 +481,4 @@ describe('Prepare for server', () => {
       textInput3: 'Test input',
     });
   });
-
 });

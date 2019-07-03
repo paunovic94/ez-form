@@ -4,7 +4,7 @@ import {
   cleanup,
   fireEvent,
   waitForElement,
-} from 'react-testing-library';
+} from '@testing-library/react';
 import useForm from '../index';
 import formElements from './formTestElements';
 import {isRequired} from './validation.test';
@@ -43,17 +43,19 @@ describe('Test validation rules with dependency: rule expect args with dependenc
       );
     }
 
-    const {container, getByValue} = render(<TestForm />);
+    const {container, getByDisplayValue} = render(<TestForm />);
 
     const [a] = container.querySelectorAll('input');
     const [inputWrapperA] = container.querySelectorAll('.TestTextInput');
 
     fireEvent.change(a, {target: {value: ''}});
-    await waitForElement(() => getByValue(''), {
+    await waitForElement(() => getByDisplayValue(''), {
       inputWrapperA,
     });
 
-    expect(container.querySelector('.a > .Error').innerHTML).toBe('Error: Is required default');
+    expect(container.querySelector('.a > .Error').innerHTML).toBe(
+      'Error: Is required default'
+    );
   });
 
   test('Validatin rule with no passed dependency value: validate a if b has any value in state', async () => {
@@ -86,13 +88,13 @@ describe('Test validation rules with dependency: rule expect args with dependenc
       );
     }
 
-    const {container, getByValue} = render(<TestForm />);
+    const {container, getByDisplayValue} = render(<TestForm />);
 
     const [inputA] = container.querySelectorAll('input');
     const [inputWrapperA] = container.querySelectorAll('.TestTextInput');
 
     fireEvent.change(inputA, {target: {value: ''}});
-    await waitForElement(() => getByValue(''), {
+    await waitForElement(() => getByDisplayValue(''), {
       inputWrapperA,
     });
 
@@ -136,7 +138,7 @@ describe('Test validation rules with dependency: rule expect args with dependenc
       );
     }
 
-    const {container, getByValue} = render(<TestForm />);
+    const {container, getByDisplayValue} = render(<TestForm />);
 
     const [inputA, inputB] = container.querySelectorAll('input');
     const [inputWrapperA, inputWrapperB] = container.querySelectorAll(
@@ -144,7 +146,7 @@ describe('Test validation rules with dependency: rule expect args with dependenc
     );
 
     fireEvent.change(inputA, {target: {value: ''}});
-    await waitForElement(() => getByValue(''), {
+    await waitForElement(() => getByDisplayValue(''), {
       inputWrapperA,
     });
 
@@ -153,13 +155,12 @@ describe('Test validation rules with dependency: rule expect args with dependenc
 
     // don't validate a after change dependency value
     fireEvent.change(inputB, {target: {value: 'BBB'}});
-    await waitForElement(() => getByValue('BBB'), {
+    await waitForElement(() => getByDisplayValue('BBB'), {
       inputWrapperB,
     });
     expect(container.querySelector('.a > .Error')).toBeNull();
   });
 });
-
 
 describe('Test validate function when rules are with dependency', () => {
   test('Pass dependency field and value as arguments of validate function', async () => {
@@ -262,10 +263,12 @@ describe('Test validate function when rules are with dependency', () => {
       );
     }
 
-    const {container, getByText, getByValue} = render(<TestForm />);
+    const {container, getByText, getByDisplayValue} = render(<TestForm />);
 
-    fireEvent.change(container.querySelector('.b > input'), {target: {value: 'B'}});
-    await waitForElement(() => getByValue('B'), {
+    fireEvent.change(container.querySelector('.b > input'), {
+      target: {value: 'B'},
+    });
+    await waitForElement(() => getByDisplayValue('B'), {
       container,
     });
 
@@ -278,7 +281,7 @@ describe('Test validate function when rules are with dependency', () => {
     fireEvent.change(container.querySelector('.b > input'), {
       target: {value: 'BBB'},
     });
-    await waitForElement(() => getByValue('BBB'), {
+    await waitForElement(() => getByDisplayValue('BBB'), {
       container,
     });
 

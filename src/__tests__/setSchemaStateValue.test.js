@@ -8,7 +8,7 @@ import {
   getByTestId,
   queryByTestId,
   wait,
-} from 'react-testing-library';
+} from '@testing-library/react';
 import useForm from '../index';
 import formElements, {formatDate} from './formTestElements';
 import {isMaxLength, isName, isRequired} from './validation.test';
@@ -54,7 +54,7 @@ describe('Set schema state value', () => {
     const {
       container,
       getByText,
-      getByValue,
+      getByDisplayValue,
       getByLabelText,
       queryByText,
     } = render(<TestForm />);
@@ -63,7 +63,7 @@ describe('Set schema state value', () => {
 
     fireEvent.click(getByText('Set schema test value'));
     let testInputText1 = await waitForElement(
-      () => getByValue('Test'),
+      () => getByDisplayValue('Test'),
       container
     );
 
@@ -101,7 +101,7 @@ describe('Set schema state value', () => {
     const {
       container,
       getByText,
-      getByValue,
+      getByDisplayValue,
       getByLabelText,
       queryByText,
     } = render(<TestForm />);
@@ -160,13 +160,9 @@ describe('Set schema state value', () => {
       );
     }
 
-    const {
-      container,
-      queryByText,
-      getByText,
-      getByValue,
-      getByLabelText,
-    } = render(<TestForm />);
+    const {container, queryByText, getByText, getByLabelText} = render(
+      <TestForm />
+    );
 
     fireEvent.click(getByText('Set schema test value'));
 
@@ -216,14 +212,14 @@ describe('Set schema state value', () => {
       );
     }
 
-    const {container, getByText, getByValue, getByLabelText} = render(
+    const {container, getByText, getByDisplayValue, getByLabelText} = render(
       <TestForm />
     );
 
     expect(getByLabelText('Label: testInputText1').value).toBe('');
     fireEvent.click(getByText('Set schema test value'));
 
-    await waitForElement(() => getByValue('Test'), container);
+    await waitForElement(() => getByDisplayValue('Test'), container);
     expect(onCompleteMock).toHaveBeenCalled();
   });
 
@@ -272,7 +268,7 @@ describe('Set schema state value', () => {
       );
     }
 
-    const {container, getByText, getByValue, getByLabelText} = render(
+    const {container, getByText, getByDisplayValue, getByLabelText} = render(
       <TestForm />
     );
 
@@ -284,8 +280,8 @@ describe('Set schema state value', () => {
 
     await waitForElement(
       () => [
-        getByValue('Test 1'),
-        getByValue('Test 2'),
+        getByDisplayValue('Test 1'),
+        getByDisplayValue('Test 2'),
         getByText('select_label'),
       ],
       container
@@ -332,7 +328,7 @@ describe('Set schema state value', () => {
       );
     }
 
-    const {container, getByText, getByValue, getByLabelText, debug} = render(
+    const {container, getByText, getByDisplayValue, getByLabelText} = render(
       <TestForm />
     );
 
@@ -341,7 +337,7 @@ describe('Set schema state value', () => {
 
     fireEvent.click(getByText('Set schema test value'));
 
-    await waitForElement(() => [getByValue('Test 1')], container);
+    await waitForElement(() => [getByDisplayValue('Test 1')], container);
 
     let errorMessage2 = container.querySelector('.testInputText2 > .Error');
     expect(errorMessage2.innerHTML).toBe('Error: Is required default');
@@ -383,11 +379,11 @@ describe('Set schema state value', () => {
       );
     }
 
-    const {container, getByText, getByValue} = render(<TestForm />);
+    const {container, getByText, getByDisplayValue} = render(<TestForm />);
     fireEvent.click(getByText('Set schema test value'));
 
     await waitForElement(
-      () => [getByValue('Test 1'), getByValue('Test 2')],
+      () => [getByDisplayValue('Test 1'), getByDisplayValue('Test 2')],
       container
     );
     expect(onCompleteMock).toHaveBeenCalled();
@@ -428,13 +424,9 @@ describe('Set schema state value', () => {
       );
     }
 
-    const {
-      container,
-      getByText,
-      getByValue,
-      getByLabelText,
-      queryByText,
-    } = render(<TestForm />);
+    const {container, getByText, getByLabelText, queryByText} = render(
+      <TestForm />
+    );
 
     expect(getByLabelText('Label: textArea1').value).toBe('');
 
@@ -480,12 +472,9 @@ describe('Set schema state value', () => {
       );
     }
 
-    const {
-      container,
-      getByText,
-      getByValue,
-      queryByText,
-    } = render(<TestForm />);
+    const {container, getByText, getByDisplayValue, queryByText} = render(
+      <TestForm />
+    );
 
     let testInput = container.querySelector('input');
     expect(testInput.value).toBe('');
@@ -500,7 +489,7 @@ describe('Set schema state value', () => {
     // Call setSchemaStateValue with  skipValidation: true
     fireEvent.click(getByText('Set schema test value'));
     testInput = await waitForElement(
-      () => getByValue('Test again invalid value'),
+      () => getByDisplayValue('Test again invalid value'),
       container
     );
 
@@ -558,9 +547,7 @@ describe('Set schema state value', () => {
       );
     }
 
-    const {container, getByText, getByValue, queryByText, debug} = render(
-      <TestForm />
-    );
+    const {container, getByText, getByDisplayValue} = render(<TestForm />);
     let [testInput1, testInput2] = container.querySelectorAll('input');
 
     expect(testInput1.value).toBe('');
@@ -590,8 +577,8 @@ describe('Set schema state value', () => {
 
     await waitForElement(
       () => [
-        getByValue('Test 1'),
-        getByValue('Test 2'),
+        getByDisplayValue('Test 1'),
+        getByDisplayValue('Test 2'),
         expect(container.querySelector('.testInputText1 > .Error')).toBeNull(),
         expect(container.querySelector('.testInputText2 > .Error')).toBeNull(),
       ],

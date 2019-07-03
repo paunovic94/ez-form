@@ -5,7 +5,7 @@ import {
   fireEvent,
   waitForElement,
   wait,
-} from 'react-testing-library';
+} from '@testing-library/react';
 import useForm from '../index';
 import formElements from './formTestElements';
 
@@ -35,7 +35,7 @@ describe('Test render additional options', () => {
       );
     }
 
-    const {container, getByValue} = render(<TestForm />);
+    const {container} = render(<TestForm />);
     const TextInputComponents = container.querySelectorAll('.TestTextInput');
 
     expect(TextInputComponents[0]).toBeTruthy();
@@ -105,14 +105,14 @@ describe('Test render additional options', () => {
       );
     }
 
-    const {container, getByValue} = render(<TestForm />);
+    const {container, getByDisplayValue} = render(<TestForm />);
 
     const input = container.querySelector('input');
 
     fireEvent.change(input, {
       target: {value: 'test1'},
     });
-    let a = await waitForElement(() => getByValue('test1'), {
+    let a = await waitForElement(() => getByDisplayValue('test1'), {
       container,
     });
 
@@ -218,7 +218,7 @@ describe('Test render additional options', () => {
       );
     }
 
-    const {container, getByValue} = render(<TestForm />);
+    const {container, getByDisplayValue} = render(<TestForm />);
     const selectInput = container.querySelector('.TestSelect input');
     const multiSelectInput = container.querySelector('.TestMultiSelect input');
 
@@ -228,7 +228,7 @@ describe('Test render additional options', () => {
     fireEvent.change(multiSelectInput, {
       target: {value: 'test multi'},
     });
-    await waitForElement(() => [getByValue('test'), getByValue('test multi')], {
+    await waitForElement(() => [getByDisplayValue('test'), getByDisplayValue('test multi')], {
       container,
     });
 
@@ -331,7 +331,7 @@ describe('Test render additional options', () => {
       );
     }
 
-    const {container, getByValue, debug, getByLabelText} = render(<TestForm />);
+    const {container, getByLabelText} = render(<TestForm />);
 
     fireEvent.click(getByLabelText('Label: checkbox1'));
     await wait(

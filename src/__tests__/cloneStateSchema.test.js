@@ -3,14 +3,11 @@ import {
   render,
   cleanup,
   fireEvent,
-  waitForElement,
-  waitForDomChange,
-  getByTestId,
-  queryByTestId,
-  wait,
-} from 'react-testing-library';
+} from '@testing-library/react';
 import useForm from '../index';
-import formElements, {formatDate} from './formTestElements';
+import formElements from './formTestElements';
+
+afterEach(cleanup);
 
 describe('Clone state schema values', () => {
   test('cloneStateValues input', () => {
@@ -171,10 +168,9 @@ describe('Clone state schema values', () => {
       );
     }
 
-    const {container, getByText, getByValue} = render(<TestForm />);
+    const {getByText} = render(<TestForm />);
     fireEvent.click(getByText('Clone schema values'));
   });
-
 
   test('cloneStateValues text area', () => {
     let initialValuesObj = {

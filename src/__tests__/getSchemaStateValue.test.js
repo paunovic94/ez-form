@@ -3,14 +3,11 @@ import {
   render,
   cleanup,
   fireEvent,
-  waitForElement,
-  waitForDomChange,
-  getByTestId,
-  queryByTestId,
-  wait,
-} from 'react-testing-library';
+} from '@testing-library/react';
 import useForm from '../index';
-import formElements, {formatDate} from './formTestElements';
+import formElements from './formTestElements';
+
+afterEach(cleanup);
 
 describe('Get schema state value', () => {
   test('Get value from state - input field', () => {

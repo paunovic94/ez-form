@@ -8,7 +8,7 @@ import {
   getByTestId,
   queryByTestId,
   wait,
-} from 'react-testing-library';
+} from '@testing-library/react';
 import useForm from '../index';
 import formElements, {formatDate} from './formTestElements';
 
@@ -102,7 +102,7 @@ describe('Validate form data on input change', () => {
       );
     }
 
-    const {container, getByValue} = render(<TestForm />);
+    const {container, getByDisplayValue, getAllByDisplayValue} = render(<TestForm />);
 
     const [input1, input2] = container.querySelectorAll('input');
     const [inputWrapper1, inputWrapper2] = container.querySelectorAll(
@@ -111,10 +111,9 @@ describe('Validate form data on input change', () => {
 
     fireEvent.change(input1, {target: {value: ''}});
 
-    await waitForElement(() => getByValue(''), {
-      inputWrapper1,
+    await waitForElement(() => getAllByDisplayValue(''), {
+      container: inputWrapper1,
     });
-
     let errorMessage1 = container.querySelector('.testInputText1 > .Error');
     let errorMessage2 = container.querySelector('.testInputText2 > .Error');
 
@@ -124,7 +123,7 @@ describe('Validate form data on input change', () => {
     fireEvent.change(input1, {target: {value: 'text'}});
     fireEvent.change(input2, {target: {value: '222'}});
 
-    await waitForElement(() => [getByValue('text'), getByValue('222')], {
+    await waitForElement(() => [getByDisplayValue('text'), getByDisplayValue('222')], {
       container,
     });
 
@@ -160,11 +159,11 @@ describe('Validate form data on input change', () => {
       return <div>{formData.testInputText1.render()}</div>;
     }
 
-    const {container, getByValue} = render(<TestForm />);
+    const {container, getByDisplayValue} = render(<TestForm />);
     const input = container.querySelector('input');
 
     fireEvent.change(input, {target: {value: ''}});
-    await waitForElement(() => getByValue(''), {
+    await waitForElement(() => getByDisplayValue(''), {
       container,
     });
 
@@ -191,14 +190,14 @@ describe('Validate form data on input change', () => {
       return <div>{formData.testInputText.render()}</div>;
     }
 
-    const {container, getByValue} = render(<TestForm />);
+    const {container, getByDisplayValue} = render(<TestForm />);
 
     const [input] = container.querySelectorAll('input');
     const [testInputText] = container.querySelectorAll('.TestTextInput');
 
     fireEvent.change(input, {target: {value: 'text'}});
 
-    await waitForElement(() => [getByValue('text')], {
+    await waitForElement(() => [getByDisplayValue('text')], {
       container,
     });
 
@@ -243,7 +242,7 @@ describe('Validate form data on input change', () => {
       );
     }
 
-    const {container, getByValue} = render(<TestForm />);
+    const {container, getByDisplayValue} = render(<TestForm />);
 
     const [input1, input2] = container.querySelectorAll('input');
     const [inputWrapper1, inputWrapper2] = container.querySelectorAll(
@@ -252,7 +251,7 @@ describe('Validate form data on input change', () => {
 
     fireEvent.change(input1, {target: {value: 'Text1'}});
 
-    await waitForElement(() => [getByValue('Text1')], {
+    await waitForElement(() => [getByDisplayValue('Text1')], {
       container,
     });
 
@@ -265,7 +264,7 @@ describe('Validate form data on input change', () => {
     fireEvent.change(input1, {target: {value: 't'}});
     fireEvent.change(input2, {target: {value: 'text2'}});
 
-    await waitForElement(() => [getByValue('t'), getByValue('text2')], {
+    await waitForElement(() => [getByDisplayValue('t'), getByDisplayValue('text2')], {
       container,
     });
 
@@ -306,13 +305,13 @@ describe('Validate form data on input change', () => {
       );
     }
 
-    const {container, getByValue} = render(<TestForm />);
+    const {container, getByDisplayValue} = render(<TestForm />);
     const [startDateInput] = container.querySelectorAll('input');
 
     let startDate = new Date();
     fireEvent.change(startDateInput, {target: {value: startDate}});
 
-    await waitForElement(() => getByValue(formatDate(startDate)), {
+    await waitForElement(() => getByDisplayValue(formatDate(startDate)), {
       container,
     });
 
@@ -366,13 +365,13 @@ describe('Validate form data on input change', () => {
       );
     }
 
-    const {container, getByValue} = render(<TestForm />);
+    const {container, getByDisplayValue} = render(<TestForm />);
     const [startDateInput] = container.querySelectorAll('input');
 
     let startDate = new Date();
     fireEvent.change(startDateInput, {target: {value: startDate}});
 
-    await waitForElement(() => getByValue(formatDate(startDate)), {
+    await waitForElement(() => getByDisplayValue(formatDate(startDate)), {
       container,
     });
 
@@ -389,7 +388,7 @@ describe('Validate form data on input change', () => {
     let newStartDate = new Date(2015, 11, 31);
     fireEvent.change(startDateInput, {target: {value: newStartDate}});
 
-    await waitForElement(() => getByValue(formatDate(newStartDate)), {
+    await waitForElement(() => getByDisplayValue(formatDate(newStartDate)), {
       container,
     });
 
@@ -449,7 +448,7 @@ describe('Validate function', () => {
       );
     }
 
-    const {container, getByText, getByValue} = render(<TestForm />);
+    const {container, getByText, getByDisplayValue} = render(<TestForm />);
     fireEvent.click(getByText('Submit form'));
 
     expect(onSubmit).not.toHaveBeenCalled();
@@ -458,7 +457,7 @@ describe('Validate function', () => {
 
     // Fix error
     fireEvent.change(container.querySelector('.b > input'), {target: {value: 'testInputText2'}});
-    await waitForElement(() => getByValue('testInputText2'), {
+    await waitForElement(() => getByDisplayValue('testInputText2'), {
       container,
     });
     fireEvent.click(getByText('Submit form'));
@@ -545,7 +544,7 @@ describe('Validate function', () => {
       );
     }
 
-    const {container, getByText, getByValue} = render(<TestForm />);
+    const {container, getByText} = render(<TestForm />);
     let errorMessages = container.querySelector('.Error');
 
     fireEvent.click(getByText('Submit form'));
@@ -591,7 +590,7 @@ describe('Validate function', () => {
       );
     }
 
-    const {container, getByText, getByValue} = render(<TestForm />);
+    const {container, getByText, getByDisplayValue} = render(<TestForm />);
 
     fireEvent.click(getByText('Submit form'));
     expect(onSubmit).not.toHaveBeenCalled();
@@ -600,7 +599,7 @@ describe('Validate function', () => {
 
     // Fix error
     fireEvent.change(container.querySelector('.a > input'), {target: {value: 'tt'}});
-    await waitForElement(() => getByValue('tt'), {
+    await waitForElement(() => getByDisplayValue('tt'), {
       container,
     });
 

@@ -5,7 +5,7 @@ import {
   fireEvent,
   waitForElement,
   wait,
-} from 'react-testing-library';
+} from '@testing-library/react';
 import useForm from '../index';
 import formElements from './formTestElements';
 
@@ -31,15 +31,18 @@ describe('Update form data on input change', () => {
       );
     }
 
-    const {container, getByValue, debug} = render(<TestForm />);
+    const {container, getByDisplayValue, debug} = render(<TestForm />);
     const [input1, input2] = container.querySelectorAll('input');
 
     fireEvent.change(input1, {target: {value: 'test1'}});
     fireEvent.change(input2, {target: {value: 'test2'}});
 
-    await waitForElement(() => [getByValue('test1'), getByValue('test2')], {
-      container,
-    });
+    await waitForElement(
+      () => [getByDisplayValue('test1'), getByDisplayValue('test2')],
+      {
+        container,
+      }
+    );
   });
 
   test('Select', async () => {
