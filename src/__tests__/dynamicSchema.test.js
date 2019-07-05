@@ -1,41 +1,51 @@
 import React from 'react';
-import {
-  render,
-  cleanup,
-} from '@testing-library/react';
+import {render, cleanup} from '@testing-library/react';
 import useForm from '../index';
 import formElements from './formTestElements';
 
 afterEach(cleanup);
 
 describe('Dynamic Schema', () => {
-  test('set to empty array initially', () => {
+  test('dynamic element set to empty array initially', () => {
     function TestForm(props) {
       const {formData} = useForm({
-        testInputText1: {
-          formElement: formElements.textInput,
-          defaultValue: 'testInputText1',
-          name: 'testInputText1',
-        },
-        testInputText2: {
-          formElement: formElements.textInput,
-          name: 'testInputText2',
-          defaultValue: 'testInputText2',
+        students: {
+          dynamicSchema: true,
+          dynamicSchemaItem: {
+            name: {
+              formElement: formElements.textInput,
+              defaultValue: 'testInputText1',
+            },
+            gender: {
+              formElement: formElements.radioGroup,
+              defaultValue: 'MALE',
+            },
+          },
         },
       });
 
-      return (
+      if (formData.students.length === 0) {
+        return <div>No students</div>;
+      }
+
+      return formData.students.map(studentSchema => (
         <div>
-          {formData.testInputText1.render({isVisible: true})}
-          {formData.testInputText2.render({isVisible: false})}
+          {studentSchema.name.render()}
+          {studentSchema.gender.render({
+            options: [
+              {value: 'MALE', label: 'Male'},
+              {value: 'FEMALE', label: 'Female'},
+              {value: 'OTHER', label: 'Other'},
+            ],
+          })}
         </div>
-      );
+      ));
     }
 
-    const {container, getByDisplayValue} = render(<TestForm />);
-    const TextInputComponents = container.querySelectorAll('.TestTextInput');
+    const {getByText, queryByDisplayValue} = render(<TestForm />);
 
-    expect(TextInputComponents[0]).toBeTruthy();
-    expect(TextInputComponents[1]).not.toBeTruthy();
+    expect(getByText('No students')).toBeTruthy();
+    expect(queryByDisplayValue('MALE')).toBeNull();
+
   });
 });

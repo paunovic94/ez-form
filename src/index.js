@@ -47,7 +47,8 @@ type SchemaValue =
   | void
   | {};
 
-type FieldMetadata = {
+// https://flow.org/en/docs/types/unions/#toc-disjoint-unions
+type StandardFieldMetadata = {|
   name: string,
   defaultValue: SchemaValue,
   formElement: FormElement,
@@ -57,7 +58,12 @@ type FieldMetadata = {
   useSecondLabel: ?boolean,
   disabled: ?boolean,
   isVisible: ?boolean,
-};
+|};
+type DynamicFieldMetadata = {|
+  dynamicSchema: true,
+  dynamicSchemaItem: StandardFieldMetadata,
+|};
+type FieldMetadata = StandardFieldMetadata | DynamicFieldMetadata;
 
 type Schema = {[string]: FieldMetadata};
 
@@ -129,7 +135,7 @@ export default function useForm(
   schemaValues: {[string]: any} = {}
 ) {
   let [formState, setFormState] = useState(() =>
-    initFormData(schema, schemaValues)
+    initFormState(schema, schemaValues)
   );
 
   function handleChange({event, fieldName, onComplete}) {
@@ -250,8 +256,8 @@ export default function useForm(
           // select
           prepared[fieldName] = value.value;
         } else if (Array.isArray(value)) {
-          prepared[fieldName] = value.map(item =>
-            item && typeof item === 'object' ? item.value : item
+          prepared[fieldName] = value.map(
+            item => (item && typeof item === 'object' ? item.value : item)
           );
         } else if (typeof value === 'string') {
           // text input, text area
@@ -281,6 +287,11 @@ export default function useForm(
 
   let formData = {};
   Object.keys(schema).forEach(fieldName => {
+    if (schema[fieldName].dynamicSchema) {
+      formData[fieldName] = [];
+      return;
+    }
+
     const {formElement, name, label, label2} = schema[fieldName];
     formData[fieldName] = {
       render: ({
@@ -343,34 +354,38 @@ export default function useForm(
   };
 }
 
-function initFormData(schema, schemaValues) {
-  let formData = {};
+function initFormState(schema, schemaValues) {
+  let formState = {};
 
   Object.keys(schema).forEach(fieldName => {
-    let {
-      defaultValue,
-      formElement,
-      validationRules = [],
-      isVisible = true,
-      disabled = false,
-      useSecondLabel = false,
-    } = schema[fieldName];
-    formData[fieldName] = {
-      value: getInitValue({
-        initValue: schemaValues[fieldName],
+    if (schema[fieldName].dynamicSchema) {
+      formState[fieldName] = {value: []};
+    } else {
+      let {
         defaultValue,
-        type: formElement.type,
-      }),
-      handleInputValueChange: ValueResolvers[formElement.type],
-      error: '',
-      validationRules,
-      isVisible,
-      disabled,
-      useSecondLabel,
-    };
+        formElement,
+        validationRules = [],
+        isVisible = true,
+        disabled = false,
+        useSecondLabel = false,
+      } = schema[fieldName];
+      formState[fieldName] = {
+        value: getInitValue({
+          initValue: schemaValues[fieldName],
+          defaultValue,
+          type: formElement.type,
+        }),
+        handleInputValueChange: ValueResolvers[formElement.type],
+        error: '',
+        validationRules,
+        isVisible,
+        disabled,
+        useSecondLabel,
+      };
+    }
   });
 
-  return formData;
+  return formState;
 }
 
 /**
@@ -431,7 +446,7 @@ function validateField(fieldState, formState, dependencyArgs = {}) {
 
       // Skip to next rule
       if (dependencyInValidationArgs) {
-      // if dependency value is defined in validation fn args and it is different than dependency value in state
+        // if dependency value is defined in validation fn args and it is different than dependency value in state
         if (dependencyArgs[dependencyField] !== dependencyValue) {
           continue;
         }
