@@ -444,6 +444,8 @@ function validateField(fieldState, formState, dependencyArgs = {}) {
       let dependencyInValidationArgs =
         rule.args && rule.args.dependencyInValidationArgs;
 
+      let dependencyValueInFormState = getIn('value.value', formState[dependencyField]) ||  getIn('value', formState[dependencyField]);
+     
       // Skip to next rule
       if (dependencyInValidationArgs) {
         // if dependency value is defined in validation fn args and it is different than dependency value in state
@@ -454,14 +456,14 @@ function validateField(fieldState, formState, dependencyArgs = {}) {
         // if dependency value is defined in args but different than dependency value in state
         dependencyField &&
         dependencyValue !== undefined &&
-        getIn('value', formState[dependencyField]) !== dependencyValue
+        dependencyValueInFormState !== dependencyValue
       ) {
         continue;
       } else if (
         // if dependency value is not defined in args and different than dependency value in state doesn't exist
         dependencyField &&
         dependencyValue === undefined &&
-        !getIn('value', formState[dependencyField])
+        !dependencyValueInFormState
       ) {
         continue;
       }

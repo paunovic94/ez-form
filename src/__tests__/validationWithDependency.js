@@ -58,6 +58,53 @@ describe('Test validation rules with dependency: rule expect args with dependenc
     );
   });
 
+
+  test('Validation with dependency with passed dependency value: test a if b is select field and b.value = "B"', async () => {
+    function TestForm() {
+      const {formData} = useForm({
+        a: {
+          formElement: formElements.textInput,
+          defaultValue: 'A',
+          name: 'a',
+          validationRules: [
+            {
+              fn: isRequired,
+              args: {
+                dependencyField: 'b',
+                dependencyValue: 'B',
+              },
+            },
+          ],
+        },
+        b: {
+          formElement: formElements.textInput,
+          name: 'b',
+          defaultValue: {value: 'B', label: 'B'},
+        },
+      });
+      return (
+        <div>
+          {formData.a.render()}
+          {formData.b.render()}
+        </div>
+      );
+    }
+
+    const {container, getByValue} = render(<TestForm />);
+
+    const [a] = container.querySelectorAll('input');
+    const [inputWrapperA] = container.querySelectorAll('.TestTextInput');
+
+    fireEvent.change(a, {target: {value: ''}});
+    await waitForElement(() => getByValue(''), {
+      inputWrapperA,
+    });
+
+    expect(container.querySelector('.a > .Error').innerHTML).toBe('Error: Is required default');
+  });
+
+
+
   test('Validatin rule with no passed dependency value: validate a if b has any value in state', async () => {
     function TestForm() {
       const {formData} = useForm({
