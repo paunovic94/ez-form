@@ -508,6 +508,6 @@ const ValueResolvers = {
   [InputTypes.MULTISELECT]: event => event,
   [InputTypes.CHECKBOX]: event => event.target.checked,
   [InputTypes.RADIOGROUP]: event => event.target.value,
-  [InputTypes.TEXTAREA]: event => event.target.value,
+  [InputTypes.TEXTAREA]: event => event.currentTarget.value,
   [InputTypes.DATEPICKER]: event => event.currentTarget.value,
 };
