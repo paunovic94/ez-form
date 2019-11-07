@@ -4,6 +4,7 @@ import {
   cleanup,
   fireEvent,
   waitForElement,
+  wait,
 } from '@testing-library/react';
 import useForm from '../index';
 import formElements from './formTestElements';
@@ -65,6 +66,7 @@ describe('Test validation rules with dependency: rule expect args with dependenc
         a: {
           formElement: formElements.textInput,
           defaultValue: 'A',
+          label: 'a',
           name: 'a',
           validationRules: [
             {
@@ -77,7 +79,7 @@ describe('Test validation rules with dependency: rule expect args with dependenc
           ],
         },
         b: {
-          formElement: formElements.textInput,
+          formElement: formElements.select,
           name: 'b',
           defaultValue: {value: 'B', label: 'B'},
         },
@@ -90,14 +92,13 @@ describe('Test validation rules with dependency: rule expect args with dependenc
       );
     }
 
-    const {container, getByValue} = render(<TestForm />);
+    const {container,getByLabelText} = render(<TestForm />);
 
     const [a] = container.querySelectorAll('input');
-    const [inputWrapperA] = container.querySelectorAll('.TestTextInput');
 
     fireEvent.change(a, {target: {value: ''}});
-    await waitForElement(() => getByValue(''), {
-      inputWrapperA,
+    await wait(() => expect(getByLabelText('Label: a').value).toEqual(''), {
+      container,
     });
 
     expect(container.querySelector('.a > .Error').innerHTML).toBe('Error: Is required default');
@@ -140,9 +141,10 @@ describe('Test validation rules with dependency: rule expect args with dependenc
     const [inputA] = container.querySelectorAll('input');
     const [inputWrapperA] = container.querySelectorAll('.TestTextInput');
 
+
     fireEvent.change(inputA, {target: {value: ''}});
     await waitForElement(() => getByDisplayValue(''), {
-      inputWrapperA,
+      inputWrapperA
     });
 
     let errorMessageA = container.querySelector('.a > .Error');
