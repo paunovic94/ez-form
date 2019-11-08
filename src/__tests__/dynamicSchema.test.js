@@ -6,7 +6,11 @@ import formElements from './formTestElements';
 afterEach(cleanup);
 
 function TestForm({initData}) {
-  const {formData} = useForm({
+  let [schema, setSchema] = useState({
+    standardField: {
+      formElement: formElements.textInput,
+      defaultValue: 'testInputText1',
+    },
     students: {
       dynamicSchema: true,
       dynamicSchemaItem: {
@@ -21,6 +25,9 @@ function TestForm({initData}) {
       },
     },
   });
+
+  const {formDataStandard, prepareForServer, setSchemaStateValue} = useForm(schema);
+  const {formDataDynamic, prepareForServer, setSchemaStateValue} = useForm(schema);
 
   if (formData.students.length === 0) {
     return <div>No students</div>;

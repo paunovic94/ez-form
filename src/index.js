@@ -164,6 +164,7 @@ export default function useForm(
 
     setFormState(prevState => {
       const fieldState = prevState[fullFieldName];
+      // todo: check if field name exists in schema and do nothing if not!!!
       let changedFiledState = {
         ...fieldState,
         value: newValue,
