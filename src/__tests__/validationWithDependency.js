@@ -4,6 +4,7 @@ import {
   cleanup,
   fireEvent,
   waitForElement,
+  wait,
 } from '@testing-library/react';
 import useForm from '../index';
 import formElements from './formTestElements';
@@ -58,6 +59,53 @@ describe('Test validation rules with dependency: rule expect args with dependenc
     );
   });
 
+
+  test('Validation with dependency with passed dependency value: test a if b is select field and b.value = "B"', async () => {
+    function TestForm() {
+      const {formData} = useForm({
+        a: {
+          formElement: formElements.textInput,
+          defaultValue: 'A',
+          label: 'a',
+          name: 'a',
+          validationRules: [
+            {
+              fn: isRequired,
+              args: {
+                dependencyField: 'b',
+                dependencyValue: 'B',
+              },
+            },
+          ],
+        },
+        b: {
+          formElement: formElements.select,
+          name: 'b',
+          defaultValue: {value: 'B', label: 'B'},
+        },
+      });
+      return (
+        <div>
+          {formData.a.render()}
+          {formData.b.render()}
+        </div>
+      );
+    }
+
+    const {container,getByLabelText} = render(<TestForm />);
+
+    const [a] = container.querySelectorAll('input');
+
+    fireEvent.change(a, {target: {value: ''}});
+    await wait(() => expect(getByLabelText('Label: a').value).toEqual(''), {
+      container,
+    });
+
+    expect(container.querySelector('.a > .Error').innerHTML).toBe('Error: Is required default');
+  });
+
+
+
   test('Validatin rule with no passed dependency value: validate a if b has any value in state', async () => {
     function TestForm() {
       const {formData} = useForm({
@@ -93,9 +141,10 @@ describe('Test validation rules with dependency: rule expect args with dependenc
     const [inputA] = container.querySelectorAll('input');
     const [inputWrapperA] = container.querySelectorAll('.TestTextInput');
 
+
     fireEvent.change(inputA, {target: {value: ''}});
     await waitForElement(() => getByDisplayValue(''), {
-      inputWrapperA,
+      inputWrapperA
     });
 
     let errorMessageA = container.querySelector('.a > .Error');
