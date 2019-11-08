@@ -292,7 +292,7 @@ export default function useForm(
       return;
     }
 
-    const {formElement, name, label, label2} = schema[fieldName];
+    const {formElement, name = fieldName, label, label2} = schema[fieldName];
     formData[fieldName] = {
       render: ({
         useSecondLabel,
@@ -444,8 +444,10 @@ function validateField(fieldState, formState, dependencyArgs = {}) {
       let dependencyInValidationArgs =
         rule.args && rule.args.dependencyInValidationArgs;
 
-      let dependencyValueInFormState = getIn('value.value', formState[dependencyField]) ||  getIn('value', formState[dependencyField]);
-     
+      let dependencyValueInFormState =
+        getIn('value.value', formState[dependencyField]) ||
+        getIn('value', formState[dependencyField]);
+
       // Skip to next rule
       if (dependencyInValidationArgs) {
         // if dependency value is defined in validation fn args and it is different than dependency value in state
