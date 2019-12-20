@@ -153,7 +153,6 @@ describe('Update form data on input change', () => {
       const {formData} = useForm({
         checkbox1: {
           formElement: formElements.checkbox,
-          name: 'checkbox1',
           label: 'checkbox1',
           defaultValue: true,
         },
