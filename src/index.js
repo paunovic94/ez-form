@@ -292,7 +292,7 @@ export default function useForm(
       return;
     }
 
-    const {formElement, name = fieldName, label, label2} = schema[fieldName];
+    const {formElement, name, label, label2} = schema[fieldName];
     formData[fieldName] = {
       render: ({
         useSecondLabel,
