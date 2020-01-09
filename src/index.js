@@ -257,8 +257,8 @@ export default function useForm(
           // select
           prepared[fieldName] = value.value;
         } else if (Array.isArray(value)) {
-          prepared[fieldName] = value.map(
-            item => (item && typeof item === 'object' ? item.value : item)
+          prepared[fieldName] = value.map(item =>
+            item && typeof item === 'object' ? item.value : item
           );
         } else if (typeof value === 'string') {
           // text input, text area
@@ -324,7 +324,7 @@ export default function useForm(
           formState[fieldName].isVisible && (
             <formElement.Component
               value={formState[fieldName].value}
-              name={name}
+              name={name || fieldName}
               error={formState[fieldName].error}
               disabled={disabled}
               label={useSecondLabel ? label2 : label}
@@ -445,8 +445,10 @@ function validateField(fieldState, formState, dependencyArgs = {}) {
       let dependencyInValidationArgs =
         rule.args && rule.args.dependencyInValidationArgs;
 
-      let dependencyValueInFormState = getIn('value.value', formState[dependencyField]) ||  getIn('value', formState[dependencyField]);
-     
+      let dependencyValueInFormState =
+        getIn('value.value', formState[dependencyField]) ||
+        getIn('value', formState[dependencyField]);
+
       // Skip to next rule
       if (dependencyInValidationArgs) {
         // if dependency value is defined in validation fn args and it is different than dependency value in state
