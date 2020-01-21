@@ -29,11 +29,17 @@ export default function useForm(
     initFormState
   );
 
-  function handleChange({event, fieldName, subFieldName, index, onComplete}) {
+  function handleChange({
+    newValue,
+    fieldName,
+    subFieldName,
+    index,
+    onComplete,
+  }) {
     dispatch({
       type: 'VALUE_CHANGE',
       payload: {
-        event,
+        newValue,
         fieldName,
         subFieldName,
         index,
@@ -279,7 +285,8 @@ function createFieldRender({
           <formElement.Component
             value={fieldState.value}
             name={
-              name || (subFieldName ? `${fieldName}_${subFieldName}` : fieldName)
+              name ||
+              (subFieldName ? `${fieldName}_${subFieldName}` : fieldName)
             }
             error={fieldState.error}
             disabled={disabled}
@@ -288,7 +295,7 @@ function createFieldRender({
             {...additionalProps}
             onChange={event =>
               handleChange({
-                event,
+                newValue: ValueResolvers[formElement.type](event),
                 fieldName,
                 subFieldName,
                 index,

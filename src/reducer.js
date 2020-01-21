@@ -34,7 +34,6 @@ function createFieldState({fieldSchemaData, initValue}) {
       defaultValue,
       type: formElement.type,
     }),
-    handleInputValueChange: ValueResolvers[formElement.type],
     error: '',
     validationRules,
     isVisible,
@@ -62,7 +61,7 @@ export function reducer(formState, action) {
   switch (action.type) {
     case 'VALUE_CHANGE': {
       const {
-        event,
+        newValue,
         fieldName,
         subFieldName,
         index,
@@ -71,7 +70,6 @@ export function reducer(formState, action) {
       const fieldState = subFieldName
         ? formState[fieldName][index][subFieldName]
         : formState[fieldName];
-      const newValue = fieldState.handleInputValueChange(event);
 
       let changedFiledState = {
         ...fieldState,
