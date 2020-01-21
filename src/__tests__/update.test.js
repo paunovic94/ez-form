@@ -31,7 +31,7 @@ describe('Update form data on input change', () => {
       );
     }
 
-    const {container, getByDisplayValue, debug} = render(<TestForm />);
+    const {container, getByDisplayValue} = render(<TestForm />);
     const [input1, input2] = container.querySelectorAll('input');
 
     fireEvent.change(input1, {target: {value: 'test1'}});

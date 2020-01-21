@@ -1,9 +1,11 @@
-import React from 'react';
-import {render, cleanup} from '@testing-library/react';
+import React, {useState} from 'react';
+import {render, cleanup, fireEvent, wait, waitForDomChange} from '@testing-library/react';
 import useForm from '../index';
 import formElements from './formTestElements';
 
 afterEach(cleanup);
+
+const delay = (to) => new Promise(res => setTimeout(res, to));
 
 function TestForm({initData}) {
   let [schema, setSchema] = useState({
@@ -26,25 +28,50 @@ function TestForm({initData}) {
     },
   });
 
-  const {formDataStandard, prepareForServer, setSchemaStateValue} = useForm(schema);
-  const {formDataDynamic, prepareForServer, setSchemaStateValue} = useForm(schema);
+  const {formData, addDynamicItem} = useForm(schema);
 
   if (formData.students.length === 0) {
-    return <div>No students</div>;
+    return (
+      <>
+        <button
+          onClick={() =>
+            addDynamicItem({
+              dynamicFieldName: 'students',
+              initData: {name: 'Milos1', gender: 'FEMALE'},
+            })
+          }>
+          Add
+        </button>
+        <div>No students</div>
+      </>
+    );
   }
 
-  return formData.students.map(studentSchema => (
-    <div className="student">
-      {studentSchema.name.render()}
-      {studentSchema.gender.render({
-        options: [
-          {value: 'MALE', label: 'Male'},
-          {value: 'FEMALE', label: 'Female'},
-          {value: 'OTHER', label: 'Other'},
-        ],
-      })}
-    </div>
-  ));
+  return (
+    <>
+      <button
+        onClick={() =>
+          addDynamicItem({
+            dynamicFieldName: 'students',
+            initData: {name: 'Milos2', gender: 'MALE'},
+          })
+        }>
+        Add
+      </button>
+      {formData.students.map(studentSchema => (
+        <div className="student">
+          {studentSchema.name.render()}
+          {studentSchema.gender.render({
+            options: [
+              {value: 'MALE', label: 'Male'},
+              {value: 'FEMALE', label: 'Female'},
+              {value: 'OTHER', label: 'Other'},
+            ],
+          })}
+        </div>
+      ))}
+    </>
+  );
 }
 
 describe('Dynamic Schema', () => {
@@ -55,21 +82,34 @@ describe('Dynamic Schema', () => {
     expect(queryByDisplayValue('MALE')).toBeNull();
   });
 
-  // test('init dynamic element with data', () => {
-  //   const {container, getByText, getByDisplayValue} = render(
-  //     <TestForm
-  //       initData={[
-  //         {name: 'Student Studentic', gender: 'OTHER'},
-  //         {name: 'Studentica Mala', gender: 'FEMALE'},
-  //         {name: 'Student Pravi', gender: 'MALE'},
-  //       ]}
-  //     />
-  //   );
-  //   let numOfRenderedStudents = container.querySelectorAll('.student');
-  //   expect(numOfRenderedStudents.length).toBe(3);
-  //   expect(getByText('No students')).toBeNull();
-  //   expect(getByDisplayValue('MALE')).toBeTruthy();
-  //   expect(getByDisplayValue('OTHER')).toBeTruthy();
-  //   expect(getByDisplayValue('FEMALE')).toBeTruthy();
-  // });
+  test('init dynamic element with data', async () => {
+    const {
+      container,
+      getByText,
+      queryByText,
+      queryByDisplayValue,
+    } = render(
+      <TestForm
+        initData={[
+          {name: 'Student Studentic', gender: 'OTHER'},
+          {name: 'Studentica Mala', gender: 'FEMALE'},
+          {name: 'Student Pravi', gender: 'MALE'},
+        ]}
+      />
+    );
+
+    fireEvent.click(getByText('Add'));
+
+    await delay(1000);
+    // await wait(() => [expect(queryByDisplayValue('Milos1')).toBeTruthy()], {
+    //   container,
+    // });
+
+    let numOfRenderedStudents = container.querySelectorAll('.student');
+    expect(numOfRenderedStudents.length).toBe(1);
+    expect(queryByText('No students')).toBeNull();
+    expect(queryByDisplayValue('MALE')).toBeTruthy();
+    expect(queryByDisplayValue('OTHER')).toBeNull();
+    expect(queryByDisplayValue('FEMALE')).toBeNull();
+  });
 });

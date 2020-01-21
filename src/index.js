@@ -1,124 +1,13 @@
 // @flow
-import React, {useState} from 'react';
-import type {ComponentType} from 'react';
-
-type IntlMessageDescriptor = {
-  id: string,
-  defaultMessage: string,
-  description: ?string,
-};
-
-type IntlMessage = {
-  descriptor: IntlMessageDescriptor,
-  values: ?{},
-};
-
-type FormElement = {
-  type: string,
-  Component: ComponentType<{value: any, error: string, onChange: any => void}>,
-};
-
-type Label = string | IntlMessage;
-type ErrorMessage = string | IntlMessage;
-
-type ValidationRule = {
-  fn: (
-    value: string,
-    message: IntlMessage,
-    args: {},
-    state: {},
-    _props: {},
-    fieldName: string,
-    validationArgs: {}
-  ) => string,
-  message: ?ErrorMessage,
-  args: ?{},
-  validateAnotherField: ?string,
-};
-
-type SelectValue = string | {value: string | number, label: string} | null;
-
-type SchemaValue =
-  | string
-  | number
-  | boolean
-  | Array<string>
-  | SelectValue
-  | void
-  | {};
-
-// https://flow.org/en/docs/types/unions/#toc-disjoint-unions
-type StandardFieldMetadata = {|
-  name: string,
-  defaultValue: SchemaValue,
-  formElement: FormElement,
-  label: ?Label,
-  label2: ?Label,
-  validationRules: ?Array<ValidationRule>,
-  useSecondLabel: ?boolean,
-  disabled: ?boolean,
-  isVisible: ?boolean,
-|};
-type DynamicFieldMetadata = {|
-  dynamicSchema: true,
-  dynamicSchemaItem: StandardFieldMetadata,
-|};
-type FieldMetadata = StandardFieldMetadata | DynamicFieldMetadata;
-
-type Schema = {[string]: FieldMetadata};
-
-// type InputType =
-//   | 'TEXT_INPUT'
-//   | 'SELECT_INPUT'
-//   | 'MULTISELECT'
-//   | 'CHECKBOX'
-//   | 'RADIOGROUP';
-//   | 'TEXT_AREA
-
-type SetSchemaStateArgs = {
-  fullFieldName: string,
-  newValue: SchemaValue,
-  skipValidation: boolean,
-  onComplete: Function,
-};
-
-type ValuesMap = {[string]: SchemaValue};
-
-type SetSchemaStateValueBulkArgs = {
-  valuesMap: ValuesMap,
-  skipValidation: boolean,
-  onComplete: Function,
-};
-
-export function getIn(path: string | Array<string>, obj: {} = {}) {
-  if (!path || path.length === 0) {
-    throw new Error('getIn: path param is required');
-  }
-
-  if (typeof path === 'string') {
-    path = path.split('.');
-  }
-
-  let res = obj;
-  for (let key of path) {
-    if (res == null) return;
-    res = res[key];
-  }
-  return res;
-}
-
-/**
- * Trims off leading & trailing spaces
- *
- * @param {string} value
- * @return {*}
- */
-export function trim(value: string) {
-  if (typeof value === 'string') {
-    value = value.replace(/^\s+/, '').replace(/\s+$/, '');
-  }
-  return value;
-}
+import React, {useReducer} from 'react';
+import {addDynamicItem} from './dynamicSchema';
+import type {
+  Schema,
+  SetSchemaStateArgs,
+  SetSchemaStateValueBulkArgs,
+} from './types';
+import {getIn, trim} from './utils';
+import {initFormState, reducer} from './reducer';
 
 export const InputTypes = {
   TEXT: 'TEXT_INPUT',
@@ -134,23 +23,29 @@ export default function useForm(
   schema: Schema,
   schemaValues: {[string]: any} = {}
 ) {
-  let [formState, setFormState] = useState(() =>
-    initFormState(schema, schemaValues)
+  const [formState, dispatch] = useReducer(
+    reducer,
+    {schema, schemaValues},
+    initFormState
   );
 
-  function handleChange({event, fieldName, onComplete}) {
-    const fieldState = formState[fieldName];
-    const newValue = fieldState.handleInputValueChange(event);
-    let changedFiledState = {
-      ...fieldState,
-      value: newValue,
-    };
+  function handleChange({event, fieldName, subFieldName, index, onComplete}) {
+    dispatch({
+      type: 'VALUE_CHANGE',
+      payload: {
+        event,
+        fieldName,
+        subFieldName,
+        index,
+        onComplete,
+      },
+    });
+  }
 
-    changedFiledState.error = validateField(changedFiledState, formState);
-    const newFormState = {...formState, [fieldName]: changedFiledState};
-    setFormState(newFormState);
-    checkIfFieldValidateAnotherField(fieldState, newFormState, setFormState);
-    onComplete && onComplete(newValue);
+  function getSchemaStateValue(fieldName: string) {
+    if (!fieldName)
+      throw new Error('getSchemaStateValue: fieldName param required');
+    return formState[fieldName].value;
   }
 
   function setSchemaStateValue({
@@ -159,33 +54,13 @@ export default function useForm(
     skipValidation = false,
     onComplete,
   }: SetSchemaStateArgs) {
-    if (!fullFieldName)
+    if (!fullFieldName) {
       throw new Error('setSchemaStateValue: fullFieldName param required');
+    }
 
-    setFormState(prevState => {
-      const fieldState = prevState[fullFieldName];
-      // todo: check if field name exists in schema and do nothing if not!!!
-      let changedFiledState = {
-        ...fieldState,
-        value: newValue,
-      };
-
-      if (skipValidation) {
-        changedFiledState.error = '';
-      } else {
-        changedFiledState.error = validateField(changedFiledState, formState);
-      }
-
-      const newFormState = {...formState, [fullFieldName]: changedFiledState};
-      if (!skipValidation) {
-        checkIfFieldValidateAnotherField(
-          fieldState,
-          newFormState,
-          setFormState
-        );
-      }
-
-      return {...prevState, [fullFieldName]: changedFiledState};
+    dispatch({
+      type: 'SET_FIELD_VALUE',
+      payload: {fullFieldName, newValue, skipValidation},
     });
     onComplete && onComplete(newValue);
   }
@@ -195,10 +70,13 @@ export default function useForm(
     skipValidation = false,
     onComplete,
   }: SetSchemaStateValueBulkArgs) {
-    if (!valuesMap)
+    if (!valuesMap) {
       throw new Error('setSchemaStateValueBulk: valuesMap param required');
-    if (typeof valuesMap !== 'object')
+    }
+
+    if (typeof valuesMap !== 'object') {
       throw new Error('setSchemaStateValueBulk: invalid valuesMap');
+    }
 
     Object.entries(valuesMap).forEach(([key, value]) => {
       if (
@@ -219,8 +97,17 @@ export default function useForm(
     });
   }
 
+  /**
+   * We can't completely move this logic to reducer because isValid result is
+   * needed immediately.
+   *
+   * @param dependencyArgs
+   * @return {boolean}
+   */
   function validate(dependencyArgs: {}) {
     let isValid = true;
+    let errors = [];
+
     Object.keys(formState).forEach(fieldName => {
       const field = formState[fieldName];
 
@@ -232,161 +119,187 @@ export default function useForm(
         isValid = false;
       }
 
-      setFormState(prevFormState => {
-        return {
-          ...prevFormState,
-          [fieldName]: {...field, error: fieldError},
-        };
-      });
+      errors.push({fieldName, fieldError});
     });
+
+    dispatch({type: 'VALIDATION_ERRORS', payload: {errors}});
+
     return isValid;
-  }
-
-  function prepareForServer() {
-    let prepared = {};
-    Object.keys(formState).forEach(fieldName => {
-      const {value} = formState[fieldName];
-      if (value === undefined || value === null || value === '') {
-        prepared[fieldName] = null;
-      } else {
-        if (
-          value &&
-          typeof value === 'object' &&
-          value.hasOwnProperty('value')
-        ) {
-          // select
-          prepared[fieldName] = value.value;
-        } else if (Array.isArray(value)) {
-          prepared[fieldName] = value.map(item =>
-            item && typeof item === 'object' ? item.value : item
-          );
-        } else if (typeof value === 'string') {
-          // text input, text area
-          prepared[fieldName] = trim(value);
-        } else {
-          prepared[fieldName] = value;
-        }
-      }
-    });
-    return prepared;
-  }
-
-  function cloneStateValues() {
-    let cloneValues = {};
-    Object.keys(formState).forEach(fieldName => {
-      const {value} = formState[fieldName];
-      cloneValues[fieldName] = value;
-    });
-    return cloneValues;
-  }
-
-  function getSchemaStateValue(fieldName: string) {
-    if (!fieldName)
-      throw new Error('getSchemaStateValue: fieldName param required');
-    return formState[fieldName].value;
   }
 
   let formData = {};
   Object.keys(schema).forEach(fieldName => {
-    if (schema[fieldName].dynamicSchema) {
-      formData[fieldName] = [];
+    const schemaFieldData = schema[fieldName];
+    if (schemaFieldData.dynamicSchema) {
+      formData[fieldName] = formState[fieldName].value.map(
+        (dynamicItemState, index) => {
+          let dynamicFieldRenders = {};
+
+          Object.entries(schemaFieldData.dynamicSchemaItem).forEach(
+            ([subFieldName, subFieldSchemaData]) => {
+              dynamicFieldRenders[subFieldName] = createFieldRender({
+                fieldState: dynamicItemState[subFieldName],
+                fieldSchemaData: subFieldSchemaData,
+                dispatch,
+                fieldName,
+                index,
+                subFieldName,
+                handleChange,
+              });
+
+              // const {formElement, name, label, label2} = subFieldSchemaData;
+              //   {
+              //   render: ({
+              //     useSecondLabel,
+              //     isVisible,
+              //     disabled,
+              //     ...additionalProps
+              //   } = {}) => {
+              //     if (
+              //       typeof isVisible === 'boolean' &&
+              //       isVisible !== dynamicItemState.isVisible
+              //     ) {
+              //       dispatch({
+              //         type: 'FIELD_VISIBILITY_CHANGED',
+              //         payload: {
+              //           fieldName,
+              //           index,
+              //           subFieldName,
+              //           isVisible,
+              //         },
+              //       });
+              //     }
+              //
+              //     const checked =
+              //       formElement.type === InputTypes.CHECKBOX
+              //         ? dynamicItemState.value
+              //         : undefined;
+              //
+              //     return (
+              //       dynamicItemState.isVisible && (
+              //         <formElement.Component
+              //           value={dynamicItemState.value}
+              //           name={name || `${fieldName}_${subFieldName}`}
+              //           error={dynamicItemState.error}
+              //           disabled={disabled}
+              //           label={useSecondLabel ? label2 : label}
+              //           checked={checked}
+              //           {...additionalProps}
+              //           onChange={event => {
+              //             handleChange({
+              //               event,
+              //               fieldName,
+              //               index,
+              //               subFieldName,
+              //               onComplete: additionalProps.onChange,
+              //             });
+              //           }}
+              //         />
+              //       )
+              //     );
+              //   },
+              // };
+            }
+          );
+
+          return dynamicFieldRenders;
+        }
+      );
       return;
     }
 
-    const {formElement, name, label, label2} = schema[fieldName];
-    formData[fieldName] = {
-      render: ({
-        useSecondLabel,
-        isVisible,
-        disabled,
-        ...additionalProps
-      } = {}) => {
-        if (
-          typeof isVisible === 'boolean' &&
-          isVisible !== formState[fieldName].isVisible
-        ) {
-          setFormState({
-            ...formState,
-            [fieldName]: {
-              ...formState[fieldName],
-              isVisible: isVisible,
-              error: '',
-            },
-          });
-        }
-
-        const checked =
-          formElement.type === InputTypes.CHECKBOX
-            ? formState[fieldName].value
-            : undefined;
-
-        return (
-          formState[fieldName].isVisible && (
-            <formElement.Component
-              value={formState[fieldName].value}
-              name={name || fieldName}
-              error={formState[fieldName].error}
-              disabled={disabled}
-              label={useSecondLabel ? label2 : label}
-              checked={checked}
-              {...additionalProps}
-              onChange={event => {
-                handleChange({
-                  event,
-                  fieldName,
-                  onComplete: additionalProps.onChange,
-                });
-              }}
-            />
-          )
-        );
-      },
-    };
+    formData[fieldName] = createFieldRender({
+      fieldState: formState[fieldName],
+      fieldSchemaData: schemaFieldData,
+      dispatch,
+      fieldName,
+      handleChange,
+    });
   });
 
   return {
     formData,
     validate,
-    prepareForServer,
-    cloneStateValues,
+    prepareForServer: () => prepareForServer(formState),
+    cloneStateValues: () => cloneStateValues(formState),
     getSchemaStateValue,
     setSchemaStateValue,
     setSchemaStateValueBulk,
+    addDynamicItem: ({dynamicFieldName, initData}) => {
+      dispatch({
+        type: 'ADD_DYNAMIC_ITEM',
+        payload: {
+          fieldName: dynamicFieldName,
+          fieldSchemaData: schema[dynamicFieldName],
+          initData,
+        },
+      });
+    },
   };
 }
 
-function initFormState(schema, schemaValues) {
-  let formState = {};
+function createFieldRender({
+  fieldState,
+  fieldSchemaData,
+  dispatch,
+  fieldName,
+  index,
+  subFieldName,
+  handleChange,
+}) {
+  const {formElement, name, label, label2} = fieldSchemaData;
 
-  Object.keys(schema).forEach(fieldName => {
-    if (schema[fieldName].dynamicSchema) {
-      formState[fieldName] = {value: []};
-    } else {
-      let {
-        defaultValue,
-        formElement,
-        validationRules = [],
-        isVisible = true,
-        disabled = false,
-        useSecondLabel = false,
-      } = schema[fieldName];
-      formState[fieldName] = {
-        value: getInitValue({
-          initValue: schemaValues[fieldName],
-          defaultValue,
-          type: formElement.type,
-        }),
-        handleInputValueChange: ValueResolvers[formElement.type],
-        error: '',
-        validationRules,
-        isVisible,
-        disabled,
-        useSecondLabel,
-      };
-    }
-  });
+  return {
+    render: ({
+      useSecondLabel,
+      isVisible,
+      disabled,
+      ...additionalProps
+    } = {}) => {
+      if (
+        typeof isVisible === 'boolean' &&
+        isVisible !== fieldState.isVisible
+      ) {
+        dispatch({
+          type: 'FIELD_VISIBILITY_CHANGED',
+          payload: {
+            fieldName,
+            index,
+            subFieldName,
+            isVisible,
+          },
+        });
+      }
 
-  return formState;
+      const checked =
+        formElement.type === InputTypes.CHECKBOX ? fieldState.value : undefined;
+
+      return (
+        fieldState.isVisible && (
+          <formElement.Component
+            value={fieldState.value}
+            name={
+              name || (subFieldName ? `${fieldName}_${subFieldName}` : fieldName)
+            }
+            error={fieldState.error}
+            disabled={disabled}
+            label={useSecondLabel ? label2 : label}
+            checked={checked}
+            {...additionalProps}
+            onChange={event =>
+              handleChange({
+                event,
+                fieldName,
+                subFieldName,
+                index,
+                onComplete: additionalProps.onChange,
+              })
+            }
+          />
+        )
+      );
+    },
+  };
 }
 
 /**
@@ -397,7 +310,7 @@ function initFormState(schema, schemaValues) {
  * @param type
  * @return {*}
  */
-function getInitValue({initValue, defaultValue, type}) {
+export function getInitValue({initValue, defaultValue, type}) {
   if (type === InputTypes.CHECKBOX) {
     if (typeof initValue === 'boolean') return initValue;
     if (initValue !== undefined) {
@@ -427,7 +340,7 @@ function getInitValue({initValue, defaultValue, type}) {
     : initValue;
 }
 
-function validateField(fieldState, formState, dependencyArgs = {}) {
+export function validateField(fieldState, formState, dependencyArgs = {}) {
   let fieldError = '';
 
   if (fieldState) {
@@ -488,24 +401,41 @@ function validateField(fieldState, formState, dependencyArgs = {}) {
   return fieldError;
 }
 
-function checkIfFieldValidateAnotherField(
-  fieldState,
-  newFormState,
-  setFormState
-) {
-  for (let rule of fieldState.validationRules) {
-    if (rule.validateAnotherField) {
-      const anotherFieldName = rule.validateAnotherField;
-      const error = validateField(newFormState[anotherFieldName], newFormState);
-      setFormState({
-        ...newFormState,
-        [anotherFieldName]: {...newFormState[anotherFieldName], error: error},
-      });
+function prepareForServer(formState) {
+  let prepared = {};
+  Object.keys(formState).forEach(fieldName => {
+    const {value} = formState[fieldName];
+    if (value === undefined || value === null || value === '') {
+      prepared[fieldName] = null;
+    } else {
+      if (value && typeof value === 'object' && value.hasOwnProperty('value')) {
+        // select
+        prepared[fieldName] = value.value;
+      } else if (Array.isArray(value)) {
+        prepared[fieldName] = value.map(
+          item => (item && typeof item === 'object' ? item.value : item)
+        );
+      } else if (typeof value === 'string') {
+        // text input, text area
+        prepared[fieldName] = trim(value);
+      } else {
+        prepared[fieldName] = value;
+      }
     }
-  }
+  });
+  return prepared;
 }
 
-const ValueResolvers = {
+function cloneStateValues(formState) {
+  let cloneValues = {};
+  Object.keys(formState).forEach(fieldName => {
+    const {value} = formState[fieldName];
+    cloneValues[fieldName] = value;
+  });
+  return cloneValues;
+}
+
+export const ValueResolvers = {
   [InputTypes.TEXT]: event => event.target.value,
   [InputTypes.SELECT]: event => event,
   [InputTypes.MULTISELECT]: event => event,
