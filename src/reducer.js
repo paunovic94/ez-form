@@ -1,12 +1,28 @@
-import {getInitValue, validateField, ValueResolvers} from './index';
-import {act} from '@testing-library/react';
+import {getInitValue, validateField} from './index';
 
 export function initFormState({schema, schemaValues}) {
   let formState = {};
 
   Object.keys(schema).forEach(fieldName => {
     if (schema[fieldName].dynamicSchema) {
-      formState[fieldName] = {value: []};
+      let dynamicFieldState = (formState[fieldName] = {value: []});
+
+      if (schemaValues[fieldName]) {
+        schemaValues[fieldName].forEach(initData => {
+          let newItemData = {};
+
+          Object.entries(schema[fieldName].dynamicSchemaItem).forEach(
+            ([subFieldName, subFieldSchemaData]) => {
+              newItemData[subFieldName] = createFieldState({
+                fieldSchemaData: subFieldSchemaData,
+                initValue: initData[subFieldName],
+              });
+            }
+          );
+
+          dynamicFieldState.value.push(newItemData);
+        });
+      }
     } else {
       formState[fieldName] = createFieldState({
         fieldSchemaData: schema[fieldName],

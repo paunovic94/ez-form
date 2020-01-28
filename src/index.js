@@ -1,6 +1,5 @@
 // @flow
 import React, {useReducer} from 'react';
-import {addDynamicItem} from './dynamicSchema';
 import type {
   Schema,
   SetSchemaStateArgs,

@@ -1,11 +1,17 @@
 import React, {useState} from 'react';
-import {render, cleanup, fireEvent, wait, waitForDomChange} from '@testing-library/react';
+import {
+  render,
+  cleanup,
+  fireEvent,
+  wait,
+  waitForDomChange,
+} from '@testing-library/react';
 import useForm from '../index';
 import formElements from './formTestElements';
 
 afterEach(cleanup);
 
-const delay = (to) => new Promise(res => setTimeout(res, to));
+const delay = to => new Promise(res => setTimeout(res, to));
 
 function TestForm({initData}) {
   let [schema, setSchema] = useState({
@@ -28,7 +34,10 @@ function TestForm({initData}) {
     },
   });
 
-  const {formData, addDynamicItem} = useForm(schema);
+  const {formData, addDynamicItem} = useForm(
+    schema,
+    initData ? {students: initData} : undefined
+  );
 
   if (formData.students.length === 0) {
     return (
@@ -83,12 +92,7 @@ describe('Dynamic Schema', () => {
   });
 
   test('init dynamic element with data', async () => {
-    const {
-      container,
-      getByText,
-      queryByText,
-      queryByDisplayValue,
-    } = render(
+    const {container, queryByText,queryAllByDisplayValue} = render(
       <TestForm
         initData={[
           {name: 'Student Studentic', gender: 'OTHER'},
@@ -98,18 +102,34 @@ describe('Dynamic Schema', () => {
       />
     );
 
-    fireEvent.click(getByText('Add'));
-
-    await delay(1000);
+    // fireEvent.click(getByText('Add'));
+    //
+    // await delay(1000);
     // await wait(() => [expect(queryByDisplayValue('Milos1')).toBeTruthy()], {
     //   container,
     // });
 
     let numOfRenderedStudents = container.querySelectorAll('.student');
-    expect(numOfRenderedStudents.length).toBe(1);
+    expect(numOfRenderedStudents.length).toBe(3);
     expect(queryByText('No students')).toBeNull();
-    expect(queryByDisplayValue('MALE')).toBeTruthy();
-    expect(queryByDisplayValue('OTHER')).toBeNull();
-    expect(queryByDisplayValue('FEMALE')).toBeNull();
+
+    let maleRadioOptions = queryAllByDisplayValue('MALE');
+    let femaleRadioOptions = queryAllByDisplayValue('FEMALE');
+    let otherRadioOptions = queryAllByDisplayValue('OTHER');
+
+    expect(maleRadioOptions[0].checked).toBe(false);
+    expect(maleRadioOptions[1].checked).toBe(false);
+    expect(maleRadioOptions[2].checked).toBe(true);
+
+    expect(femaleRadioOptions[0].checked).toBe(false);
+    expect(femaleRadioOptions[1].checked).toBe(true);
+    expect(femaleRadioOptions[2].checked).toBe(false);
+
+    expect(otherRadioOptions[0].checked).toBe(true);
+    expect(otherRadioOptions[1].checked).toBe(false);
+    expect(otherRadioOptions[2].checked).toBe(false);
   });
+
+  // addDynamicItem
+  // removeDynamicItem
 });
