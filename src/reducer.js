@@ -84,7 +84,7 @@ export function reducer(formState, action) {
         onComplete,
       } = action.payload;
       const fieldState = subFieldName
-        ? formState[fieldName][index][subFieldName]
+        ? formState[fieldName]['value'][index][subFieldName]
         : formState[fieldName];
 
       let changedFiledState = {
@@ -94,15 +94,19 @@ export function reducer(formState, action) {
 
       changedFiledState.error = validateField(
         changedFiledState,
-        subFieldName ? formState[fieldName][index] : formState
+        subFieldName ? formState[fieldName]['value'][index] : formState
       );
       const newFormState = subFieldName
         ? {
             ...formState,
-            [fieldName]: formState[fieldName].map(
-              (f, i) =>
-                i === index ? {...f, [subFieldName]: changedFiledState} : f
-            ),
+            [fieldName]: {
+              value: formState[fieldName].value.map(
+                (subSchemaState, i) =>
+                  i === index
+                    ? {...subSchemaState, [subFieldName]: changedFiledState}
+                    : subSchemaState
+              ),
+            },
           }
         : {...formState, [fieldName]: changedFiledState};
       let newFormStateWithOtherFieldsValidations = checkIfFieldValidateAnotherField(

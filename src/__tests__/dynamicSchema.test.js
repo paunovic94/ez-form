@@ -3,8 +3,6 @@ import {
   render,
   cleanup,
   fireEvent,
-  wait,
-  waitForDomChange,
 } from '@testing-library/react';
 import useForm from '../index';
 import formElements from './formTestElements';
@@ -84,7 +82,8 @@ function TestForm({initData}) {
                 index,
               })
             }>
-            Remove{index+1}
+            Remove
+            {index + 1}
           </button>
         </div>
       ))}
@@ -179,18 +178,14 @@ describe('Dynamic Schema', () => {
   });
 
   test('removeDynamicItem', async () => {
-    const {
-      container,
-      getByText,
-      queryAllByDisplayValue,
-    } = render(
+    const {container, getByText, queryAllByDisplayValue} = render(
       <TestForm
         initData={[
           {name: 'Student1', gender: 'OTHER'},
           {name: 'Student2', gender: 'MALE'},
           {name: 'Student3', gender: 'FEMALE'},
           {name: 'Student4', gender: 'MALE'},
-          {name: 'Student5', gender: 'OTHER'},
+          {name: 'Student5', gender: 'FEMALE'},
         ]}
       />
     );
@@ -220,6 +215,36 @@ describe('Dynamic Schema', () => {
     expect(queryAllByDisplayValue('Student5').length).toBe(0);
   });
 
-  // updating
+  test('update', async () => {
+    const {container, getByText, queryAllByDisplayValue} = render(
+      <TestForm
+        initData={[
+          {name: 'Student1', gender: 'OTHER'},
+          {name: 'Student2', gender: 'MALE'},
+          {name: 'Student3', gender: 'FEMALE'},
+        ]}
+      />
+    );
+
+    expect(queryAllByDisplayValue('Student1').length).toBe(1);
+    expect(queryAllByDisplayValue('Student2').length).toBe(1);
+    expect(queryAllByDisplayValue('Student3').length).toBe(1);
+
+    const [input1, input2, input3] = container.querySelectorAll('input[type=text]');
+    fireEvent.change(input1, {target: {value: 'test1'}});
+    fireEvent.change(input2, {target: {value: 'test2'}});
+    fireEvent.change(input3, {target: {value: 'test3'}});
+
+    await delay(100);
+
+    expect(queryAllByDisplayValue('Student1').length).toBe(0);
+    expect(queryAllByDisplayValue('Student2').length).toBe(0);
+    expect(queryAllByDisplayValue('Student3').length).toBe(0);
+
+    expect(queryAllByDisplayValue('test1').length).toBe(1);
+    expect(queryAllByDisplayValue('test2').length).toBe(1);
+    expect(queryAllByDisplayValue('test3').length).toBe(1);
+  });
+
   // validation
 });
