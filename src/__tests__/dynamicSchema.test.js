@@ -67,8 +67,8 @@ function TestForm({initData}) {
         }>
         Add
       </button>
-      {formData.students.map(studentSchema => (
-        <div className="student">
+      {formData.students.map((studentSchema, index) => (
+        <div className="student" key={index}>
           {studentSchema.name.render()}
           {studentSchema.gender.render({
             options: [
@@ -92,7 +92,12 @@ describe('Dynamic Schema', () => {
   });
 
   test('init dynamic element with data', async () => {
-    const {container, queryByText,queryAllByDisplayValue} = render(
+    const {
+      container,
+      queryByText,
+      queryByDisplayValue,
+      queryAllByDisplayValue,
+    } = render(
       <TestForm
         initData={[
           {name: 'Student Studentic', gender: 'OTHER'},
@@ -128,8 +133,45 @@ describe('Dynamic Schema', () => {
     expect(otherRadioOptions[0].checked).toBe(true);
     expect(otherRadioOptions[1].checked).toBe(false);
     expect(otherRadioOptions[2].checked).toBe(false);
+
+    expect(queryByDisplayValue('Student Studentic')).toBeTruthy();
+    expect(queryByDisplayValue('Studentica Mala')).toBeTruthy();
+    expect(queryByDisplayValue('Student Pravi')).toBeTruthy();
+  });
+
+  test('addDynamicItem', async () => {
+    const {
+      container,
+      getByText,
+      queryByDisplayValue,
+      queryAllByDisplayValue,
+      getAllByLabelText,
+    } = render(<TestForm initData={[{name: 'Student1', gender: 'OTHER'}]} />);
+
+    fireEvent.click(getByText('Add'));
+    // fireEvent.click(getByText('Add'));
+    await delay(100);
+
+    let numOfRenderedStudents = container.querySelectorAll('.student');
+    expect(numOfRenderedStudents.length).toBe(2);
+    expect(queryAllByDisplayValue('Student1').length).toBe(1);
+    expect(queryAllByDisplayValue('Milos2').length).toBe(1);
+
+    let otherRadioOptions = queryAllByDisplayValue('OTHER');
+    expect(otherRadioOptions[0].checked).toBe(true);
+    expect(otherRadioOptions[1].checked).toBe(false);
+    // expect(otherRadioOptions[2].checked).toBe(false);
+
+    let maleRadioOptions = queryAllByDisplayValue('MALE');
+
+    expect(maleRadioOptions[0].checked).toBe(false);
+    expect(maleRadioOptions[1].checked).toBe(true);
+    // expect(maleRadioOptions[2].checked).toBe(true);
+
   });
 
   // addDynamicItem
   // removeDynamicItem
+  // updating
+  // validation
 });
