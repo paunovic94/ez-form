@@ -34,7 +34,7 @@ function TestForm({initData}) {
     },
   });
 
-  const {formData, addDynamicItem} = useForm(
+  const {formData, addDynamicItem, removeDynamicItem} = useForm(
     schema,
     initData ? {students: initData} : undefined
   );
@@ -77,6 +77,15 @@ function TestForm({initData}) {
               {value: 'OTHER', label: 'Other'},
             ],
           })}
+          <button
+            onClick={() =>
+              removeDynamicItem({
+                dynamicFieldName: 'students',
+                index,
+              })
+            }>
+            Remove{index+1}
+          </button>
         </div>
       ))}
     </>
@@ -167,11 +176,50 @@ describe('Dynamic Schema', () => {
     expect(maleRadioOptions[0].checked).toBe(false);
     expect(maleRadioOptions[1].checked).toBe(true);
     // expect(maleRadioOptions[2].checked).toBe(true);
-
   });
 
-  // addDynamicItem
-  // removeDynamicItem
+  test('removeDynamicItem', async () => {
+    const {
+      container,
+      getByText,
+      queryAllByDisplayValue,
+    } = render(
+      <TestForm
+        initData={[
+          {name: 'Student1', gender: 'OTHER'},
+          {name: 'Student2', gender: 'MALE'},
+          {name: 'Student3', gender: 'FEMALE'},
+          {name: 'Student4', gender: 'MALE'},
+          {name: 'Student5', gender: 'OTHER'},
+        ]}
+      />
+    );
+
+    let numOfRenderedStudents = container.querySelectorAll('.student');
+    expect(numOfRenderedStudents.length).toBe(5);
+    expect(queryAllByDisplayValue('Student1').length).toBe(1);
+    expect(queryAllByDisplayValue('Student2').length).toBe(1);
+    expect(queryAllByDisplayValue('Student3').length).toBe(1);
+    expect(queryAllByDisplayValue('Student4').length).toBe(1);
+    expect(queryAllByDisplayValue('Student5').length).toBe(1);
+
+    fireEvent.click(getByText('Remove3')); // student3
+    // ostalo 1,2,4,5
+    fireEvent.click(getByText('Remove1')); // student1
+    // ostalo 2,4,5
+    // Student5 je sad index 3
+    fireEvent.click(getByText('Remove3')); // student5
+    await delay(100);
+
+    let numOfRenderedStudents2 = container.querySelectorAll('.student');
+    expect(numOfRenderedStudents2.length).toBe(2);
+    expect(queryAllByDisplayValue('Student1').length).toBe(0);
+    expect(queryAllByDisplayValue('Student2').length).toBe(1);
+    expect(queryAllByDisplayValue('Student3').length).toBe(0);
+    expect(queryAllByDisplayValue('Student4').length).toBe(1);
+    expect(queryAllByDisplayValue('Student5').length).toBe(0);
+  });
+
   // updating
   // validation
 });

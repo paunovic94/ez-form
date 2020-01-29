@@ -183,6 +183,18 @@ export function reducer(formState, action) {
         },
       };
     }
+    case 'REMOVE_DYNAMIC_ITEM': {
+      let {fieldName, index} = action.payload;
+
+      return {
+        ...formState,
+        [fieldName]: {
+          value: formState[fieldName].value.filter(
+            (item, itemIndex) => itemIndex !== index
+          ),
+        },
+      };
+    }
     default:
       throw new Error('Reducer: unknown action type ' + action.type);
   }

@@ -240,6 +240,15 @@ export default function useForm(
         },
       });
     },
+    removeDynamicItem: ({dynamicFieldName, index}) => {
+      dispatch({
+        type: 'REMOVE_DYNAMIC_ITEM',
+        payload: {
+          fieldName: dynamicFieldName,
+          index,
+        },
+      });
+    },
   };
 }
 
