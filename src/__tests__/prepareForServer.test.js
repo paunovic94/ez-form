@@ -481,4 +481,66 @@ describe('Prepare for server', () => {
       textInput3: 'Test input',
     });
   });
+
+  test('dynamic fields', () => {
+    let onSubmitMock = jest.fn();
+    function TestForm(props) {
+      const {formData, prepareForServer} = useForm(
+        {
+          textArea1: {
+            formElement: formElements.textArea,
+          },
+          dynamicField: {
+            dynamicSchemaItem: {
+              name: {
+                formElement: formElements.textArea,
+              },
+              isActive: {
+                formElement: formElements.checkbox,
+              },
+            },
+          },
+        },
+        {
+          textArea1: 'Test area',
+          dynamicField: [
+            {name: 'User 1', isActive: true},
+            {name: 'User 2', isActive: false},
+            {name: 'User 3', isActive: true},
+          ],
+        }
+      );
+
+      return (
+        <div>
+          {formData.textArea1.render()}
+          {formData.dynamicField.map(item => (
+            <div>
+              {item.name.render()}
+              {item.isActive.render()}
+            </div>
+          ))}
+          <button
+            onClick={() => {
+              let dataForServer = prepareForServer();
+              onSubmitMock(dataForServer);
+            }}>
+            Submit form
+          </button>
+        </div>
+      );
+    }
+    const {getByText} = render(<TestForm />);
+
+    fireEvent.click(getByText('Submit form'));
+
+    expect(onSubmitMock.mock.calls[0][0]).toEqual({
+      textArea1: 'Test area',
+      dynamicField: [
+        {name: 'User 1', isActive: true},
+        {name: 'User 2', isActive: false},
+        {name: 'User 3', isActive: true},
+      ],
+    });
+  });
 });

@@ -116,7 +116,7 @@ export default function useForm(
     Object.keys(formState).forEach(fieldName => {
       const fieldState = formState[fieldName];
 
-      if (Array.isArray(fieldState.value)) {
+      if (fieldState.isDynamic) {
         fieldState.value.forEach((subFormState, index) => {
           let {isValid: subFormIsValid, errors: subFormErrors} = validateState({
             formState: subFormState,
@@ -408,8 +408,12 @@ export function validateField(fieldState, formState, dependencyArgs = {}) {
 function prepareForServer(formState) {
   let prepared = {};
   Object.keys(formState).forEach(fieldName => {
-    const {value} = formState[fieldName];
-    if (value === undefined || value === null || value === '') {
+    const {value, isDynamic} = formState[fieldName];
+    if (isDynamic) {
+      prepared[fieldName] = value.map(subFormState =>
+        prepareForServer(subFormState)
+      );
+    } else if (value === undefined || value === null || value === '') {
       prepared[fieldName] = null;
     } else {
       if (value && typeof value === 'object' && value.hasOwnProperty('value')) {

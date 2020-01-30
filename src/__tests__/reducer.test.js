@@ -16,6 +16,7 @@ describe('utils', () => {
       value: 'v2',
     },
     field3: {
+      isDynamic: true,
       value: [
         {
           field31: {
@@ -67,6 +68,7 @@ describe('utils', () => {
         value: 'v2',
       },
       field3: {
+        isDynamic: true,
         value: [
           {
             field31: {
@@ -123,6 +125,7 @@ describe('utils', () => {
         value: 'v2',
       },
       field3: {
+        isDynamic: true,
         value: [
           {
             field31: {

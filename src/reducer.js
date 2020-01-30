@@ -5,7 +5,10 @@ export function initFormState({schema, schemaValues}) {
 
   Object.keys(schema).forEach(fieldName => {
     if (schema[fieldName].dynamicSchemaItem) {
-      let dynamicFieldState = (formState[fieldName] = {value: []});
+      let dynamicFieldState = (formState[fieldName] = {
+        isDynamic: true,
+        value: [],
+      });
 
       if (schemaValues[fieldName]) {
         schemaValues[fieldName].forEach(initData => {
@@ -100,6 +103,7 @@ export function reducer(formState, action) {
         ? {
             ...formState,
             [fieldName]: {
+              isDynamic: true,
               value: formState[fieldName].value.map(
                 (subSchemaState, i) =>
                   i === index
@@ -192,6 +196,7 @@ export function reducer(formState, action) {
       return {
         ...formState,
         [fieldName]: {
+          isDynamic: true,
           value: [...formState[fieldName].value, newItemData],
         },
       };
@@ -202,6 +207,7 @@ export function reducer(formState, action) {
       return {
         ...formState,
         [fieldName]: {
+          isDynamic: true,
           value: formState[fieldName].value.filter(
             (item, itemIndex) => itemIndex !== index
           ),
@@ -233,6 +239,7 @@ export function updateFieldProp({
     return {
       ...formState,
       [fieldName]: {
+        isDynamic: true,
         value: formState[fieldName].value.map(
           (item, itemIndex) =>
             itemIndex === index
