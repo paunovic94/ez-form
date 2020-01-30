@@ -60,7 +60,6 @@ export type StandardFieldMetadata = {|
   isVisible: ?boolean,
 |};
 export type DynamicFieldMetadata = {|
-  dynamicSchema: true,
   dynamicSchemaItem: StandardFieldMetadata,
 |};
 export type FieldMetadata = StandardFieldMetadata | DynamicFieldMetadata;

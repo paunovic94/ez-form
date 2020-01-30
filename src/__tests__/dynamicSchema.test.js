@@ -9,7 +9,7 @@ import formElements from './formTestElements';
 
 afterEach(cleanup);
 
-const delay = to => new Promise(res => setTimeout(res, to));
+export const delay = to => new Promise(res => setTimeout(res, to));
 
 function TestForm({initData}) {
   let [schema, setSchema] = useState({
@@ -18,7 +18,6 @@ function TestForm({initData}) {
       defaultValue: 'testInputText1',
     },
     students: {
-      dynamicSchema: true,
       dynamicSchemaItem: {
         name: {
           formElement: formElements.textInput,
@@ -115,13 +114,6 @@ describe('Dynamic Schema', () => {
       />
     );
 
-    // fireEvent.click(getByText('Add'));
-    //
-    // await delay(1000);
-    // await wait(() => [expect(queryByDisplayValue('Milos1')).toBeTruthy()], {
-    //   container,
-    // });
-
     let numOfRenderedStudents = container.querySelectorAll('.student');
     expect(numOfRenderedStudents.length).toBe(3);
     expect(queryByText('No students')).toBeNull();
@@ -151,30 +143,29 @@ describe('Dynamic Schema', () => {
     const {
       container,
       getByText,
-      queryByDisplayValue,
       queryAllByDisplayValue,
-      getAllByLabelText,
     } = render(<TestForm initData={[{name: 'Student1', gender: 'OTHER'}]} />);
 
     fireEvent.click(getByText('Add'));
-    // fireEvent.click(getByText('Add'));
+    fireEvent.click(getByText('Add'));
     await delay(100);
 
     let numOfRenderedStudents = container.querySelectorAll('.student');
-    expect(numOfRenderedStudents.length).toBe(2);
+    expect(numOfRenderedStudents.length).toBe(3);
     expect(queryAllByDisplayValue('Student1').length).toBe(1);
-    expect(queryAllByDisplayValue('Milos2').length).toBe(1);
+    expect(queryAllByDisplayValue('Milos2').length).toBe(2);
 
     let otherRadioOptions = queryAllByDisplayValue('OTHER');
     expect(otherRadioOptions[0].checked).toBe(true);
     expect(otherRadioOptions[1].checked).toBe(false);
-    // expect(otherRadioOptions[2].checked).toBe(false);
+    expect(otherRadioOptions[2].checked).toBe(false);
 
     let maleRadioOptions = queryAllByDisplayValue('MALE');
 
     expect(maleRadioOptions[0].checked).toBe(false);
     expect(maleRadioOptions[1].checked).toBe(true);
-    // expect(maleRadioOptions[2].checked).toBe(true);
+    expect(maleRadioOptions[2].checked).toBe(true);
+
   });
 
   test('removeDynamicItem', async () => {
@@ -246,5 +237,5 @@ describe('Dynamic Schema', () => {
     expect(queryAllByDisplayValue('test3').length).toBe(1);
   });
 
-  // validation
+  // validation in validation.test.js
 });

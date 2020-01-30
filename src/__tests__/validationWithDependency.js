@@ -278,7 +278,6 @@ describe('Test validate function when rules are with dependency', () => {
       const {formData, validate} = useForm({
         a: {
           formElement: formElements.textInput,
-          name: 'a',
           validationRules: [
             {
               fn: isRequired,
@@ -291,7 +290,6 @@ describe('Test validate function when rules are with dependency', () => {
         },
         b: {
           formElement: formElements.textInput,
-          name: 'b',
         },
       });
 

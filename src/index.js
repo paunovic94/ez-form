@@ -110,21 +110,26 @@ export default function useForm(
    * @return {boolean}
    */
   function validate(dependencyArgs: {}) {
-    let isValid = true;
-    let errors = [];
+    let {isValid, errors} = validateState({formState, dependencyArgs});
 
+    // find dynamic schema items
     Object.keys(formState).forEach(fieldName => {
-      const field = formState[fieldName];
+      const fieldState = formState[fieldName];
 
-      if (!field.validationRules || field.validationRules.length === 0) return;
-
-      const fieldError = validateField(field, formState, dependencyArgs);
-
-      if (isValid && fieldError !== '') {
-        isValid = false;
+      if (Array.isArray(fieldState.value)) {
+        fieldState.value.forEach((subFormState, index) => {
+          let {isValid: subFormIsValid, errors: subFormErrors} = validateState({
+            formState: subFormState,
+            index,
+            dynamicFieldName: fieldName,
+            dependencyArgs,
+          });
+          errors.push(...subFormErrors);
+          if (isValid && subFormIsValid === false) {
+            isValid = false;
+          }
+        });
       }
-
-      errors.push({fieldName, fieldError});
     });
 
     dispatch({type: 'VALIDATION_ERRORS', payload: {errors}});
@@ -132,10 +137,45 @@ export default function useForm(
     return isValid;
   }
 
+  function validateState({formState, dynamicFieldName, index, dependencyArgs}) {
+    let isValid = true;
+    let errors = [];
+
+    Object.keys(formState).forEach(fieldName => {
+      const fieldState = formState[fieldName];
+
+      if (
+        !fieldState.validationRules ||
+        fieldState.validationRules.length === 0
+      ) {
+        return;
+      }
+
+      const fieldError = validateField(fieldState, formState, dependencyArgs);
+
+      if (isValid && fieldError !== '') {
+        isValid = false;
+      }
+
+      if (dynamicFieldName) {
+        errors.push({
+          fieldName: dynamicFieldName,
+          index,
+          subFieldName: fieldName,
+          fieldError,
+        });
+      } else {
+        errors.push({fieldName, fieldError});
+      }
+    });
+
+    return {errors, isValid};
+  }
+
   let formData = {};
   Object.keys(schema).forEach(fieldName => {
     const schemaFieldData = schema[fieldName];
-    if (schemaFieldData.dynamicSchema) {
+    if (schemaFieldData.dynamicSchemaItem) {
       formData[fieldName] = formState[fieldName].value.map(
         (dynamicItemState, index) => {
           let dynamicFieldRenders = {};
@@ -151,59 +191,6 @@ export default function useForm(
                 subFieldName,
                 handleChange,
               });
-
-              // const {formElement, name, label, label2} = subFieldSchemaData;
-              //   {
-              //   render: ({
-              //     useSecondLabel,
-              //     isVisible,
-              //     disabled,
-              //     ...additionalProps
-              //   } = {}) => {
-              //     if (
-              //       typeof isVisible === 'boolean' &&
-              //       isVisible !== dynamicItemState.isVisible
-              //     ) {
-              //       dispatch({
-              //         type: 'FIELD_VISIBILITY_CHANGED',
-              //         payload: {
-              //           fieldName,
-              //           index,
-              //           subFieldName,
-              //           isVisible,
-              //         },
-              //       });
-              //     }
-              //
-              //     const checked =
-              //       formElement.type === InputTypes.CHECKBOX
-              //         ? dynamicItemState.value
-              //         : undefined;
-              //
-              //     return (
-              //       dynamicItemState.isVisible && (
-              //         <formElement.Component
-              //           value={dynamicItemState.value}
-              //           name={name || `${fieldName}_${subFieldName}`}
-              //           error={dynamicItemState.error}
-              //           disabled={disabled}
-              //           label={useSecondLabel ? label2 : label}
-              //           checked={checked}
-              //           {...additionalProps}
-              //           onChange={event => {
-              //             handleChange({
-              //               event,
-              //               fieldName,
-              //               index,
-              //               subFieldName,
-              //               onComplete: additionalProps.onChange,
-              //             });
-              //           }}
-              //         />
-              //       )
-              //     );
-              //   },
-              // };
             }
           );
 
@@ -294,7 +281,9 @@ function createFieldRender({
             value={fieldState.value}
             name={
               name ||
-              (subFieldName ? `${fieldName}_${subFieldName}` : fieldName)
+              (subFieldName
+                ? `${fieldName}_${subFieldName}_${index}`
+                : fieldName)
             }
             error={fieldState.error}
             disabled={disabled}

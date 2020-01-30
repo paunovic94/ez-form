@@ -21,7 +21,6 @@ describe('Set schema state value', () => {
       const {formData, setSchemaStateValue} = useForm({
         testInputText1: {
           formElement: formElements.textInput,
-          name: 'testInputText1',
           label: 'testInputText1',
           validationRules: [
             {
@@ -76,7 +75,6 @@ describe('Set schema state value', () => {
       const {formData, setSchemaStateValue} = useForm({
         testSelect: {
           formElement: formElements.select,
-          name: 'testSelect',
           label: 'testSelect',
         },
       });
@@ -116,7 +114,6 @@ describe('Set schema state value', () => {
       const {formData, setSchemaStateValue} = useForm({
         testInputText1: {
           formElement: formElements.textInput,
-          name: 'testInputText1',
           label: 'testInputText1',
           validationRules: [
             {

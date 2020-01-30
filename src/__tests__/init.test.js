@@ -244,19 +244,16 @@ describe('init default value from schema', () => {
         testInputText1: {
           formElement: formElements.textInput,
           defaultValue: 'testInputText1',
-          name: 'testInputText1',
           label: 'testInputText1',
         },
         testInputText2: {
           formElement: formElements.textInput,
-          name: 'testInputText2',
           defaultValue: 'testInputText2',
           label: 'testInputText2',
           label2: 'testInputText2 label2',
         },
         testInputText3: {
           formElement: formElements.textInput,
-          name: 'testInputText3',
           defaultValue: 'testInputText3',
           label: 'testInputText3',
           label2: 'testInputText3 label2',

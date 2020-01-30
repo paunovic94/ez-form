@@ -4,7 +4,7 @@ export function initFormState({schema, schemaValues}) {
   let formState = {};
 
   Object.keys(schema).forEach(fieldName => {
-    if (schema[fieldName].dynamicSchema) {
+    if (schema[fieldName].dynamicSchemaItem) {
       let dynamicFieldState = (formState[fieldName] = {value: []});
 
       if (schemaValues[fieldName]) {
@@ -145,10 +145,19 @@ export function reducer(formState, action) {
     case 'VALIDATION_ERRORS': {
       let errors = action.payload.errors;
       let updatedFormState = errors.reduce((acc, curr) => {
-        return {
-          ...acc,
-          [curr.fieldName]: {...acc[curr.fieldName], error: curr.fieldError},
-        };
+        return updateFieldProp({
+          formState: acc,
+          fieldName: curr.fieldName,
+          index: curr.index,
+          subFieldName: curr.subFieldName,
+          updateValues: {
+            error: curr.fieldError,
+          },
+        });
+        // return {
+        //   ...acc,
+        //   [curr.fieldName]: {...acc[curr.fieldName], error: curr.fieldError},
+        // };
       }, formState);
 
       return updatedFormState;

@@ -11,6 +11,7 @@ import {
 } from '@testing-library/react';
 import useForm from '../index';
 import formElements, {formatDate} from './formTestElements';
+import {delay} from './dynamicSchema.test';
 
 export function getNestedValue(state, name) {
   if (!state) return;
@@ -73,7 +74,6 @@ describe('Validate form data on input change', () => {
         testInputText1: {
           formElement: formElements.textInput,
           defaultValue: 'text1',
-          name: 'testInputText1',
           validationRules: [
             {
               fn: isRequired,
@@ -85,7 +85,6 @@ describe('Validate form data on input change', () => {
         },
         testInputText2: {
           formElement: formElements.textInput,
-          name: 'testInputText2',
           validationRules: [
             {
               fn: isName,
@@ -102,7 +101,9 @@ describe('Validate form data on input change', () => {
       );
     }
 
-    const {container, getByDisplayValue, getAllByDisplayValue} = render(<TestForm />);
+    const {container, getByDisplayValue, getAllByDisplayValue} = render(
+      <TestForm />
+    );
 
     const [input1, input2] = container.querySelectorAll('input');
     const [inputWrapper1, inputWrapper2] = container.querySelectorAll(
@@ -123,9 +124,12 @@ describe('Validate form data on input change', () => {
     fireEvent.change(input1, {target: {value: 'text'}});
     fireEvent.change(input2, {target: {value: '222'}});
 
-    await waitForElement(() => [getByDisplayValue('text'), getByDisplayValue('222')], {
-      container,
-    });
+    await waitForElement(
+      () => [getByDisplayValue('text'), getByDisplayValue('222')],
+      {
+        container,
+      }
+    );
 
     errorMessage1 = container.querySelector('.testInputText1 > .Error');
     errorMessage2 = container.querySelector('.testInputText2 > .Error');
@@ -141,7 +145,6 @@ describe('Validate form data on input change', () => {
         testInputText1: {
           formElement: formElements.textInput,
           defaultValue: 'text1',
-          name: 'testInputText1',
           validationRules: [
             {
               fn: isRequired,
@@ -210,7 +213,6 @@ describe('Validate form data on input change', () => {
       const {formData} = useForm({
         testInputText1: {
           formElement: formElements.textInput,
-          name: 'testInputText1',
           validationRules: [
             {
               fn: isMaxLength,
@@ -225,7 +227,6 @@ describe('Validate form data on input change', () => {
         },
         testInputText2: {
           formElement: formElements.textInput,
-          name: 'testInputText2',
           validationRules: [
             {
               fn: isRequired,
@@ -264,9 +265,12 @@ describe('Validate form data on input change', () => {
     fireEvent.change(input1, {target: {value: 't'}});
     fireEvent.change(input2, {target: {value: 'text2'}});
 
-    await waitForElement(() => [getByDisplayValue('t'), getByDisplayValue('text2')], {
-      container,
-    });
+    await waitForElement(
+      () => [getByDisplayValue('t'), getByDisplayValue('text2')],
+      {
+        container,
+      }
+    );
 
     errorMessage1 = container.querySelector('.testInputText1 > .Error');
     errorMessage2 = container.querySelector('.testInputText2 > .Error');
@@ -280,7 +284,6 @@ describe('Validate form data on input change', () => {
       const {formData} = useForm({
         startDate: {
           formElement: formElements.textInput,
-          name: 'startDate',
           validationRules: [
             {
               fn: isStartDateBeforeEndDate,
@@ -292,7 +295,6 @@ describe('Validate form data on input change', () => {
         },
         endDate: {
           formElement: formElements.textInput,
-          name: 'endDate',
           defaultValue: new Date(2017, 12, 31),
         },
       });
@@ -326,7 +328,6 @@ describe('Validate form data on input change', () => {
       const {formData} = useForm({
         startDate: {
           formElement: formElements.textInput,
-          name: 'startDate',
           validationRules: [
             {
               fn: isStartDateBeforeEndDate,
@@ -341,7 +342,6 @@ describe('Validate form data on input change', () => {
         },
         endDate: {
           formElement: formElements.textInput,
-          name: 'endDate',
           defaultValue: new Date(2017, 11, 31),
           validationRules: [
             {
@@ -407,7 +407,6 @@ describe('Validate function', () => {
       const {formData, validate} = useForm({
         a: {
           formElement: formElements.textInput,
-          name: 'a',
           validationRules: [
             {
               fn: isMaxLength,
@@ -422,7 +421,6 @@ describe('Validate function', () => {
         },
         b: {
           formElement: formElements.textInput,
-          name: 'b',
           validationRules: [
             {
               fn: isRequired,
@@ -453,10 +451,14 @@ describe('Validate function', () => {
 
     expect(onSubmit).not.toHaveBeenCalled();
     expect(container.querySelector('.a > .Error')).toBeNull();
-    expect(container.querySelector('.b > .Error').innerHTML).toBe('Error: Is required default');
+    expect(container.querySelector('.b > .Error').innerHTML).toBe(
+      'Error: Is required default'
+    );
 
     // Fix error
-    fireEvent.change(container.querySelector('.b > input'), {target: {value: 'testInputText2'}});
+    fireEvent.change(container.querySelector('.b > input'), {
+      target: {value: 'testInputText2'},
+    });
     await waitForElement(() => getByDisplayValue('testInputText2'), {
       container,
     });
@@ -474,7 +476,6 @@ describe('Validate function', () => {
       const {formData, validate} = useForm({
         a: {
           formElement: formElements.textInput,
-          name: 'a',
           isVisible: false,
           validationRules: [
             {
@@ -484,7 +485,6 @@ describe('Validate function', () => {
         },
         b: {
           formElement: formElements.textInput,
-          name: 'b',
         },
       });
 
@@ -518,11 +518,9 @@ describe('Validate function', () => {
       const {formData, validate} = useForm({
         a: {
           formElement: formElements.textInput,
-          name: 'a',
         },
         b: {
           formElement: formElements.textInput,
-          name: 'b',
           validationRules: [],
         },
       });
@@ -560,7 +558,6 @@ describe('Validate function', () => {
       const {formData, validate} = useForm({
         a: {
           formElement: formElements.textInput,
-          name: 'a',
           validationRules: [
             {
               fn: isRequired,
@@ -569,7 +566,6 @@ describe('Validate function', () => {
         },
         b: {
           formElement: formElements.textInput,
-          name: 'b',
         },
       });
 
@@ -598,7 +594,9 @@ describe('Validate function', () => {
     expect(container.querySelector('.b > .Error')).toBeNull();
 
     // Fix error
-    fireEvent.change(container.querySelector('.a > input'), {target: {value: 'tt'}});
+    fireEvent.change(container.querySelector('.a > input'), {
+      target: {value: 'tt'},
+    });
     await waitForElement(() => getByDisplayValue('tt'), {
       container,
     });
@@ -616,7 +614,6 @@ describe('Validate function', () => {
       const {formData, validate} = useForm({
         a: {
           formElement: formElements.textInput,
-          name: 'a',
           defaultValue: 'A',
           validationRules: [
             {
@@ -647,5 +644,230 @@ describe('Validate function', () => {
     const {getByText} = render(<TestForm />);
     fireEvent.click(getByText('Submit form'));
     expect(onSubmit).toHaveBeenCalled();
+  });
+});
+
+describe('Dynamic schema validation', () => {
+  function TestDynamicForm({onValidate, initData}) {
+    const {formData, validate} = useForm(
+      {
+        testInputText1: {
+          formElement: formElements.textInput,
+          defaultValue: '',
+          validationRules: [
+            {
+              fn: isRequired,
+            },
+            {
+              fn: isName,
+            },
+          ],
+        },
+        dynamicTextField: {
+          dynamicSchemaItem: {
+            dTestInputText1: {
+              formElement: formElements.textInput,
+              defaultValue: '',
+              validationRules: [
+                {
+                  fn: isRequired,
+                  message: 'Polje je obavezno',
+                },
+                {
+                  fn: isName,
+                },
+              ],
+            },
+            dTestInputText2: {
+              formElement: formElements.textInput,
+              defaultValue: '',
+              validationRules: [
+                {
+                  fn: isName,
+                },
+              ],
+            },
+          },
+        },
+      },
+      initData || {
+        testInputText1: 'text1',
+        dynamicTextField: [
+          {
+            dTestInputText1: 'text1.1',
+            dTestInputText2: 'text1.2',
+          },
+          {
+            dTestInputText1: 'text2.1',
+            dTestInputText2: 'text2.2',
+          },
+        ],
+      }
+    );
+
+    return (
+      <div>
+        {formData.testInputText1.render()}
+        <br />
+        {formData.dynamicTextField.map((subSchemaItem, index) => (
+          <div className="Item" key={index}>
+            {subSchemaItem.dTestInputText1.render()}
+            {subSchemaItem.dTestInputText2.render()}
+          </div>
+        ))}
+        <button
+          onClick={() => {
+            let isValid = validate();
+            if (isValid) {
+              onValidate();
+            }
+          }}>
+          Validate
+        </button>
+      </div>
+    );
+  }
+
+  test('Validate only changed input in dynamic item', async () => {
+    const {container, getByDisplayValue, getAllByDisplayValue} = render(
+      <TestDynamicForm />
+    );
+
+    const [input1, input2, input3, input4, input5] = container.querySelectorAll(
+      'input'
+    );
+    const [
+      inputWrapper1,
+      inputWrapper2,
+      inputWrapper3,
+      inputWrapper4,
+      inputWrapper5,
+    ] = container.querySelectorAll('.TestTextInput');
+
+    fireEvent.change(input3, {target: {value: '12345'}});
+
+    await waitForElement(() => getAllByDisplayValue('12345'), {
+      container: inputWrapper3,
+    });
+
+    let errorMessage1 = container.querySelector('.testInputText1 > .Error');
+    let errorMessage2 = container.querySelector(
+      '.dynamicTextField_dTestInputText1_0 > .Error'
+    );
+    let errorMessage3 = container.querySelector(
+      '.dynamicTextField_dTestInputText2_0 > .Error'
+    );
+    let errorMessage4 = container.querySelector(
+      '.dynamicTextField_dTestInputText1_1 > .Error'
+    );
+    let errorMessage5 = container.querySelector(
+      '.dynamicTextField_dTestInputText2_1 > .Error'
+    );
+
+    expect(errorMessage3.innerHTML).toBe('Error: Is name default');
+    expect(errorMessage1).toBeNull();
+    expect(errorMessage2).toBeNull();
+    expect(errorMessage4).toBeNull();
+    expect(errorMessage5).toBeNull();
+
+    fireEvent.change(input1, {target: {value: ''}});
+    fireEvent.change(input3, {target: {value: 'SomeName'}});
+    fireEvent.change(input4, {target: {value: '54321'}});
+
+    await waitForElement(
+      () => [getByDisplayValue('SomeName'), getByDisplayValue('54321')],
+      {
+        container,
+      }
+    );
+
+    errorMessage1 = container.querySelector('.testInputText1 > .Error');
+    errorMessage2 = container.querySelector(
+      '.dynamicTextField_dTestInputText1_0 > .Error'
+    );
+    errorMessage3 = container.querySelector(
+      '.dynamicTextField_dTestInputText2_0 > .Error'
+    );
+    errorMessage4 = container.querySelector(
+      '.dynamicTextField_dTestInputText1_1 > .Error'
+    );
+    errorMessage5 = container.querySelector(
+      '.dynamicTextField_dTestInputText2_1 > .Error'
+    );
+
+    expect(errorMessage1.innerHTML).toBe('Error: Is required default');
+    expect(errorMessage2).toBeNull();
+    expect(errorMessage3).toBeNull();
+    expect(errorMessage4.innerHTML).toBe('Error: Is name default');
+    expect(errorMessage5).toBeNull();
+  });
+
+  test('Validate all - all valid', async () => {
+    let onValidate = jest.fn();
+
+    const {getByText} = render(
+      <TestDynamicForm onValidate={onValidate} initData={{
+        testInputText1: 'textPrvi',
+        dynamicTextField: [
+          {
+            dTestInputText1: 'textdrugi',
+            dTestInputText2: 'texttreci',
+          },
+          {
+            dTestInputText1: 'textcetvrti',
+            dTestInputText2: 'textpeti',
+          },
+        ],
+      }}/>
+    );
+
+    fireEvent.click(getByText('Validate'));
+    await delay(100);
+    expect(onValidate).toHaveBeenCalled();
+  });
+
+  test('Validate all - not all valid', async () => {
+    let onValidate = jest.fn();
+
+    const {container, getByText, getAllByDisplayValue} = render(
+      <TestDynamicForm onValidate={onValidate} initData={{
+        testInputText1: '',
+        dynamicTextField: [
+          {
+            dTestInputText1: 'textdrugi',
+            dTestInputText2: 'texttreci2',
+          },
+          {
+            dTestInputText1: '',
+            dTestInputText2: 'textpeti',
+          },
+        ],
+      }}/>
+    );
+
+    fireEvent.click(getByText('Validate'));
+    await delay(100);
+
+    let errorMessage1 = container.querySelector('.testInputText1 > .Error');
+    let errorMessage2 = container.querySelector(
+      '.dynamicTextField_dTestInputText1_0 > .Error'
+    );
+    let errorMessage3 = container.querySelector(
+      '.dynamicTextField_dTestInputText2_0 > .Error'
+    );
+    let errorMessage4 = container.querySelector(
+      '.dynamicTextField_dTestInputText1_1 > .Error'
+    );
+    let errorMessage5 = container.querySelector(
+      '.dynamicTextField_dTestInputText2_1 > .Error'
+    );
+
+    expect(errorMessage1.innerHTML).toBe('Error: Is required default');
+    expect(errorMessage2).toBeNull();
+    expect(errorMessage3.innerHTML).toBe('Error: Is name default');
+    expect(errorMessage4.innerHTML).toBe('Error: Polje je obavezno');
+    expect(errorMessage5).toBeNull();
+
+    expect(onValidate).not.toHaveBeenCalled();
   });
 });
