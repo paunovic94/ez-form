@@ -434,11 +434,19 @@ function prepareForServer(formState) {
   return prepared;
 }
 
+/**
+ * clone is very similar to prepareForServer. The only difference is that it doesn't
+ * transform values at all, i.e. select/multiselect, trimming, etc
+ * @param formState
+ * @return {{}}
+ */
 function cloneStateValues(formState) {
   let cloneValues = {};
   Object.keys(formState).forEach(fieldName => {
-    const {value} = formState[fieldName];
-    cloneValues[fieldName] = value;
+    const {value, isDynamic} = formState[fieldName];
+    cloneValues[fieldName] = isDynamic
+      ? value.map(subFormState => cloneStateValues(subFormState))
+      : value;
   });
   return cloneValues;
 }

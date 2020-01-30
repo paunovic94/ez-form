@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-  render,
-  cleanup,
-  fireEvent,
-} from '@testing-library/react';
+import {render, cleanup, fireEvent} from '@testing-library/react';
 import useForm from '../index';
 import formElements from './formTestElements';
 
@@ -227,6 +223,84 @@ describe('Clone state schema values', () => {
                   textArea5: [],
                   textArea6: 1,
                 });
+              }
+            }}>
+            Clone schema values
+          </button>
+        </div>
+      );
+    }
+
+    const {container, getByText} = render(<TestForm />);
+    fireEvent.click(getByText('Clone schema values'));
+  });
+
+  test('all including dynamic field', () => {
+    let initialValuesObj = {
+      testInputText1: 'Test 1',
+      checkbox: false,
+      dynamicField: [
+        {
+          gender: 'MALE',
+          note: 'Hello',
+          nationality: ['one', 'two'],
+        },
+        {
+          gender: 'FEMALE',
+          note: 'Hello2',
+          nationality: ['one'],
+        },
+        {
+          gender: 'MALE',
+          note: 'Hello3',
+          nationality: ['one', 'three'],
+        },
+      ],
+    };
+
+    function TestForm(props) {
+      const {formData, cloneStateValues} = useForm(
+        {
+          testInputText1: {
+            formElement: formElements.textInput,
+          },
+          checkbox: {
+            formElement: formElements.checkbox,
+          },
+          dynamicField: {
+            dynamicSchemaItem: {
+              gender: {
+                formElement: formElements.radioGroup,
+              },
+              note: {
+                formElement: formElements.textArea,
+              },
+              nationality: {
+                formElement: formElements.multiSelect,
+              },
+            },
+          },
+        },
+        initialValuesObj
+      );
+
+      return (
+        <div>
+          {formData.testInputText1.render()}
+          {formData.checkbox.render()}
+          {formData.dynamicField.map(item => (
+            <div>
+              {item.gender.render()}
+              {item.note.render()}
+              {item.nationality.render()}
+            </div>
+          ))}
+
+          <button
+            onClick={() => {
+              {
+                let clonedState = cloneStateValues();
+                expect(clonedState).toEqual(initialValuesObj);
               }
             }}>
             Clone schema values
