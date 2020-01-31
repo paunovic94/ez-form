@@ -1,10 +1,24 @@
-import {getInitValue, validateField} from './index';
+// @flow
 
-export function initFormState({schema, schemaValues}) {
+import {getInitValue, validateField} from './index';
+import type {
+  Action,
+  FieldState,
+  FormState,
+  ReducerInitArgs,
+  StandardFieldMetadata,
+} from './types';
+
+export function initFormState({
+  schema,
+  schemaValues = {},
+}: ReducerInitArgs): FormState {
   let formState = {};
 
   Object.keys(schema).forEach(fieldName => {
-    if (schema[fieldName].dynamicSchemaItem) {
+    let schemaFieldData = schema[fieldName];
+
+    if (schemaFieldData.dynamicSchemaItem) {
       let dynamicFieldState = (formState[fieldName] = {
         isDynamic: true,
         value: [],
@@ -14,8 +28,10 @@ export function initFormState({schema, schemaValues}) {
         schemaValues[fieldName].forEach(initData => {
           let newItemData = {};
 
-          Object.entries(schema[fieldName].dynamicSchemaItem).forEach(
-            ([subFieldName, subFieldSchemaData]) => {
+          Object.keys(schemaFieldData.dynamicSchemaItem).forEach(
+            subFieldName => {
+              let subFieldSchemaData =
+                schemaFieldData.dynamicSchemaItem[subFieldName];
               newItemData[subFieldName] = createFieldState({
                 fieldSchemaData: subFieldSchemaData,
                 initValue: initData[subFieldName],
@@ -28,7 +44,7 @@ export function initFormState({schema, schemaValues}) {
       }
     } else {
       formState[fieldName] = createFieldState({
-        fieldSchemaData: schema[fieldName],
+        fieldSchemaData: schemaFieldData,
         initValue: schemaValues[fieldName],
       });
     }
@@ -37,14 +53,17 @@ export function initFormState({schema, schemaValues}) {
   return formState;
 }
 
-function createFieldState({fieldSchemaData, initValue}) {
+type CreateFieldStateArgs = {
+  fieldSchemaData: StandardFieldMetadata,
+  initValue: any,
+};
+
+function createFieldState({fieldSchemaData, initValue}: CreateFieldStateArgs) {
   let {
     defaultValue,
     formElement,
     validationRules = [],
     isVisible = true,
-    disabled = false,
-    useSecondLabel = false,
   } = fieldSchemaData;
 
   return {
@@ -56,12 +75,14 @@ function createFieldState({fieldSchemaData, initValue}) {
     error: '',
     validationRules,
     isVisible,
-    disabled,
-    useSecondLabel,
   };
 }
 
-function checkIfFieldValidateAnotherField(fieldState, newFormState) {
+function checkIfFieldValidateAnotherField(
+  fieldState: FieldState,
+  newFormState: FormState
+): FormState {
+  // TODO: implement dynamic schema logic
   for (let rule of fieldState.validationRules) {
     if (rule.validateAnotherField) {
       const anotherFieldName = rule.validateAnotherField;
@@ -76,7 +97,7 @@ function checkIfFieldValidateAnotherField(fieldState, newFormState) {
   return newFormState;
 }
 
-export function reducer(formState, action) {
+export function reducer(formState: FormState, action: Action): FormState {
   switch (action.type) {
     case 'VALUE_CHANGE': {
       const {
@@ -86,9 +107,11 @@ export function reducer(formState, action) {
         index,
         onComplete,
       } = action.payload;
-      const fieldState = subFieldName
-        ? formState[fieldName]['value'][index][subFieldName]
-        : formState[fieldName];
+
+      const fieldState =
+        subFieldName && typeof index === 'number'
+          ? formState[fieldName]['value'][index][subFieldName]
+          : formState[fieldName];
 
       let changedFiledState = {
         ...fieldState,
@@ -97,7 +120,8 @@ export function reducer(formState, action) {
 
       changedFiledState.error = validateField(
         changedFiledState,
-        subFieldName ? formState[fieldName]['value'][index] : formState
+        subFieldName ? formState[fieldName]['value'][index] : formState,
+        {}
       );
       const newFormState = subFieldName
         ? {
@@ -133,7 +157,11 @@ export function reducer(formState, action) {
       if (skipValidation) {
         changedFiledState.error = '';
       } else {
-        changedFiledState.error = validateField(changedFiledState, formState);
+        changedFiledState.error = validateField(
+          changedFiledState,
+          formState,
+          {}
+        );
       }
 
       let newFormState = {...formState, [fullFieldName]: changedFiledState};
@@ -184,14 +212,14 @@ export function reducer(formState, action) {
 
       let newItemData = {};
 
-      Object.entries(fieldSchemaData.dynamicSchemaItem).forEach(
-        ([subFieldName, subFieldSchemaData]) => {
-          newItemData[subFieldName] = createFieldState({
-            fieldSchemaData: subFieldSchemaData,
-            initValue: initData[subFieldName],
-          });
-        }
-      );
+      Object.keys(fieldSchemaData.dynamicSchemaItem).forEach(subFieldName => {
+        let subFieldSchemaData =
+          fieldSchemaData.dynamicSchemaItem[subFieldName];
+        newItemData[subFieldName] = createFieldState({
+          fieldSchemaData: subFieldSchemaData,
+          initValue: initData[subFieldName],
+        });
+      });
 
       return {
         ...formState,
@@ -219,13 +247,24 @@ export function reducer(formState, action) {
   }
 }
 
+type UpdateFieldPropArgs = {
+  formState: FormState,
+  fieldName: string,
+  index: ?number,
+  subFieldName: ?string,
+  updateValues: {|
+    value?: any,
+    error?: string,
+    isVisible?: boolean,
+  |},
+};
 export function updateFieldProp({
   formState,
   fieldName,
   index,
   subFieldName,
   updateValues,
-}) {
+}: UpdateFieldPropArgs) {
   if (!subFieldName) {
     return {
       ...formState,

@@ -1,9 +1,19 @@
 // @flow
 import React, {useReducer} from 'react';
 import type {
+  Action,
+  AddDynamicItemArgs,
+  FieldState,
+  FormState,
+  InitValuesMap,
+  InputType,
+  MultiSelectValue,
+  RemoveDynamicItemArgs,
   Schema,
+  SelectValue,
   SetSchemaStateArgs,
   SetSchemaStateValueBulkArgs,
+  StandardFieldMetadata,
 } from './types';
 import {getIn, trim} from './utils';
 import {initFormState, reducer} from './reducer';
@@ -18,11 +28,8 @@ export const InputTypes = {
   DATEPICKER: 'DATEPICKER',
 };
 
-export default function useForm(
-  schema: Schema,
-  schemaValues: {[string]: any} = {}
-) {
-  const [formState, dispatch] = useReducer(
+export default function useForm(schema: Schema, schemaValues: ?InitValuesMap) {
+  const [formState, dispatch] = useReducer<any, any, any>(
     reducer,
     {schema, schemaValues},
     initFormState
@@ -109,8 +116,13 @@ export default function useForm(
    * @param dependencyArgs
    * @return {boolean}
    */
-  function validate(dependencyArgs: {}) {
-    let {isValid, errors} = validateState({formState, dependencyArgs});
+  function validate(dependencyArgs: any) {
+    let {isValid, errors} = validateState({
+      formState,
+      dependencyArgs,
+      dynamicFieldName: undefined,
+      index: undefined,
+    });
 
     // find dynamic schema items
     Object.keys(formState).forEach(fieldName => {
@@ -137,7 +149,17 @@ export default function useForm(
     return isValid;
   }
 
-  function validateState({formState, dynamicFieldName, index, dependencyArgs}) {
+  function validateState({
+    formState,
+    dynamicFieldName,
+    index,
+    dependencyArgs,
+  }: {
+    formState: FormState,
+    dynamicFieldName: ?string,
+    index: ?number,
+    dependencyArgs: ?{[string]: any},
+  }) {
     let isValid = true;
     let errors = [];
 
@@ -151,7 +173,11 @@ export default function useForm(
         return;
       }
 
-      const fieldError = validateField(fieldState, formState, dependencyArgs);
+      const fieldError = validateField(
+        fieldState,
+        formState,
+        dependencyArgs || {}
+      );
 
       if (isValid && fieldError !== '') {
         isValid = false;
@@ -180,8 +206,10 @@ export default function useForm(
         (dynamicItemState, index) => {
           let dynamicFieldRenders = {};
 
-          Object.entries(schemaFieldData.dynamicSchemaItem).forEach(
-            ([subFieldName, subFieldSchemaData]) => {
+          Object.keys(schemaFieldData.dynamicSchemaItem).forEach(
+            subFieldName => {
+              let subFieldSchemaData =
+                schemaFieldData.dynamicSchemaItem[subFieldName];
               dynamicFieldRenders[subFieldName] = createFieldRender({
                 fieldState: dynamicItemState[subFieldName],
                 fieldSchemaData: subFieldSchemaData,
@@ -205,6 +233,8 @@ export default function useForm(
       fieldSchemaData: schemaFieldData,
       dispatch,
       fieldName,
+      index: undefined,
+      subFieldName: undefined,
       handleChange,
     });
   });
@@ -217,7 +247,7 @@ export default function useForm(
     getSchemaStateValue,
     setSchemaStateValue,
     setSchemaStateValueBulk,
-    addDynamicItem: ({dynamicFieldName, initData}) => {
+    addDynamicItem: ({dynamicFieldName, initData}: AddDynamicItemArgs) => {
       dispatch({
         type: 'ADD_DYNAMIC_ITEM',
         payload: {
@@ -227,7 +257,7 @@ export default function useForm(
         },
       });
     },
-    removeDynamicItem: ({dynamicFieldName, index}) => {
+    removeDynamicItem: ({dynamicFieldName, index}: RemoveDynamicItemArgs) => {
       dispatch({
         type: 'REMOVE_DYNAMIC_ITEM',
         payload: {
@@ -239,6 +269,22 @@ export default function useForm(
   };
 }
 
+type CreateFieldRenderArgs = {
+  fieldState: FieldState,
+  fieldSchemaData: StandardFieldMetadata,
+  dispatch: Action => void,
+  fieldName: string,
+  index: ?number,
+  subFieldName: ?string,
+  handleChange: ({
+    newValue: any,
+    fieldName: string,
+    subFieldName: ?string,
+    index: ?number,
+    onComplete: ?(any) => void,
+  }) => void,
+};
+
 function createFieldRender({
   fieldState,
   fieldSchemaData,
@@ -247,8 +293,8 @@ function createFieldRender({
   index,
   subFieldName,
   handleChange,
-}) {
-  const {formElement, name, label, label2} = fieldSchemaData;
+}: CreateFieldRenderArgs) {
+  const {formElement, label, label2} = fieldSchemaData;
 
   return {
     render: ({
@@ -278,18 +324,17 @@ function createFieldRender({
       return (
         fieldState.isVisible && (
           <formElement.Component
+            {...additionalProps}
             value={fieldState.value}
             name={
-              name ||
-              (subFieldName
+              subFieldName && typeof index === 'number'
                 ? `${fieldName}_${subFieldName}_${index}`
-                : fieldName)
+                : fieldName
             }
             error={fieldState.error}
             disabled={disabled}
             label={useSecondLabel ? label2 : label}
             checked={checked}
-            {...additionalProps}
             onChange={event =>
               handleChange({
                 newValue: ValueResolvers[formElement.type](event),
@@ -306,15 +351,17 @@ function createFieldRender({
   };
 }
 
-/**
- * init/defaultValue expected to be either undefined or boolean!
- *
- * @param initValue
- * @param defaultValue
- * @param type
- * @return {*}
- */
-export function getInitValue({initValue, defaultValue, type}) {
+type GetInitValueArgs = {
+  initValue: any,
+  defaultValue: any,
+  type: InputType,
+};
+
+export function getInitValue({
+  initValue,
+  defaultValue,
+  type,
+}: GetInitValueArgs) {
   if (type === InputTypes.CHECKBOX) {
     if (typeof initValue === 'boolean') return initValue;
     if (initValue !== undefined) {
@@ -344,7 +391,11 @@ export function getInitValue({initValue, defaultValue, type}) {
     : initValue;
 }
 
-export function validateField(fieldState, formState, dependencyArgs = {}) {
+export function validateField(
+  fieldState: FieldState,
+  formState: FormState,
+  dependencyArgs: {[string]: any}
+) {
   let fieldError = '';
 
   if (fieldState) {
@@ -362,14 +413,18 @@ export function validateField(fieldState, formState, dependencyArgs = {}) {
       let dependencyInValidationArgs =
         rule.args && rule.args.dependencyInValidationArgs;
 
-      let dependencyValueInFormState =
-        getIn('value.value', formState[dependencyField]) ||
-        getIn('value', formState[dependencyField]);
+      let dependencyValueInFormState = dependencyField
+        ? getIn('value.value', formState[dependencyField]) ||
+          getIn('value', formState[dependencyField])
+        : undefined;
 
       // Skip to next rule
       if (dependencyInValidationArgs) {
         // if dependency value is defined in validation fn args and it is different than dependency value in state
-        if (dependencyArgs[dependencyField] !== dependencyValue) {
+        if (
+          dependencyField &&
+          dependencyArgs[dependencyField] !== dependencyValue
+        ) {
           continue;
         }
       } else if (
@@ -452,11 +507,16 @@ function cloneStateValues(formState) {
 }
 
 export const ValueResolvers = {
-  [InputTypes.TEXT]: event => event.target.value,
-  [InputTypes.SELECT]: event => event,
-  [InputTypes.MULTISELECT]: event => event,
-  [InputTypes.CHECKBOX]: event => event.target.checked,
-  [InputTypes.RADIOGROUP]: event => event.target.value,
-  [InputTypes.TEXTAREA]: event => event.currentTarget.value,
-  [InputTypes.DATEPICKER]: event => event.currentTarget.value,
+  [InputTypes.TEXT]: (event: SyntheticEvent<HTMLInputElement>) =>
+    event.currentTarget.value,
+  [InputTypes.SELECT]: (event: SelectValue) => event,
+  [InputTypes.MULTISELECT]: (event: MultiSelectValue) => event,
+  [InputTypes.CHECKBOX]: (event: SyntheticEvent<HTMLInputElement>) =>
+    event.currentTarget.checked,
+  [InputTypes.RADIOGROUP]: (event: SyntheticEvent<HTMLInputElement>) =>
+    event.currentTarget.value,
+  [InputTypes.TEXTAREA]: (event: SyntheticEvent<HTMLInputElement>) =>
+    event.currentTarget.value,
+  [InputTypes.DATEPICKER]: (event: SyntheticEvent<HTMLInputElement>) =>
+    event.currentTarget.value,
 };
