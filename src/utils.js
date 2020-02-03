@@ -1,5 +1,5 @@
-
-export function getIn(path: string | Array<string>, obj: {} = {}) {
+// @flow
+export function getIn(path: string | Array<string>, obj: ?{} = {}) {
   if (!path || path.length === 0) {
     throw new Error('getIn: path param is required');
   }

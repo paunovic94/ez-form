@@ -14,6 +14,8 @@ import type {
   SetSchemaStateArgs,
   SetSchemaStateValueBulkArgs,
   StandardFieldMetadata,
+  StandardFieldState,
+  SubFormState,
 } from './types';
 import {getIn, trim} from './utils';
 import {initFormState, reducer} from './reducer';
@@ -42,16 +44,25 @@ export default function useForm(schema: Schema, schemaValues: ?InitValuesMap) {
     index,
     onComplete,
   }) {
-    dispatch({
-      type: 'VALUE_CHANGE',
-      payload: {
-        newValue,
-        fieldName,
-        subFieldName,
-        index,
-        onComplete,
-      },
-    });
+    subFieldName
+      ? dispatch({
+          type: 'VALUE_CHANGE_DYNAMIC',
+          payload: {
+            newValue,
+            fieldName,
+            subFieldName,
+            index,
+            onComplete,
+          },
+        })
+      : dispatch({
+          type: 'VALUE_CHANGE_STANDARD',
+          payload: {
+            newValue,
+            fieldName,
+            onComplete,
+          },
+        });
   }
 
   function getSchemaStateValue(fieldName: string) {
@@ -71,10 +82,9 @@ export default function useForm(schema: Schema, schemaValues: ?InitValuesMap) {
     }
 
     dispatch({
-      type: 'SET_FIELD_VALUE',
-      payload: {fullFieldName, newValue, skipValidation},
+      type: 'VALUE_CHANGE_STANDARD',
+      payload: {fieldName: fullFieldName, newValue, skipValidation, onComplete},
     });
-    onComplete && onComplete(newValue);
   }
 
   function setSchemaStateValueBulk({
@@ -392,10 +402,10 @@ export function getInitValue({
 }
 
 export function validateField(
-  fieldState: FieldState,
-  formState: FormState,
+  fieldState: StandardFieldState,
+  formState: FormState | SubFormState,
   dependencyArgs: {[string]: any}
-) {
+): string {
   let fieldError = '';
 
   if (fieldState) {
@@ -413,9 +423,17 @@ export function validateField(
       let dependencyInValidationArgs =
         rule.args && rule.args.dependencyInValidationArgs;
 
+      // required to satisfy flow types!
+      let dependancyFieldState = dependencyField
+        ? formState[dependencyField]
+        : undefined;
+      if (dependancyFieldState && dependancyFieldState.isDynamic) {
+        throw new Error('validateField: dynamic field set as dependency');
+      }
+
       let dependencyValueInFormState = dependencyField
-        ? getIn('value.value', formState[dependencyField]) ||
-          getIn('value', formState[dependencyField])
+        ? getIn('value.value', dependancyFieldState) ||
+          getIn('value', dependancyFieldState)
         : undefined;
 
       // Skip to next rule

@@ -104,22 +104,32 @@ type DynamicFieldState = {|
 export type FieldState = StandardFieldState | DynamicFieldState;
 
 export type FormState = {[string]: FieldState};
+export type SubFormState = {[string]: StandardFieldState};
 
 export type Action =
   | {|
-      type: 'VALUE_CHANGE',
+      type: 'VALUE_CHANGE_STANDARD',
       payload: {|
         newValue: any,
         fieldName: string,
-        subFieldName: ?string,
-        index: ?number,
+        skipValidation: ?boolean,
         onComplete: any => void,
       |},
     |}
-  | {
-      type: 'SET_FIELD_VALUE',
-      payload: {fullFieldName: string, newValue: any, skipValidation: ?boolean},
-    }
+  | {|
+      type: 'VALUE_CHANGE_DYNAMIC',
+      payload: {|
+        newValue: any,
+        fieldName: string,
+        subFieldName: string,
+        index: number,
+        onComplete: any => void,
+      |},
+    |}
+  // | {
+  //     type: 'SET_FIELD_VALUE',
+  //     payload: {fullFieldName: string, newValue: any, skipValidation: ?boolean},
+  //   }
   | {
       type: 'VALIDATION_ERRORS',
       payload: {

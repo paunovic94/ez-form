@@ -60,3 +60,6 @@ Differences with original schema:
 
 
 	* npm publish --access public
+	
+Flow:
+ - check type of variable in file: flow type-at-pos /path/to/file.js 6 6

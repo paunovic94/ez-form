@@ -7,6 +7,8 @@ import type {
   FormState,
   ReducerInitArgs,
   StandardFieldMetadata,
+  StandardFieldState,
+  SubFormState,
 } from './types';
 
 export function initFormState({
@@ -78,28 +80,96 @@ function createFieldState({fieldSchemaData, initValue}: CreateFieldStateArgs) {
   };
 }
 
+/**
+ *
+ * @param fieldState
+ * @param newFormOrSubFormState - it's either a "full" formState when checking standard field
+ *   or it's a subFormState if checking dynamic one
+ * @return {{[p: string]: StandardFieldState}}
+ */
 function checkIfFieldValidateAnotherField(
-  fieldState: FieldState,
-  newFormState: FormState
-): FormState {
-  // TODO: implement dynamic schema logic
+  fieldState: StandardFieldState,
+  newFormOrSubFormState: FormState | SubFormState
+): {[string]: StandardFieldState} {
+  let ret = {};
+
   for (let rule of fieldState.validationRules) {
     if (rule.validateAnotherField) {
       const anotherFieldName = rule.validateAnotherField;
-      const error = validateField(newFormState[anotherFieldName], newFormState);
-      newFormState = {
-        ...newFormState,
-        [anotherFieldName]: {...newFormState[anotherFieldName], error: error},
+      const anotherFieldState = newFormOrSubFormState[anotherFieldName];
+
+      if (anotherFieldState.isDynamic) {
+        throw new Error(
+          'checkIfFieldValidateAnotherField: another field is dynamic.'
+        );
+      }
+
+      const error = validateField(anotherFieldState, newFormOrSubFormState, {});
+
+      ret[anotherFieldName] = {
+        ...newFormOrSubFormState[anotherFieldName],
+        error: error,
       };
+      // newFormOrSubFormState = {
+      //   ...newFormOrSubFormState,
+      //   [anotherFieldName]: {
+      //     ...newFormOrSubFormState[anotherFieldName],
+      //     error: error,
+      //   },
+      // };
     }
   }
 
-  return newFormState;
+  return ret;
+  // return newFormOrSubFormState;
 }
 
 export function reducer(formState: FormState, action: Action): FormState {
   switch (action.type) {
-    case 'VALUE_CHANGE': {
+    case 'VALUE_CHANGE_STANDARD': {
+      const {newValue, fieldName, onComplete, skipValidation} = action.payload;
+
+      const fieldState = formState[fieldName];
+      // check if field name exists in schema and do nothing if not!!!
+      if (!fieldState) return formState;
+
+      let newFormState = {...formState};
+
+      if (fieldState.isDynamic) return formState;
+
+      // For both standard and dynamic field:
+      // 1. update value
+      // 2. update error
+      // 3. check and validate anothe field if needed
+      let changedFieldState = {
+        ...fieldState,
+        value: newValue,
+      };
+      newFormState[fieldName] = changedFieldState;
+
+      let anotherFieldsState;
+
+      if (skipValidation) {
+        changedFieldState.error = '';
+      } else {
+        changedFieldState.error = validateField(
+          changedFieldState,
+          newFormState,
+          {}
+        );
+
+        anotherFieldsState = checkIfFieldValidateAnotherField(
+          changedFieldState,
+          newFormState
+        );
+      }
+
+      onComplete && onComplete(newValue);
+      return anotherFieldsState
+        ? Object.assign(newFormState, anotherFieldsState)
+        : newFormState;
+    }
+    case 'VALUE_CHANGE_DYNAMIC': {
       const {
         newValue,
         fieldName,
@@ -108,71 +178,47 @@ export function reducer(formState: FormState, action: Action): FormState {
         onComplete,
       } = action.payload;
 
-      const fieldState =
-        subFieldName && typeof index === 'number'
-          ? formState[fieldName]['value'][index][subFieldName]
-          : formState[fieldName];
+      const fieldState = formState[fieldName];
+      let newFormState = {...formState};
 
-      let changedFiledState = {
-        ...fieldState,
+      // For both standard and dynamic field:
+      // 1. update value
+      // 2. update error
+      // 3. check and validate anothe field if needed
+      let subFormState = {...fieldState.value[index]};
+      let subFieldState = subFormState[subFieldName];
+      let changedSubFieldState = {
+        ...subFieldState,
         value: newValue,
       };
-
-      changedFiledState.error = validateField(
-        changedFiledState,
-        subFieldName ? formState[fieldName]['value'][index] : formState,
+      subFormState[subFieldName] = changedSubFieldState;
+      changedSubFieldState.error = validateField(
+        changedSubFieldState,
+        subFormState,
         {}
       );
-      const newFormState = subFieldName
-        ? {
-            ...formState,
-            [fieldName]: {
-              isDynamic: true,
-              value: formState[fieldName].value.map(
-                (subSchemaState, i) =>
-                  i === index
-                    ? {...subSchemaState, [subFieldName]: changedFiledState}
-                    : subSchemaState
-              ),
-            },
-          }
-        : {...formState, [fieldName]: changedFiledState};
-      let newFormStateWithOtherFieldsValidations = checkIfFieldValidateAnotherField(
-        fieldState,
-        newFormState
+      let anotherSubFieldsState = checkIfFieldValidateAnotherField(
+        changedSubFieldState,
+        subFormState
       );
-      onComplete && onComplete(newValue);
-      return newFormStateWithOtherFieldsValidations;
-    }
-    case 'SET_FIELD_VALUE': {
-      const {fullFieldName, newValue, skipValidation} = action.payload;
 
-      const fieldState = formState[fullFieldName];
-      // todo: check if field name exists in schema and do nothing if not!!!
-      let changedFiledState = {
+      newFormState[fieldName] = {
         ...fieldState,
-        value: newValue,
+        value: fieldState.value.map(
+          (item, itemIndex) =>
+            itemIndex === index
+              ? // subform could countain changes from another field validation!
+                {
+                  ...subFormState,
+                  ...anotherSubFieldsState,
+                  [subFieldName]: changedSubFieldState,
+                }
+              : item
+        ),
       };
 
-      if (skipValidation) {
-        changedFiledState.error = '';
-      } else {
-        changedFiledState.error = validateField(
-          changedFiledState,
-          formState,
-          {}
-        );
-      }
-
-      let newFormState = {...formState, [fullFieldName]: changedFiledState};
-      if (!skipValidation) {
-        newFormState = checkIfFieldValidateAnotherField(
-          fieldState,
-          newFormState
-        );
-      }
-
-      return {...formState, [fullFieldName]: changedFiledState};
+      onComplete && onComplete(newValue);
+      return newFormState;
     }
     case 'VALIDATION_ERRORS': {
       let errors = action.payload.errors;
