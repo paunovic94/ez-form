@@ -59,7 +59,6 @@ describe('Test validation rules with dependency: rule expect args with dependenc
     );
   });
 
-
   test('Validation with dependency with passed dependency value: test a if b is select field and b.value = "B"', async () => {
     function TestForm() {
       const {formData} = useForm({
@@ -92,7 +91,7 @@ describe('Test validation rules with dependency: rule expect args with dependenc
       );
     }
 
-    const {container,getByLabelText} = render(<TestForm />);
+    const {container, getByLabelText} = render(<TestForm />);
 
     const [a] = container.querySelectorAll('input');
 
@@ -101,10 +100,10 @@ describe('Test validation rules with dependency: rule expect args with dependenc
       container,
     });
 
-    expect(container.querySelector('.a > .Error').innerHTML).toBe('Error: Is required default');
+    expect(container.querySelector('.a > .Error').innerHTML).toBe(
+      'Error: Is required default'
+    );
   });
-
-
 
   test('Validatin rule with no passed dependency value: validate a if b has any value in state', async () => {
     function TestForm() {
@@ -141,10 +140,9 @@ describe('Test validation rules with dependency: rule expect args with dependenc
     const [inputA] = container.querySelectorAll('input');
     const [inputWrapperA] = container.querySelectorAll('.TestTextInput');
 
-
     fireEvent.change(inputA, {target: {value: ''}});
     await waitForElement(() => getByDisplayValue(''), {
-      inputWrapperA
+      inputWrapperA,
     });
 
     let errorMessageA = container.querySelector('.a > .Error');
@@ -335,5 +333,92 @@ describe('Test validate function when rules are with dependency', () => {
     fireEvent.click(getByText('Submit form'));
     expect(container.querySelector('.a > .Error')).toBeNull();
     expect(onSubmit).toHaveBeenCalled();
+  });
+});
+
+describe('validateAnotherField in dynamic schema',  () => {
+  test('validation with dependency + validateAnotherField', async () => {
+    function TestForm() {
+      const {formData} = useForm(
+        {
+          dynamicField: {
+            dynamicSchemaItem: {
+              a: {
+                formElement: formElements.textInput,
+                defaultValue: '',
+                validationRules: [
+                  {
+                    fn: isRequired,
+                    args: {
+                      dependencyField: 'b',
+                      dependencyValue: 'B',
+                    },
+                  },
+                ],
+              },
+              b: {
+                formElement: formElements.textInput,
+                defaultValue: '',
+                validationRules: [
+                  {
+                    fn: isRequired,
+                  },
+                  {
+                    validateAnotherField: 'a',
+                  },
+                ],
+              },
+            },
+          },
+        },
+        {dynamicField: [{a: 'A1', b: 'B1'}, {a: '', b: 'B2'}]}
+      );
+      return (
+        <div>
+          {formData.dynamicField.map((item, index) => (
+            <div className={'Item' + index}>
+              {item.a.render()}
+              {item.b.render()}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    const {container, getByDisplayValue, getAllByDisplayValue} = render(<TestForm />);
+    //
+    const [inputA1, inputB1, inputA2, inputB2] = container.querySelectorAll(
+      'input'
+    );
+    const [
+      inputWrapperA1,
+      inputWrapperB1,
+      inputWrapperA2,
+      inputWrapperB2,
+    ] = container.querySelectorAll('.TestTextInput');
+
+    fireEvent.change(inputB2, {target: {value: ''}});
+    await waitForElement(() => getAllByDisplayValue('').length === 2);
+
+    let errorMessageA1 = inputWrapperA1.querySelector('.Error');
+    let errorMessageB1 = inputWrapperB1.querySelector('.Error');
+    let errorMessageA2 = inputWrapperA2.querySelector('.Error');
+    let errorMessageB2 = inputWrapperB2.querySelector('.Error');
+    expect(errorMessageA1).toBeNull();
+    expect(errorMessageB1).toBeNull();
+    expect(errorMessageA2).toBeNull();
+    expect(errorMessageB2.innerHTML).toBe('Error: Is required default');
+
+    fireEvent.change(inputB2, {target: {value: 'B'}});
+    await waitForElement(() => getByDisplayValue('B'));
+
+    errorMessageA1 = inputWrapperA1.querySelector('.Error');
+    errorMessageB1 = inputWrapperB1.querySelector('.Error');
+    errorMessageA2 = inputWrapperA2.querySelector('.Error');
+    errorMessageB2 = inputWrapperB2.querySelector('.Error');
+    expect(errorMessageA1).toBeNull();
+    expect(errorMessageB1).toBeNull();
+    expect(errorMessageA2.innerHTML).toBe('Error: Is required default');
+    expect(errorMessageB2).toBeNull();
   });
 });
