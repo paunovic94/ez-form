@@ -164,7 +164,14 @@ export function reducer(formState: FormState, action: Action): FormState {
         );
       }
 
-      onComplete && onComplete(newValue);
+      // onComplete must be called after TO ... otherwise, if another dispatch was
+      // triggered in onComplete, reducer would be called 2 times but with the same
+      // state, causing invalid state update as it is expected that the second action
+      // triggers reducer with updated state from the previous action.
+      //
+      // Ideally, onComplete should be called in useEffect
+      onComplete && setTimeout(() => onComplete(newValue), 0);
+
       return anotherFieldsState
         ? Object.assign(newFormState, anotherFieldsState)
         : newFormState;
@@ -217,7 +224,8 @@ export function reducer(formState: FormState, action: Action): FormState {
         ),
       };
 
-      onComplete && onComplete(newValue);
+      onComplete && setTimeout(() => onComplete(newValue), 0);
+
       return newFormState;
     }
     case 'VALIDATION_ERRORS': {

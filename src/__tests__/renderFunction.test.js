@@ -92,15 +92,28 @@ describe('Test render additional options', () => {
     let handleInputChangeMock = jest.fn();
 
     function TestForm() {
-      const {formData} = useForm({
+      const {formData, setSchemaStateValue} = useForm({
         testInputText1: {
+          formElement: formElements.textInput,
+        },
+        testInputText2: {
           formElement: formElements.textInput,
         },
       });
 
       return (
         <div>
-          {formData.testInputText1.render({onChange: handleInputChangeMock})}
+          {formData.testInputText1.render({
+            onChange: newVal => {
+              expect(newVal).toBe('test1');
+              handleInputChangeMock();
+              setSchemaStateValue({
+                fullFieldName: 'testInputText2',
+                newValue: 'test2-on-change',
+              });
+            },
+          })}
+          {formData.testInputText2.render()}
         </div>
       );
     }
@@ -112,7 +125,7 @@ describe('Test render additional options', () => {
     fireEvent.change(input, {
       target: {value: 'test1'},
     });
-    let a = await waitForElement(() => getByDisplayValue('test1'), {
+    await waitForElement(() => getByDisplayValue('test2-on-change'), {
       container,
     });
 
@@ -228,9 +241,12 @@ describe('Test render additional options', () => {
     fireEvent.change(multiSelectInput, {
       target: {value: 'test multi'},
     });
-    await waitForElement(() => [getByDisplayValue('test'), getByDisplayValue('test multi')], {
-      container,
-    });
+    await waitForElement(
+      () => [getByDisplayValue('test'), getByDisplayValue('test multi')],
+      {
+        container,
+      }
+    );
 
     expect(handleInputChangeMock).toHaveBeenCalled();
     expect(handleInputChangeMock.mock.calls[0][0]).toEqual('test');
