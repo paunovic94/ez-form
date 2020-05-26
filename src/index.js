@@ -311,6 +311,7 @@ function createFieldRender({
       useSecondLabel,
       isVisible,
       disabled,
+      value: valueFromAdditionalProps,
       ...additionalProps
     } = {}) => {
       if (
@@ -329,13 +330,15 @@ function createFieldRender({
       }
 
       const checked =
-        formElement.type === InputTypes.CHECKBOX ? fieldState.value : undefined;
+        formElement.type === InputTypes.CHECKBOX
+          ? valueFromAdditionalProps ?? fieldState.value
+          : undefined;
 
       return (
         fieldState.isVisible && (
           <formElement.Component
             {...additionalProps}
-            value={fieldState.value}
+            value={valueFromAdditionalProps ?? fieldState.value}
             name={
               subFieldName && typeof index === 'number'
                 ? `${fieldName}_${subFieldName}_${index}`
