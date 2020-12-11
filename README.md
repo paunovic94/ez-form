@@ -4,6 +4,7 @@ Basics
 	* "externalized" formElement (formElements file)
 	* defaultValue
 	* label, label2
+	* labelAsPlaceholder - default is true - should use label as placeholder
 
 Additional requirements
 	* Trigger an action on input change (get some data, update another field, …)

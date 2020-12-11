@@ -304,7 +304,7 @@ function createFieldRender({
   subFieldName,
   handleChange,
 }: CreateFieldRenderArgs) {
-  const {formElement, label, label2} = fieldSchemaData;
+  const {formElement, label, label2, labelAsPlaceholder = true} = fieldSchemaData;
 
   return {
     render: ({
@@ -347,6 +347,7 @@ function createFieldRender({
             error={fieldState.error}
             disabled={disabled}
             label={useSecondLabel ? label2 : label}
+            labelAsPlaceholder={labelAsPlaceholder}
             checked={checked}
             onChange={event =>
               handleChange({
